@@ -160,14 +160,17 @@ const domiciliariosDia = async (fecha) => {
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
   const ventas = await prisma.venta.findMany({
-    where: { fecha: { gte: inicio, lt: fin }, estado: { nombre_estado: 'entregado' } },
+    where: {
+      fecha: { gte: inicio, lt: fin },
+      estado: { nombre_estado: 'entregado' },
+      // Solo ventas con pago registrado (facturadas por un domi)
+      pagos: { some: { id_empleado: { not: undefined } } },
+    },
     include: {
-      // Pagos → empleado que cobró (fuente principal del nombre del domi)
       pagos: { include: {
         empleado: { include: { usuario: true } },
         detallePagos: { include: { metodoPago: true } },
       }},
-      // VentaDomiciliario como fallback
       ventasDomiciliario: { include: { empleado: { include: { usuario: true } } } },
     },
   });
@@ -175,8 +178,8 @@ const domiciliariosDia = async (fecha) => {
   const resumen = {};
   ventas.forEach((v) => {
     const nombre = v.pagos?.[0]?.empleado?.usuario?.nombre
-      || v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre
-      || 'Sin asignar';
+      || v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre;
+    if (!nombre) return; // omitir ventas sin domi identificable
 
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;

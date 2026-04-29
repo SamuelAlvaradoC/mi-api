@@ -209,6 +209,9 @@ const cambiarEstado = async (id, datos, id_usuario) => {
 };
 
 const anular = async (id, motivo_anulacion) => {
+  if (!motivo_anulacion || !String(motivo_anulacion).trim()) {
+    throw { status: 400, message: 'El motivo de anulación es requerido' };
+  }
   const venta = await obtener(id);
   if (venta.estado?.nombre_estado === 'anulado') throw { status: 400, message: 'La venta ya está anulada' };
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });
