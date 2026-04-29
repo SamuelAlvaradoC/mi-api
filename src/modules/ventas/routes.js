@@ -16,8 +16,8 @@ router.get('/:id',             verifyToken, checkPermiso('ver_ventas'),         
 router.get('/:id/total',       verifyToken, checkPermiso('ver_ventas'),                                 controller.totalVenta);
 router.get('/:id/comprobante', verifyToken, checkPermiso('ver_ventas'),                                 controller.comprobante);
 router.post('/:id/whatsapp',   verifyToken, checkPermiso('ver_ventas'),                                 controller.whatsapp);
-// cambiar_estado_venta | facturar_pedido (domi) | gestionar_cocina (cocinero → marcar listo)
-router.patch('/:id/estado',    verifyToken, checkPermisoAny('cambiar_estado_venta','facturar_pedido','gestionar_cocina'),  controller.cambiarEstado);
+// cambiar_estado_venta (admin) | confirmar_domicilios (confirmador) | facturar_pedido (domi) | gestionar_cocina (cocinero)
+router.patch('/:id/estado',    verifyToken, checkPermisoAny('cambiar_estado_venta','confirmar_domicilios','facturar_pedido','gestionar_cocina'),  controller.cambiarEstado);
 router.patch('/:id/anular',    verifyToken, checkPermiso('anular_venta'),                               controller.anular);
 
 module.exports = router;

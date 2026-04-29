@@ -139,11 +139,18 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     estadoId     = estado.id_estado;
     estadoNombre = estado.nombre_estado;
   }
+  // Validar motivo cuando se anula vía cambiarEstado
+  if (estadoNombre === 'anulado') {
+    const motivo = datos.motivo_anulacion || '';
+    if (!String(motivo).trim()) throw { status: 400, message: 'El motivo de anulación es requerido' };
+  }
+
   const updateData = { id_estado: estadoId };
   if (metodo_pago)                              updateData.metodo_pago         = metodo_pago;
   if (comprobante_url)                          updateData.comprobante_url     = comprobante_url;
   if (monto_efectivo      != null)              updateData.monto_efectivo      = Number(monto_efectivo);
   if (monto_transferencia != null)              updateData.monto_transferencia = Number(monto_transferencia);
+  if (estadoNombre === 'anulado' && datos.motivo_anulacion) updateData.motivo_anulacion = String(datos.motivo_anulacion).trim();
   const ventaActualizada = await prisma.venta.update({
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });

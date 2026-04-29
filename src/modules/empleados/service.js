@@ -21,13 +21,16 @@ const obtener = async (id) => {
   return e;
 };
 
+const ROL_POR_CARGO = { 'Domiciliario': 2, 'Cocinero': 5, 'Confirmador': 3 };
+
 const crear = async ({ nombre, email, contrasena, id_rol, cargo, fecha_ingreso }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
   if (existe) throw { status: 409, message: 'El email ya está registrado' };
-  const hash = await bcrypt.hash(contrasena, 10);
+  const hash   = await bcrypt.hash(contrasena, 10);
+  const rolFinal = id_rol || ROL_POR_CARGO[cargo] || 2;
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.create({
-      data: { nombre, email, contrasena: hash, id_rol: id_rol || 2, estado: 1 },
+      data: { nombre, email, contrasena: hash, id_rol: rolFinal, estado: 1 },
     });
     return tx.empleado.create({
       data: { id_usuario: usuario.id_usuario, cargo, fecha_ingreso: new Date(fecha_ingreso), estado: 1 },
