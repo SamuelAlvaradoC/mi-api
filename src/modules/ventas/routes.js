@@ -9,8 +9,8 @@ const router = Router();
 // Estáticas antes de /:id  (rutas de cliente — sin checkPermiso)
 router.get('/mis-pedidos',     verifyToken,                                                             controller.misVentas);
 router.post('/mi-pedido',      verifyToken,                                                             controller.crearMiPedido);
-router.get('/filtrar',         verifyToken, checkPermiso('ver_ventas'),                                 controller.filtrar);
-router.get('/',                verifyToken, checkPermiso('ver_ventas'),                                 controller.listar);
+router.get('/filtrar',         verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.filtrar);
+router.get('/',                verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.listar);
 router.post('/',               verifyToken, checkPermiso('gestionar_ventas'),                           controller.crear);
 router.get('/:id',             verifyToken, checkPermiso('ver_ventas'),                                 controller.obtener);
 router.get('/:id/total',       verifyToken, checkPermiso('ver_ventas'),                                 controller.totalVenta);
