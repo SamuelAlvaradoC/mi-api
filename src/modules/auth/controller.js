@@ -123,6 +123,18 @@ const verificarReset = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const misPermisos = async (req, res, next) => {
+  try {
+    const prisma = require('../../config/prisma');
+    const rol = await prisma.rol.findUnique({
+      where: { id_rol: req.user.id_rol },
+      include: { rolPermisos: { include: { permiso: true } } },
+    });
+    const permisos = (rol?.rolPermisos || []).map((rp) => rp.permiso?.nombre).filter(Boolean);
+    success(res, permisos);
+  } catch (err) { next(err); }
+};
+
 module.exports = { login, register, logout, recuperarContrasena, cambiarContrasena,
   solicitarReset, verificarReset,
-  getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth };
+  getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth, misPermisos };
