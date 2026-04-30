@@ -23,11 +23,40 @@ const obtener = async (id) => {
   return u;
 };
 
+const ROLES_EMPLEADO = ['domiciliario', 'cocinero', 'confirmador_domicilio', 'admin'];
+const CARGO_MAP      = { domiciliario: 'Domiciliario', cocinero: 'Cocinero', confirmador_domicilio: 'Confirmador', admin: 'Administrador' };
+
 const crear = async (datos) => {
   const existe = await prisma.usuario.findUnique({ where: { email: datos.email } });
   if (existe) throw { status: 409, message: 'El email ya está registrado' };
   const hash = await bcrypt.hash(datos.contrasena, 10);
-  return prisma.usuario.create({ data: { ...datos, contrasena: hash }, select });
+
+  // Obtener nombre del rol para decidir qué perfil crear
+  const rol = datos.id_rol ? await prisma.rol.findUnique({ where: { id_rol: datos.id_rol } }) : null;
+  const rolNombre = rol?.nombre || '';
+
+  const usuario = await prisma.usuario.create({ data: { ...datos, contrasena: hash }, select });
+
+  // Auto-crear perfil vinculado según el rol
+  try {
+    if (ROLES_EMPLEADO.includes(rolNombre)) {
+      const yaExiste = await prisma.empleado.findFirst({ where: { id_usuario: usuario.id_usuario } });
+      if (!yaExiste) {
+        await prisma.empleado.create({
+          data: { id_usuario: usuario.id_usuario, cargo: CARGO_MAP[rolNombre] || 'Empleado', fecha_ingreso: new Date(), estado: 1 },
+        });
+      }
+    } else if (rolNombre === 'cliente') {
+      const yaExiste = await prisma.cliente.findFirst({ where: { id_usuario: usuario.id_usuario } });
+      if (!yaExiste) {
+        await prisma.cliente.create({ data: { id_usuario: usuario.id_usuario, telefono: datos.telefono || null, estado: 1 } });
+      }
+    }
+  } catch (perfErr) {
+    console.error('Error creando perfil vinculado:', perfErr.message);
+  }
+
+  return usuario;
 };
 
 const actualizar = async (id, datos) => {
