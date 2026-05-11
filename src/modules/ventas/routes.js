@@ -20,5 +20,6 @@ router.post('/:id/whatsapp',   verifyToken, checkPermiso('ver_ventas'),         
 // cambiar_estado_venta (admin) | confirmar_domicilios (confirmador) | facturar_pedido (domi) | gestionar_cocina (cocinero)
 router.patch('/:id/estado',    verifyToken, checkPermisoAny('cambiar_estado_venta','confirmar_domicilios','facturar_pedido','gestionar_cocina'),  controller.cambiarEstado);
 router.patch('/:id/anular',    verifyToken, checkPermiso('anular_venta'),                               controller.anular);
+router.patch('/:id/editar',   verifyToken, checkPermiso('gestionar_ventas'),                              controller.editar);
 
 module.exports = router;

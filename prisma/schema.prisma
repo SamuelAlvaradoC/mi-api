@@ -270,6 +270,7 @@ model DetalleTopping {
   id_detalle_topping Int @id @default(autoincrement())
   id_detalle_venta   Int
   id_topping         Int
+  cantidad           Int @default(1)
 
   detalleVenta DetalleVenta @relation(fields: [id_detalle_venta], references: [id_detalle_venta])
   topping      Topping      @relation(fields: [id_topping], references: [id_topping])

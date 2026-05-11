@@ -68,7 +68,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
 
   const productoIds = items.map((i) => i.id_producto);
   const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds } } });
-  const precioP     = Object.fromEntries(productos.map((p) => [p.id_producto, Number(p.precio)]));
+  const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, { precio: Number(p.precio), max_toppings: p.max_toppings || 0 }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
   const adiciones   = adicionIds.length ? await prisma.adicion.findMany({ where: { id_adicion: { in: adicionIds } } }) : [];
@@ -76,16 +76,20 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
 
   let subtotal = 0;
   const itemsCalc = items.map((item) => {
-    const pu = precioP[item.id_producto];
-    if (!pu) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
+    const pd = prodData[item.id_producto];
+    if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
+    const maxTop = item.max_toppings != null ? item.max_toppings : pd.max_toppings;
+    const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);
+    const toppingExtra = Math.max(0, totalTop - maxTop) * 2000;
+    const precioUnitItem = pd.precio + toppingExtra;
     const adicionesCalc = (item.adiciones || []).map((a) => ({
       id_adicion: a.id_adicion, cantidad: a.cantidad,
       precio_unitario: precioA[a.id_adicion],
       subtotal: precioA[a.id_adicion] * a.cantidad,
     }));
-    const itemSub = pu * item.cantidad + adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const itemSub = precioUnitItem * item.cantidad + adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
     subtotal += itemSub;
-    return { ...item, precio_unitario: pu, subtotal: pu * item.cantidad, adicionesCalc };
+    return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
   });
 
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
@@ -117,7 +121,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
           id_producto: item.id_producto, cantidad: item.cantidad,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
-          detalleToppings:  { create: (item.toppings || []).map((id_topping) => ({ id_topping })) },
+          detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({
             id_adicion: a.id_adicion, cantidad: a.cantidad,
             precio_unitario: a.precio_unitario, subtotal: a.subtotal,
@@ -310,4 +314,67 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url });
 };
 
-module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido };
+const editar = async (id, { items, costo_domicilio }) => {
+  const venta = await obtener(id);
+  const bloqueados = ['entregado', 'anulado'];
+  if (bloqueados.includes(venta.estado?.nombre_estado)) {
+    throw { status: 400, message: 'No se puede editar una venta entregada o anulada' };
+  }
+
+  // Borrar detalles existentes en orden de FK
+  const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
+  if (detalleIds.length > 0) {
+    await prisma.detalleTopping.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+    await prisma.detalleAdicion.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+    await prisma.detalleVenta.deleteMany({ where: { id_venta: id } });
+  }
+
+  // Recalcular con misma lógica que crear
+  const productoIds = items.map((i) => i.id_producto);
+  const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds } } });
+  const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, { precio: Number(p.precio), max_toppings: p.max_toppings || 0 }]));
+
+  const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
+  const adics       = adicionIds.length ? await prisma.adicion.findMany({ where: { id_adicion: { in: adicionIds } } }) : [];
+  const precioA     = Object.fromEntries(adics.map((a) => [a.id_adicion, Number(a.precio)]));
+
+  let subtotal = 0;
+  const itemsCalc = items.map((item) => {
+    const pd = prodData[item.id_producto];
+    if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
+    const maxTop = item.max_toppings != null ? item.max_toppings : pd.max_toppings;
+    const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);
+    const toppingExtra = Math.max(0, totalTop - maxTop) * 2000;
+    const precioUnitItem = pd.precio + toppingExtra;
+    const adicionesCalc = (item.adiciones || []).map((a) => ({
+      id_adicion: a.id_adicion, cantidad: a.cantidad,
+      precio_unitario: precioA[a.id_adicion] || 0,
+      subtotal: (precioA[a.id_adicion] || 0) * a.cantidad,
+    }));
+    const itemSub = precioUnitItem * item.cantidad + adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    subtotal += itemSub;
+    return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
+  });
+
+  const total = subtotal + Number(costo_domicilio || 0);
+
+  await prisma.venta.update({
+    where: { id_venta: id },
+    data: {
+      subtotal, total, costo_domicilio: Number(costo_domicilio || 0),
+      detalleVentas: {
+        create: itemsCalc.map((item) => ({
+          id_producto: item.id_producto, cantidad: item.cantidad,
+          precio_unitario: item.precio_unitario, subtotal: item.subtotal,
+          chocolate: item.chocolate || null,
+          detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
+          detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal })) },
+        })),
+      },
+    },
+  });
+
+  return obtener(id);
+};
+
+module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar };

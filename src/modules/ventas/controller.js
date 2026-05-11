@@ -15,4 +15,6 @@ const totalVenta   = async (req, res, next) => { try { success(res, await servic
 const misVentas    = async (req, res, next) => { try { success(res, await service.misVentas(req.user.id_usuario)); } catch (e) { next(e); } };
 const crearMiPedido= async (req, res, next) => { try { success(res, await service.crearMiPedido(req.user.id_usuario, req.body), 'Pedido creado', 201); } catch (e) { next(e); } };
 
-module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido };
+const editar = async (req, res, next) => { try { success(res, await service.editar(Number(req.params.id), req.body), 'Venta actualizada'); } catch (e) { next(e); } };
+
+module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar };
