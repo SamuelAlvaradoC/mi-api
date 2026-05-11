@@ -3,12 +3,13 @@ const controller = require('./controller');
 const verifyToken = require('../../middlewares/verifyToken');
 const checkPermiso = require('../../middlewares/checkPermiso');
 const { checkPermisoAny } = require('../../middlewares/checkPermiso');
+const checkHorario = require('../../middlewares/checkHorario');
 
 const router = Router();
 
 // Estáticas antes de /:id  (rutas de cliente — sin checkPermiso)
 router.get('/mis-pedidos',     verifyToken,                                                             controller.misVentas);
-router.post('/mi-pedido',      verifyToken,                                                             controller.crearMiPedido);
+router.post('/mi-pedido',      verifyToken, checkHorario,                                              controller.crearMiPedido);
 router.get('/filtrar',         verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.filtrar);
 router.get('/',                verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.listar);
 router.post('/',               verifyToken, checkPermiso('gestionar_ventas'),                           controller.crear);

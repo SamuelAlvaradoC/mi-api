@@ -61,6 +61,7 @@ model Usuario {
   rol      Rol       @relation(fields: [id_rol], references: [id_rol])
   cliente  Cliente?
   empleado Empleado?
+  resenas  Resena[]
 
   @@map("usuarios")
 }
@@ -111,16 +112,17 @@ model Categoria {
 }
 
 model Producto {
-  id_producto      Int      @id @default(autoincrement())
-  id_categoria     Int
-  nombre           String   @db.VarChar(100)
-  descripcion      String?  @db.Text
-  tamano           String?  @db.VarChar(20)
-  precio           Decimal  @db.Decimal(10, 2)
-  permite_toppings Int      @default(0) @db.SmallInt
-  max_toppings     Int?
-  img              String?  @db.VarChar(255)
-  estado           Int      @default(1) @db.SmallInt
+  id_producto        Int      @id @default(autoincrement())
+  id_categoria       Int
+  nombre             String   @db.VarChar(100)
+  descripcion        String?  @db.Text
+  tamano             String?  @db.VarChar(20)
+  precio             Decimal  @db.Decimal(10, 2)
+  permite_toppings   Int      @default(0) @db.SmallInt
+  max_toppings       Int?
+  permite_chocolate  Boolean  @default(false)
+  img                String?  @db.VarChar(255)
+  estado             Int      @default(1) @db.SmallInt
 
   categoria     Categoria      @relation(fields: [id_categoria], references: [id_categoria])
   detalleVentas DetalleVenta[]
@@ -133,6 +135,7 @@ model Topping {
   nombre      String  @db.VarChar(100)
   descripcion String? @db.VarChar(150)
   img         String? @db.VarChar(255)
+  gramaje     String? @db.VarChar(50)
   estado      Int     @default(1) @db.SmallInt
 
   detalleToppings DetalleTopping[]
@@ -145,6 +148,7 @@ model Adicion {
   nombre      String  @db.VarChar(100)
   descripcion String? @db.VarChar(150)
   img         String? @db.VarChar(255)
+  gramaje     String? @db.VarChar(50)
   precio      Decimal @db.Decimal(10, 2)
   estado      Int     @default(1) @db.SmallInt
 
@@ -237,6 +241,7 @@ model DetalleVenta {
   cantidad         Int
   precio_unitario  Decimal @db.Decimal(10, 2)
   subtotal         Decimal @db.Decimal(10, 2)
+  chocolate        String? @db.VarChar(20)
 
   venta    Venta    @relation(fields: [id_venta], references: [id_venta])
   producto Producto @relation(fields: [id_producto], references: [id_producto])
@@ -319,6 +324,29 @@ model DetallePago {
 // ─────────────────────────────────────────────
 // DOMICILIOS
 // ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+// RESEÑAS
+// ─────────────────────────────────────────────
+
+model Resena {
+  id_resena             Int      @id @default(autoincrement())
+  sede                  String   @db.VarChar(50)
+  frecuencia            String   @db.VarChar(50)
+  calificacion_atencion Int
+  calificacion_producto Int
+  recomendaria          String   @db.VarChar(20)
+  tiempo_adecuado       String   @db.VarChar(30)
+  lo_que_gusto          String?  @db.Text
+  producto_deseado      String?  @db.Text
+  mejora                String?  @db.Text
+  fecha                 DateTime @default(now())
+  id_usuario            Int?
+
+  usuario Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("resenas")
+}
 
 model VentaDomiciliario {
   id_venta_domiciliario Int       @id @default(autoincrement())

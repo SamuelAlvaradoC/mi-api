@@ -23,11 +23,20 @@ const obtener = async (id) => {
   return p;
 };
 
-const crear = (datos) => prisma.producto.create({ data: { ...datos, estado: 1 }, include: inc });
+const crear = (datos) => prisma.producto.create({
+  data: {
+    ...datos,
+    estado: 1,
+    permite_chocolate: datos.permite_chocolate ? true : false,
+  },
+  include: inc,
+});
 
 const actualizar = async (id, datos) => {
   await obtener(id);
-  return prisma.producto.update({ where: { id_producto: id }, data: datos, include: inc });
+  const data = { ...datos };
+  if (data.permite_chocolate !== undefined) data.permite_chocolate = data.permite_chocolate ? true : false;
+  return prisma.producto.update({ where: { id_producto: id }, data, include: inc });
 };
 
 const eliminar = async (id) => {

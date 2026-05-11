@@ -116,6 +116,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
         create: itemsCalc.map((item) => ({
           id_producto: item.id_producto, cantidad: item.cantidad,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
+          chocolate: item.chocolate || null,
           detalleToppings:  { create: (item.toppings || []).map((id_topping) => ({ id_topping })) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({
             id_adicion: a.id_adicion, cantidad: a.cantidad,
