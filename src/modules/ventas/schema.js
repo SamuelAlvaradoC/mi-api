@@ -1,13 +1,29 @@
 const { z } = require('zod');
 
 const itemVentaSchema = z.object({
-  id_producto: z.number().int().positive(),
-  cantidad:    z.number().int().positive(),
-  toppings:    z.array(z.number().int().positive()).optional().default([]),
-  adiciones:   z.array(z.object({
-    id_adicion: z.number().int().positive(),
-    cantidad:   z.number().int().positive(),
-  })).optional().default([]),
+  id_producto:     z.number().int().positive(),
+  cantidad:        z.number().int().positive(),
+  max_toppings:    z.number().int().min(0).optional(),
+  precio_unitario: z.number().optional(),
+  chocolate:       z.string().optional().nullable(),
+  toppings: z.array(
+    z.union([
+      z.number().int().positive(),
+      z.object({
+        id_topping: z.number().int().positive(),
+        cantidad:   z.number().int().positive().default(1),
+      }),
+    ])
+  ).optional().default([]),
+  adiciones: z.array(
+    z.union([
+      z.number().int().positive(),
+      z.object({
+        id_adicion: z.number().int().positive(),
+        cantidad:   z.number().int().positive().default(1),
+      }),
+    ])
+  ).optional().default([]),
 });
 
 const nuevaDireccionSchema = z.object({
@@ -21,16 +37,16 @@ const nuevaDireccionSchema = z.object({
 });
 
 const crearVentaSchema = z.object({
-  id_cliente:        z.number().int().positive(),
-  id_direccion:      z.number().int().positive().optional(),
-  nueva_direccion:   nuevaDireccionSchema.optional(),
-  costo_domicilio:   z.number().min(0).default(0),
-  observaciones:     z.string().optional(),
-  metodo_pago:       z.string().optional(),
-  monto_efectivo:    z.number().min(0).optional(),
-  monto_transferencia: z.number().min(0).optional(),
-  comprobante_url:   z.string().url().optional().or(z.literal('')).nullable(),
-  items:             z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
+  id_cliente:          z.number().int().positive(),
+  id_direccion:        z.number().int().positive().optional(),
+  nueva_direccion:     nuevaDireccionSchema.optional(),
+  costo_domicilio:     z.number().min(0).default(0),
+  observaciones:       z.string().optional().nullable(),
+  metodo_pago:         z.string().optional().nullable(),
+  monto_efectivo:      z.number().min(0).optional().nullable(),
+  monto_transferencia: z.number().min(0).optional().nullable(),
+  comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
 });
 
 const estadoVentaSchema = z.object({
@@ -40,6 +56,7 @@ const estadoVentaSchema = z.object({
   monto_efectivo:      z.number().min(0).optional(),
   monto_transferencia: z.number().min(0).optional(),
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  motivo_anulacion:    z.string().optional(),
 }).refine((d) => d.id_estado !== undefined || d.nombre_estado !== undefined, {
   message: 'Debe proporcionar id_estado o nombre_estado',
 });
