@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../../config/prisma');
-const { enviarCodigoRecuperacion } = require('../../utils/mailer');
+const { enviarCodigoRecuperacion } = require('../../utils/mailerGmail');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
 const resetTokens    = new Map(); // email → { token, expiry }
@@ -95,8 +95,8 @@ const solicitarReset = async ({ email }) => {
       ? 'Código enviado a tu correo electrónico'
       : 'No se pudo enviar el email — usa el código de desarrollo',
   };
-  // Si el email no se pudo enviar, devolver el código para desarrollo/demo
-  if (!emailEnviado) resp.dev_token = codigo;
+  // En desarrollo: devolver el código si el email falló. En producción: nunca exponer el código.
+  if (!emailEnviado && process.env.NODE_ENV !== 'production') resp.dev_token = codigo;
   return resp;
 };
 
