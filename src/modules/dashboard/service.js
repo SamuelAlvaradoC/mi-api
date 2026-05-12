@@ -141,16 +141,20 @@ const totalDia = async (fecha) => {
     }),
   ]);
 
-  const efectivo      = pagos.filter((p) => p.metodoPago?.nombre === 'efectivo').reduce((a, p) => a + Number(p.monto), 0);
-  const transferencia = pagos.filter((p) => p.metodoPago?.nombre === 'transferencia').reduce((a, p) => a + Number(p.monto), 0);
+  const efectivoBruto  = pagos.filter((p) => p.metodoPago?.nombre === 'efectivo').reduce((a, p) => a + Number(p.monto), 0);
+  const transferencia  = pagos.filter((p) => p.metodoPago?.nombre === 'transferencia').reduce((a, p) => a + Number(p.monto), 0);
+  const totalDomicilios = Number(domicilios._sum.costo_domicilio || 0);
+  const efectivoNeto   = efectivoBruto - totalDomicilios;
+  const ingresoTotal   = efectivoNeto + transferencia;
 
   return {
-    fecha:               fecha || null,
-    total_ventas:        result._count.id_venta,
-    monto_total:         result._sum.total || 0,
-    total_efectivo:      efectivo,
-    total_transferencia: transferencia,
-    total_domicilios:    Number(domicilios._sum.costo_domicilio || 0),
+    fecha:                fecha || null,
+    total_ventas:         result._count.id_venta,
+    monto_total:          ingresoTotal,
+    total_efectivo:       efectivoNeto,
+    total_efectivo_bruto: efectivoBruto,
+    total_transferencia:  transferencia,
+    total_domicilios:     totalDomicilios,
   };
 };
 
