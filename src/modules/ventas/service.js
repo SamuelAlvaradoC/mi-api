@@ -32,7 +32,9 @@ const listar = async ({ estado, fecha } = {}) => {
     where.fecha  = { gte: inicio, lte: fin };
   }
 
-  return prisma.venta.findMany({ where, include: includeDetalle, orderBy: { fecha: 'desc' } });
+  // Cuando se filtra por estado (cocina/domicilios) mostrar el más antiguo primero
+  const orderBy = estado ? { id_venta: 'asc' } : { fecha: 'desc' };
+  return prisma.venta.findMany({ where, include: includeDetalle, orderBy });
 };
 
 const filtrar = (estadoId) => prisma.venta.findMany({
@@ -314,7 +316,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url });
 };
 
-const editar = async (id, { items, costo_domicilio }) => {
+const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia }) => {
   const venta = await obtener(id);
   const bloqueados = ['entregado', 'anulado'];
   if (bloqueados.includes(venta.estado?.nombre_estado)) {
@@ -358,10 +360,23 @@ const editar = async (id, { items, costo_domicilio }) => {
 
   const total = subtotal + Number(costo_domicilio || 0);
 
+  // Calcular montos si se especifica método de pago
+  let montoEf = venta.monto_efectivo;
+  let montoTr = venta.monto_transferencia;
+  let metodoFinal = venta.metodo_pago;
+  if (metodo_pago) {
+    metodoFinal = metodo_pago;
+    montoEf = monto_efectivo !== undefined ? Number(monto_efectivo) : montoEf;
+    montoTr = monto_transferencia !== undefined ? Number(monto_transferencia) : montoTr;
+  }
+
   await prisma.venta.update({
     where: { id_venta: id },
     data: {
       subtotal, total, costo_domicilio: Number(costo_domicilio || 0),
+      metodo_pago: metodoFinal,
+      monto_efectivo: montoEf,
+      monto_transferencia: montoTr,
       detalleVentas: {
         create: itemsCalc.map((item) => ({
           id_producto: item.id_producto, cantidad: item.cantidad,
