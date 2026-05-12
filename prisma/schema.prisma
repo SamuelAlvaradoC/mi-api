@@ -349,6 +349,15 @@ model Resena {
   @@map("resenas")
 }
 
+model Configuracion {
+  id          Int     @id @default(autoincrement())
+  clave       String  @unique
+  valor       String
+  descripcion String?
+
+  @@map("configuraciones")
+}
+
 model VentaDomiciliario {
   id_venta_domiciliario Int       @id @default(autoincrement())
   id_empleado           Int
