@@ -37,7 +37,8 @@ const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
     distKm = calcularDistanciaLinea(lat, lng) * 1.3;
   }
 
-  const costo = Math.ceil(TARIFA_BASE + distKm * tarifa);
+  const costoExacto = TARIFA_BASE + distKm * tarifa;
+  const costo = Math.round(costoExacto / 1000) * 1000; // redondear al millar más cercano
   return {
     costo,
     distKm: Math.round(distKm * 10) / 10,
