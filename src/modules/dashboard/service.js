@@ -14,9 +14,15 @@ const ventasPorMes = async () => {
   const año = new Date().getFullYear();
   const raw = await prisma.$queryRaw`
     SELECT
-      EXTRACT(YEAR  FROM fecha)::int                               AS año,
-      EXTRACT(MONTH FROM fecha)::int                               AS mes,
-      COALESCE(SUM(total - COALESCE(costo_domicilio,0)), 0)        AS monto_total
+      EXTRACT(YEAR  FROM fecha)::int AS año,
+      EXTRACT(MONTH FROM fecha)::int AS mes,
+      COALESCE(SUM(
+        CASE
+          WHEN COALESCE(monto_efectivo,0) + COALESCE(monto_transferencia,0) > 0
+          THEN COALESCE(monto_efectivo,0) + COALESCE(monto_transferencia,0) - COALESCE(costo_domicilio,0)
+          ELSE total - COALESCE(costo_domicilio,0)
+        END
+      ), 0) AS monto_total
     FROM ventas
     WHERE EXTRACT(YEAR FROM fecha) = ${año}
       AND id_estado != (SELECT id_estado FROM estados WHERE nombre_estado = 'anulado' LIMIT 1)
@@ -39,15 +45,18 @@ const ventasPorDia = async (fecha) => {
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: { not: estadoAnulado?.id_estado } },
-    select: { fecha: true, total: true, costo_domicilio: true },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   const horas = {};
   for (let h = 0; h < 24; h++) horas[h] = 0;
   ventas.forEach((v) => {
     const hora = (new Date(v.fecha).getUTCHours() - 5 + 24) % 24;
-    // Usar ingreso neto (total - costo_domicilio) para coincidir con "Ingresos hoy"
-    const neto = Number(v.total) - Number(v.costo_domicilio || 0);
+    // Neto = efectivo recibido + transferencia - costo domicilio (misma lógica que KPI)
+    const ef   = Number(v.monto_efectivo || 0);
+    const tr   = Number(v.monto_transferencia || 0);
+    const dom  = Number(v.costo_domicilio || 0);
+    const neto = (ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom);
     horas[hora] = horas[hora] + neto;
   });
 
@@ -78,16 +87,20 @@ const ventasPorSemana = async (fecha) => {
       fecha: { gte: lunes, lt: new Date(lunes.getTime() + 7 * 24 * 60 * 60 * 1000) },
       id_estado: { not: estadoAnulado?.id_estado },
     },
-    select: { fecha: true, total: true, costo_domicilio: true },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   return diasSemana.map((label, i) => {
     const inicio = new Date(lunes.getTime() + i * 24 * 60 * 60 * 1000);
     const fin    = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
-    // Usar ingreso neto (total - costo_domicilio) para coincidir con "Ingresos hoy"
     const total  = ventas
       .filter((v) => new Date(v.fecha) >= inicio && new Date(v.fecha) < fin)
-      .reduce((s, v) => s + Number(v.total) - Number(v.costo_domicilio || 0), 0);
+      .reduce((s, v) => {
+        const ef  = Number(v.monto_efectivo || 0);
+        const tr  = Number(v.monto_transferencia || 0);
+        const dom = Number(v.costo_domicilio || 0);
+        return s + ((ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom));
+      }, 0);
     return { label, total };
   });
 };
@@ -163,43 +176,38 @@ const domiciliariosDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
+  // Buscar ventas entregadas del día, sin requerir registro de pago manual
+  // El domiciliario se identifica por ventasDomiciliario (asignación de despacho)
   const ventas = await prisma.venta.findMany({
     where: {
       fecha: { gte: inicio, lt: fin },
       estado: { nombre_estado: 'entregado' },
-      // Solo ventas con pago registrado (facturadas por un domi)
-      pagos: { some: { id_empleado: { not: undefined } } },
     },
-    include: {
-      pagos: { include: {
-        empleado: { include: { usuario: true } },
-        detallePagos: { include: { metodoPago: true } },
-      }},
-      ventasDomiciliario: { include: { empleado: { include: { usuario: true } } } },
+    select: {
+      id_venta: true,
+      total: true,
+      monto_efectivo: true,
+      monto_transferencia: true,
+      metodo_pago: true,
+      ventasDomiciliario: {
+        select: { empleado: { select: { usuario: { select: { nombre: true } } } } },
+        orderBy: { hora_asignacion: 'asc' },
+      },
     },
   });
 
   const resumen = {};
   ventas.forEach((v) => {
-    const nombre = v.pagos?.[0]?.empleado?.usuario?.nombre
-      || v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre;
-    if (!nombre) return; // omitir ventas sin domi identificable
+    // Identificar domi desde la asignación de despacho
+    const nombre = v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre;
+    if (!nombre) return; // venta sin domi asignado
 
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;
     resumen[nombre].total += Number(v.total);
-
-    const detallePagos = v.pagos?.[0]?.detallePagos || [];
-    if (detallePagos.length > 0) {
-      detallePagos.forEach((dp) => {
-        if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
-        if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
-      });
-    } else {
-      // Fallback a columnas de la venta
-      resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
-      resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
-    }
+    // Usar montos reales de la venta (siempre disponibles desde el pedido)
+    resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
+    resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
   });
   return Object.values(resumen);
 };
