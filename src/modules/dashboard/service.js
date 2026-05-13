@@ -128,31 +128,28 @@ const totalDia = async (fecha) => {
     return { gte: inicio, lt: fin };
   })() : undefined;
 
-  const [result, domicilios, pagos] = await Promise.all([
-    prisma.venta.aggregate({
-      where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: { not: estadoAnulado?.id_estado } },
-      _sum:   { total: true },
-      _count: { id_venta: true },
-    }),
-    prisma.venta.aggregate({
-      where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: estadoEntregado?.id_estado },
-      _sum: { costo_domicilio: true },
-    }),
-    prisma.detallePago.findMany({
-      where: { pago: { venta: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: estadoEntregado?.id_estado } } },
-      include: { metodoPago: true },
-    }),
-  ]);
+  // Leer directamente de la tabla ventas (monto_efectivo / monto_transferencia)
+  // ya que detallePago solo existe cuando el admin registra pago manualmente.
+  const ventas = await prisma.venta.findMany({
+    where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: { not: estadoAnulado?.id_estado } },
+    select: { id_venta: true, id_estado: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+  });
 
-  const efectivoBruto  = pagos.filter((p) => p.metodoPago?.nombre === 'efectivo').reduce((a, p) => a + Number(p.monto), 0);
-  const transferencia  = pagos.filter((p) => p.metodoPago?.nombre === 'transferencia').reduce((a, p) => a + Number(p.monto), 0);
-  const totalDomicilios = Number(domicilios._sum.costo_domicilio || 0);
-  const efectivoNeto   = efectivoBruto - totalDomicilios;
-  const ingresoTotal   = efectivoNeto + transferencia;
+  const totalVentas    = ventas.length;
+  const efectivoBruto  = ventas.reduce((s, v) => s + Number(v.monto_efectivo || 0), 0);
+  const transferencia  = ventas.reduce((s, v) => s + Number(v.monto_transferencia || 0), 0);
+
+  // Domicilios: solo de ventas ya entregadas (se le pagan al domi con el efectivo)
+  const totalDomicilios = ventas
+    .filter((v) => v.id_estado === estadoEntregado?.id_estado)
+    .reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
+
+  const efectivoNeto = efectivoBruto - totalDomicilios;
+  const ingresoTotal = efectivoNeto + transferencia;
 
   return {
     fecha:                fecha || null,
-    total_ventas:         result._count.id_venta,
+    total_ventas:         totalVentas,
     monto_total:          ingresoTotal,
     total_efectivo:       efectivoNeto,
     total_efectivo_bruto: efectivoBruto,
