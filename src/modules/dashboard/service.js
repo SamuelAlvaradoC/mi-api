@@ -14,9 +14,9 @@ const ventasPorMes = async () => {
   const año = new Date().getFullYear();
   const raw = await prisma.$queryRaw`
     SELECT
-      EXTRACT(YEAR  FROM fecha)::int AS año,
-      EXTRACT(MONTH FROM fecha)::int AS mes,
-      COALESCE(SUM(total), 0)        AS monto_total
+      EXTRACT(YEAR  FROM fecha)::int                               AS año,
+      EXTRACT(MONTH FROM fecha)::int                               AS mes,
+      COALESCE(SUM(total - COALESCE(costo_domicilio,0)), 0)        AS monto_total
     FROM ventas
     WHERE EXTRACT(YEAR FROM fecha) = ${año}
       AND id_estado != (SELECT id_estado FROM estados WHERE nombre_estado = 'anulado' LIMIT 1)
@@ -39,14 +39,16 @@ const ventasPorDia = async (fecha) => {
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: { not: estadoAnulado?.id_estado } },
-    select: { fecha: true, total: true },
+    select: { fecha: true, total: true, costo_domicilio: true },
   });
 
   const horas = {};
   for (let h = 0; h < 24; h++) horas[h] = 0;
   ventas.forEach((v) => {
     const hora = (new Date(v.fecha).getUTCHours() - 5 + 24) % 24;
-    horas[hora] = horas[hora] + Number(v.total);
+    // Usar ingreso neto (total - costo_domicilio) para coincidir con "Ingresos hoy"
+    const neto = Number(v.total) - Number(v.costo_domicilio || 0);
+    horas[hora] = horas[hora] + neto;
   });
 
   const nonZero = Object.entries(horas).filter(([, t]) => t > 0);
@@ -76,15 +78,16 @@ const ventasPorSemana = async (fecha) => {
       fecha: { gte: lunes, lt: new Date(lunes.getTime() + 7 * 24 * 60 * 60 * 1000) },
       id_estado: { not: estadoAnulado?.id_estado },
     },
-    select: { fecha: true, total: true },
+    select: { fecha: true, total: true, costo_domicilio: true },
   });
 
   return diasSemana.map((label, i) => {
     const inicio = new Date(lunes.getTime() + i * 24 * 60 * 60 * 1000);
     const fin    = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
+    // Usar ingreso neto (total - costo_domicilio) para coincidir con "Ingresos hoy"
     const total  = ventas
       .filter((v) => new Date(v.fecha) >= inicio && new Date(v.fecha) < fin)
-      .reduce((s, v) => s + Number(v.total), 0);
+      .reduce((s, v) => s + Number(v.total) - Number(v.costo_domicilio || 0), 0);
     return { label, total };
   });
 };
