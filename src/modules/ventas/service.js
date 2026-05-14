@@ -337,9 +337,27 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
 
 const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia }) => {
   const venta = await obtener(id);
-  const bloqueados = ['entregado', 'anulado'];
-  if (bloqueados.includes(venta.estado?.nombre_estado)) {
-    throw { status: 400, message: 'No se puede editar una venta entregada o anulada' };
+  const estadoActual = venta.estado?.nombre_estado;
+
+  // Anuladas: nunca se pueden tocar
+  if (estadoActual === 'anulado') {
+    throw { status: 400, message: 'No se puede editar una venta anulada' };
+  }
+
+  // Entregadas: solo se permite cambiar el método de pago (no los productos)
+  if (estadoActual === 'entregado') {
+    if (!metodo_pago) throw { status: 400, message: 'En ventas entregadas solo se puede cambiar el método de pago' };
+
+    let montoEf = null, montoTr = null, metodoFinal = metodo_pago;
+    if (metodo_pago === 'efectivo')      { montoEf = Number(venta.total); montoTr = 0; }
+    if (metodo_pago === 'transferencia') { montoTr = Number(venta.total); montoEf = 0; }
+    if (metodo_pago === 'mixto')         { montoEf = Number(monto_efectivo || 0); montoTr = Number(monto_transferencia || 0); }
+
+    await prisma.venta.update({
+      where: { id_venta: id },
+      data: { metodo_pago: metodoFinal, monto_efectivo: montoEf, monto_transferencia: montoTr },
+    });
+    return obtener(id);
   }
 
   // Borrar detalles existentes en orden de FK
