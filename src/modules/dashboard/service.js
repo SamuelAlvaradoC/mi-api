@@ -25,7 +25,7 @@ const ventasPorMes = async () => {
       ), 0) AS monto_total
     FROM ventas
     WHERE EXTRACT(YEAR FROM fecha) = ${año}
-      AND id_estado != (SELECT id_estado FROM estados WHERE nombre_estado = 'anulado' LIMIT 1)
+      AND id_estado = (SELECT id_estado FROM estados WHERE nombre_estado = 'entregado' LIMIT 1)
     GROUP BY año, mes
     ORDER BY mes ASC
   `;
@@ -47,8 +47,8 @@ const ventasPorDia = async (fecha) => {
     prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } }),
   ]);
   const ventas = await prisma.venta.findMany({
-    where: { fecha: { gte: inicio, lt: fin }, id_estado: { not: estadoAnulado?.id_estado } },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true, id_estado: true },
+    where: { fecha: { gte: inicio, lt: fin }, id_estado: estadoEntregado?.id_estado },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   const horas = {};
@@ -57,8 +57,7 @@ const ventasPorDia = async (fecha) => {
     const hora = (new Date(v.fecha).getUTCHours() - 5 + 24) % 24;
     const ef   = Number(v.monto_efectivo || 0);
     const tr   = Number(v.monto_transferencia || 0);
-    // Solo restar domicilio si la venta está entregada (misma lógica que totalDia)
-    const dom  = (v.id_estado === estadoEntregado?.id_estado) ? Number(v.costo_domicilio || 0) : 0;
+    const dom  = Number(v.costo_domicilio || 0);
     const neto = (ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom);
     horas[hora] = horas[hora] + neto;
   });
@@ -85,15 +84,14 @@ const ventasPorSemana = async (fecha) => {
   const lunes = new Date(lunesISO + 'T05:00:00.000Z'); // medianoche Colombia
 
   const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const estadoEntregadoSem = await prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } });
   const ventas = await prisma.venta.findMany({
     where: {
       fecha: { gte: lunes, lt: new Date(lunes.getTime() + 7 * 24 * 60 * 60 * 1000) },
-      id_estado: { not: estadoAnulado?.id_estado },
+      id_estado: estadoEntregadoSem?.id_estado,
     },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true, id_estado: true },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
-
-  const estadoEntregadoSem = await prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } });
 
   return diasSemana.map((label, i) => {
     const inicio = new Date(lunes.getTime() + i * 24 * 60 * 60 * 1000);
@@ -103,7 +101,7 @@ const ventasPorSemana = async (fecha) => {
       .reduce((s, v) => {
         const ef  = Number(v.monto_efectivo || 0);
         const tr  = Number(v.monto_transferencia || 0);
-        const dom = (v.id_estado === estadoEntregadoSem?.id_estado) ? Number(v.costo_domicilio || 0) : 0;
+        const dom = Number(v.costo_domicilio || 0);
         return s + ((ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom));
       }, 0);
     return { label, total };
@@ -146,21 +144,16 @@ const totalDia = async (fecha) => {
     return { gte: inicio, lt: fin };
   })() : undefined;
 
-  // Leer directamente de la tabla ventas (monto_efectivo / monto_transferencia)
-  // ya que detallePago solo existe cuando el admin registra pago manualmente.
+  // Solo contar ventas ENTREGADAS — pedidos pendientes no son ingresos reales aún
   const ventas = await prisma.venta.findMany({
-    where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: { not: estadoAnulado?.id_estado } },
-    select: { id_venta: true, id_estado: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: estadoEntregado?.id_estado },
+    select: { id_venta: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   const totalVentas    = ventas.length;
   const efectivoBruto  = ventas.reduce((s, v) => s + Number(v.monto_efectivo || 0), 0);
   const transferencia  = ventas.reduce((s, v) => s + Number(v.monto_transferencia || 0), 0);
-
-  // Domicilios: solo de ventas ya entregadas (se le pagan al domi con el efectivo)
-  const totalDomicilios = ventas
-    .filter((v) => v.id_estado === estadoEntregado?.id_estado)
-    .reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
+  const totalDomicilios = ventas.reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
 
   const efectivoNeto = efectivoBruto - totalDomicilios;
   const ingresoTotal = efectivoNeto + transferencia;
