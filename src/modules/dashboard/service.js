@@ -181,66 +181,40 @@ const domiciliariosDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
-  // Leer de pagos: ahí está el domiciliario que atendió cada venta entregada del día
-  const pagos = await prisma.pago.findMany({
-    where: {
-      venta: {
-        fecha: { gte: inicio, lt: fin },
-        estado: { nombre_estado: 'entregado' },
-      },
-    },
-    include: {
-      empleado: { include: { usuario: { select: { nombre: true } } } },
-      venta: {
-        select: { total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
-      },
-      detallePagos: { include: { metodoPago: true } },
-    },
-  });
-
-  // También ventas entregadas del día que NO tienen pago registrado aún
-  const ventasSinPago = await prisma.venta.findMany({
+  // Leer directo de ventas: id_domiciliario ya tiene quién entregó
+  const ventas = await prisma.venta.findMany({
     where: {
       fecha: { gte: inicio, lt: fin },
       estado: { nombre_estado: 'entregado' },
-      pagos: { none: {} },
     },
-    select: { id_venta: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: {
+      total: true,
+      costo_domicilio: true,
+      monto_efectivo: true,
+      monto_transferencia: true,
+      id_domiciliario: true,
+    },
   });
+
+  // Cargar nombres de domiciliarios de una vez
+  const ids = [...new Set(ventas.map(v => v.id_domiciliario).filter(Boolean))];
+  const empleados = ids.length > 0
+    ? await prisma.empleado.findMany({
+        where: { id_empleado: { in: ids } },
+        include: { usuario: { select: { nombre: true } } },
+      })
+    : [];
+  const nombrePorId = Object.fromEntries(empleados.map(e => [e.id_empleado, e.usuario?.nombre || '—']));
 
   const resumen = {};
-
-  // Agrupar pagos por domiciliario
-  pagos.forEach((pago) => {
-    const nombre = pago.empleado?.usuario?.nombre;
-    if (!nombre) return;
+  ventas.forEach((v) => {
+    const nombre = v.id_domiciliario ? (nombrePorId[v.id_domiciliario] || 'Desconocido') : 'Sin asignar';
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;
-    resumen[nombre].total += Number(pago.venta.total);
-
-    const detalles = pago.detallePagos || [];
-    if (detalles.length > 0) {
-      detalles.forEach((dp) => {
-        if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
-        if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
-      });
-    } else {
-      resumen[nombre].efectivo      += Number(pago.venta.monto_efectivo      || 0);
-      resumen[nombre].transferencia += Number(pago.venta.monto_transferencia || 0);
-    }
+    resumen[nombre].total      += Number(v.total);
+    resumen[nombre].efectivo   += Number(v.monto_efectivo      || 0);
+    resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
   });
-
-  // Ventas entregadas sin pago: mostrar bajo "Sin asignar" para no perder datos
-  if (ventasSinPago.length > 0) {
-    const nombre = 'Sin asignar';
-    resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
-    ventasSinPago.forEach((v) => {
-      resumen[nombre].entregas++;
-      resumen[nombre].total += Number(v.total);
-      resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
-      resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
-    });
-  }
 
   return Object.values(resumen).filter(r => r.entregas > 0);
 };

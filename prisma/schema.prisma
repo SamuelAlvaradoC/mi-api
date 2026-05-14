@@ -222,6 +222,7 @@ model Venta {
   monto_efectivo      Decimal? @db.Decimal(10, 2)
   monto_transferencia Decimal? @db.Decimal(10, 2)
   comprobante_url     String?  @db.Text
+  id_domiciliario     Int?     // empleado que realizó la entrega
 
   cliente   Cliente    @relation(fields: [id_cliente], references: [id_cliente])
   estado    Estado     @relation(fields: [id_estado], references: [id_estado])
