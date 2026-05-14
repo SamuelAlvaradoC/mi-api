@@ -162,7 +162,26 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });
 
-  // Al marcar como entregado con método de pago → crear registro en pagos/detalle_pagos
+  // Al marcar como entregado → guardar quién entregó en pagos (aunque no haya facturación)
+  // Esto alimenta "Domiciliarios del día" en el dashboard
+  if (estadoNombre === 'entregado' && id_usuario) {
+    try {
+      const empleado = await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } });
+      if (empleado) {
+        const yaExiste = await prisma.pago.findFirst({ where: { id_venta: id } });
+        if (!yaExiste) {
+          const venta = await prisma.venta.findUnique({ where: { id_venta: id }, select: { total: true } });
+          await prisma.pago.create({
+            data: { id_venta: id, id_empleado: empleado.id_empleado, total_pagado: venta.total, fecha_pago: new Date() },
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error guardando pago de entrega:', e.message);
+    }
+  }
+
+  // Al marcar como entregado con método de pago → crear detalle en pagos/detalle_pagos
   if (estadoNombre === 'entregado' && metodo_pago) {
     try {
       const empleado = id_usuario
