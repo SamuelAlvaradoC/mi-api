@@ -10,7 +10,7 @@ const router = Router();
 // Estáticas antes de /:id  (rutas de cliente — sin checkPermiso)
 router.get('/mis-pedidos',     verifyToken, controller.misVentas);
 router.get('/mis-despachos',   verifyToken, controller.misDespachos); // domi: sus ventas despachadas/entregadas
-router.post('/mi-pedido',      verifyToken, /* checkHorario, */ controller.crearMiPedido); // TODO: restaurar horario (1-8pm)
+router.post('/mi-pedido',      verifyToken, checkHorario, controller.crearMiPedido);
 router.get('/filtrar',         verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.filtrar);
 router.get('/',                verifyToken, checkPermisoAny('ver_ventas','gestionar_cocina'),         controller.listar);
 router.post('/',               verifyToken, checkPermiso('gestionar_ventas'),                           controller.crear);
