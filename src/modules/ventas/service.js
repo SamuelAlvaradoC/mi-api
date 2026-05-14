@@ -166,10 +166,12 @@ const cambiarEstado = async (id, datos, id_usuario) => {
   });
 
   // Al coger (despachado) o entregar → guardar el domiciliario en la venta
+  // Solo si quien actúa es un Domiciliario (nunca sobreescribir con id del admin)
   if ((estadoNombre === 'despachado' || estadoNombre === 'entregado') && id_usuario) {
     try {
       const empleado = await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } });
-      if (empleado) {
+      const esDomiciliario = empleado?.cargo?.toLowerCase().includes('domiciliario');
+      if (empleado && esDomiciliario) {
         await prisma.venta.update({
           where: { id_venta: id },
           data: { id_domiciliario: empleado.id_empleado },
