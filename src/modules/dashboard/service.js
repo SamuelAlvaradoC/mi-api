@@ -181,88 +181,68 @@ const domiciliariosDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
-  // Estrategia: buscar ventasDomiciliario con hora_entrega HOY
-  // (creados por cambiarEstado desde hoy en adelante)
-  const registrosDomi = await prisma.ventaDomiciliario.findMany({
+  // Leer de pagos: ahí está el domiciliario que atendió cada venta entregada del día
+  const pagos = await prisma.pago.findMany({
     where: {
-      hora_entrega: { gte: inicio, lt: fin },
+      venta: {
+        fecha: { gte: inicio, lt: fin },
+        estado: { nombre_estado: 'entregado' },
+      },
     },
     include: {
       empleado: { include: { usuario: { select: { nombre: true } } } },
       venta: {
-        select: { total: true, monto_efectivo: true, monto_transferencia: true,
-          pagos: { include: { detallePagos: { include: { metodoPago: true } } } } },
+        select: { total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
       },
+      detallePagos: { include: { metodoPago: true } },
     },
   });
 
-  // Fallback: ventas entregadas del día por venta.fecha (para registros históricos)
-  const ventasFallback = await prisma.venta.findMany({
+  // También ventas entregadas del día que NO tienen pago registrado aún
+  const ventasSinPago = await prisma.venta.findMany({
     where: {
       fecha: { gte: inicio, lt: fin },
       estado: { nombre_estado: 'entregado' },
-      // Que tengan algún ventasDomiciliario con hora_entrega fuera del rango o sin ella
-      NOT: { ventasDomiciliario: { some: { hora_entrega: { gte: inicio, lt: fin } } } },
+      pagos: { none: {} },
     },
-    include: {
-      ventasDomiciliario: {
-        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
-        orderBy: { id_venta_domiciliario: 'desc' },
-        take: 1,
-      },
-      pagos: {
-        include: {
-          empleado: { include: { usuario: { select: { nombre: true } } } },
-          detallePagos: { include: { metodoPago: true } },
-        },
-      },
-    },
+    select: { id_venta: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   const resumen = {};
 
-  // Procesar registros con hora_entrega de hoy
-  registrosDomi.forEach((rd) => {
-    const nombre = rd.empleado?.usuario?.nombre;
+  // Agrupar pagos por domiciliario
+  pagos.forEach((pago) => {
+    const nombre = pago.empleado?.usuario?.nombre;
     if (!nombre) return;
-    const v = rd.venta;
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;
-    resumen[nombre].total += Number(v.total);
-    const detalles = v.pagos?.[0]?.detallePagos || [];
+    resumen[nombre].total += Number(pago.venta.total);
+
+    const detalles = pago.detallePagos || [];
     if (detalles.length > 0) {
       detalles.forEach((dp) => {
         if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
         if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
       });
     } else {
-      resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
-      resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
+      resumen[nombre].efectivo      += Number(pago.venta.monto_efectivo      || 0);
+      resumen[nombre].transferencia += Number(pago.venta.monto_transferencia || 0);
     }
   });
 
-  // Procesar ventas sin hora_entrega registrada (fallback histórico)
-  ventasFallback.forEach((v) => {
-    const nombre =
-      v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre ||
-      v.pagos?.[0]?.empleado?.usuario?.nombre;
-    if (!nombre) return;
-    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
-    resumen[nombre].entregas++;
-    resumen[nombre].total += Number(v.total);
-    const detalles = v.pagos?.[0]?.detallePagos || [];
-    if (detalles.length > 0) {
-      detalles.forEach((dp) => {
-        if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
-        if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
-      });
-    } else {
+  // Ventas entregadas sin pago: mostrar bajo "Sin asignar" para no perder datos
+  if (ventasSinPago.length > 0) {
+    const nombre = 'Sin asignar';
+    resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
+    ventasSinPago.forEach((v) => {
+      resumen[nombre].entregas++;
+      resumen[nombre].total += Number(v.total);
       resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
       resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
-    }
-  });
+    });
+  }
 
-  return Object.values(resumen);
+  return Object.values(resumen).filter(r => r.entregas > 0);
 };
 
 const totalidadClientes = async (fecha) => {

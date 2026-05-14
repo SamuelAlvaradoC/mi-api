@@ -162,37 +162,6 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });
 
-  // Al marcar como entregado → registrar en ventasDomiciliario quién lo entregó
-  if (estadoNombre === 'entregado') {
-    try {
-      const empleado = id_usuario
-        ? await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } })
-        : null;
-      if (empleado) {
-        // Buscar o crear el estado de domicilio "entregado"
-        const estadoDomi = await prisma.estadoDomicilio.findFirst({
-          where: { nombre_estado: { contains: 'entregado', mode: 'insensitive' } },
-        }) || await prisma.estadoDomicilio.findFirst();
-
-        if (estadoDomi) {
-          const existing = await prisma.ventaDomiciliario.findFirst({ where: { id_venta: id } });
-          if (existing) {
-            await prisma.ventaDomiciliario.update({
-              where: { id_venta_domiciliario: existing.id_venta_domiciliario },
-              data: { id_empleado: empleado.id_empleado, id_estado_domicilio: estadoDomi.id_estado_domicilio, hora_entrega: new Date() },
-            });
-          } else {
-            await prisma.ventaDomiciliario.create({
-              data: { id_venta: id, id_empleado: empleado.id_empleado, id_estado_domicilio: estadoDomi.id_estado_domicilio, hora_asignacion: new Date(), hora_entrega: new Date() },
-            });
-          }
-        }
-      }
-    } catch (domiErr) {
-      console.error('Error registrando ventaDomiciliario:', domiErr.message);
-    }
-  }
-
   // Al marcar como entregado con método de pago → crear registro en pagos/detalle_pagos
   if (estadoNombre === 'entregado' && metodo_pago) {
     try {
