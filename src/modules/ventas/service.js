@@ -165,8 +165,8 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });
 
-  // Al marcar como entregado → guardar el domiciliario directamente en la venta
-  if (estadoNombre === 'entregado' && id_usuario) {
+  // Al coger (despachado) o entregar → guardar el domiciliario en la venta
+  if ((estadoNombre === 'despachado' || estadoNombre === 'entregado') && id_usuario) {
     try {
       const empleado = await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } });
       if (empleado) {
