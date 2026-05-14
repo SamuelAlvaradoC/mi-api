@@ -13,8 +13,22 @@ const whatsapp     = async (req, res, next) => { try { success(res, await servic
 const totalVenta   = async (req, res, next) => { try { success(res, await service.totalVenta(Number(req.params.id))); } catch (e) { next(e); } };
 
 const misVentas    = async (req, res, next) => { try { success(res, await service.misVentas(req.user.id_usuario)); } catch (e) { next(e); } };
+
+// Panel domi: solo ve SUS ventas despachadas/entregadas (filtradas por id_domiciliario)
+const misDespachos = async (req, res, next) => {
+  try {
+    const prisma = require('../../config/prisma');
+    const empleado = await prisma.empleado.findUnique({ where: { id_usuario: req.user.id_usuario } });
+    if (!empleado) return success(res, []);
+    success(res, await service.listar({
+      estado: req.query.estado,
+      fecha:  req.query.fecha,
+      id_domiciliario: empleado.id_empleado,
+    }));
+  } catch (e) { next(e); }
+};
 const crearMiPedido= async (req, res, next) => { try { success(res, await service.crearMiPedido(req.user.id_usuario, req.body), 'Pedido creado', 201); } catch (e) { next(e); } };
 
 const editar = async (req, res, next) => { try { success(res, await service.editar(Number(req.params.id), req.body), 'Venta actualizada'); } catch (e) { next(e); } };
 
-module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar };
+module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar, misDespachos };

@@ -14,7 +14,7 @@ const includeDetalle = {
   },
 };
 
-const listar = async ({ estado, fecha } = {}) => {
+const listar = async ({ estado, fecha, id_domiciliario } = {}) => {
   const where = {};
 
   if (estado) {
@@ -26,13 +26,16 @@ const listar = async ({ estado, fecha } = {}) => {
   }
 
   if (fecha) {
-    // Filtrar por día completo en hora Colombia (UTC-5): medianoche Colombia = 05:00 UTC
     const inicio = new Date(fecha + 'T05:00:00.000Z');
     const fin    = new Date(inicio.getTime() + 24 * 60 * 60 * 1000 - 1);
     where.fecha  = { gte: inicio, lte: fin };
   }
 
-  // Cuando se filtra por estado (cocina/domicilios) mostrar el más antiguo primero
+  // Filtrar por domiciliario (panel del domi: solo ve sus ventas despachadas/entregadas)
+  if (id_domiciliario) {
+    where.id_domiciliario = Number(id_domiciliario);
+  }
+
   const orderBy = estado ? { id_venta: 'asc' } : { fecha: 'desc' };
   return prisma.venta.findMany({ where, include: includeDetalle, orderBy });
 };
