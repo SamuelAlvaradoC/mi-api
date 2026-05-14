@@ -398,14 +398,15 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
 
   const total = subtotal + Number(costo_domicilio || 0);
 
-  // Calcular montos si se especifica método de pago
+  // Calcular montos: para efectivo/transferencia siempre derivar del total real (evitar inconsistencias)
   let montoEf = venta.monto_efectivo;
   let montoTr = venta.monto_transferencia;
   let metodoFinal = venta.metodo_pago;
   if (metodo_pago) {
     metodoFinal = metodo_pago;
-    montoEf = monto_efectivo !== undefined ? Number(monto_efectivo) : montoEf;
-    montoTr = monto_transferencia !== undefined ? Number(monto_transferencia) : montoTr;
+    if (metodo_pago === 'efectivo')      { montoEf = total; montoTr = 0; }
+    else if (metodo_pago === 'transferencia') { montoTr = total; montoEf = 0; }
+    else if (metodo_pago === 'mixto')    { montoEf = Number(monto_efectivo || 0); montoTr = Number(monto_transferencia || 0); }
   }
 
   await prisma.venta.update({
