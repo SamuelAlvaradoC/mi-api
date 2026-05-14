@@ -42,20 +42,23 @@ const ventasPorDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
-  const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });
+  const [estadoAnulado, estadoEntregado] = await Promise.all([
+    prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } }),
+    prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } }),
+  ]);
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: { not: estadoAnulado?.id_estado } },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true, id_estado: true },
   });
 
   const horas = {};
   for (let h = 0; h < 24; h++) horas[h] = 0;
   ventas.forEach((v) => {
     const hora = (new Date(v.fecha).getUTCHours() - 5 + 24) % 24;
-    // Neto = efectivo recibido + transferencia - costo domicilio (misma lógica que KPI)
     const ef   = Number(v.monto_efectivo || 0);
     const tr   = Number(v.monto_transferencia || 0);
-    const dom  = Number(v.costo_domicilio || 0);
+    // Solo restar domicilio si la venta está entregada (misma lógica que totalDia)
+    const dom  = (v.id_estado === estadoEntregado?.id_estado) ? Number(v.costo_domicilio || 0) : 0;
     const neto = (ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom);
     horas[hora] = horas[hora] + neto;
   });
@@ -87,8 +90,10 @@ const ventasPorSemana = async (fecha) => {
       fecha: { gte: lunes, lt: new Date(lunes.getTime() + 7 * 24 * 60 * 60 * 1000) },
       id_estado: { not: estadoAnulado?.id_estado },
     },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true, id_estado: true },
   });
+
+  const estadoEntregadoSem = await prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } });
 
   return diasSemana.map((label, i) => {
     const inicio = new Date(lunes.getTime() + i * 24 * 60 * 60 * 1000);
@@ -98,7 +103,7 @@ const ventasPorSemana = async (fecha) => {
       .reduce((s, v) => {
         const ef  = Number(v.monto_efectivo || 0);
         const tr  = Number(v.monto_transferencia || 0);
-        const dom = Number(v.costo_domicilio || 0);
+        const dom = (v.id_estado === estadoEntregadoSem?.id_estado) ? Number(v.costo_domicilio || 0) : 0;
         return s + ((ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom));
       }, 0);
     return { label, total };
@@ -176,39 +181,77 @@ const domiciliariosDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
-  // Buscar ventas entregadas del día, sin requerir registro de pago manual
-  // El domiciliario se identifica por ventasDomiciliario (asignación de despacho)
+  // Buscar ventas entregadas del día (por fecha del pedido)
+  // El domiciliario se identifica por ventasDomiciliario o pagos (cualquiera disponible)
   const ventas = await prisma.venta.findMany({
     where: {
       fecha: { gte: inicio, lt: fin },
       estado: { nombre_estado: 'entregado' },
     },
-    select: {
-      id_venta: true,
-      total: true,
-      monto_efectivo: true,
-      monto_transferencia: true,
-      metodo_pago: true,
+    include: {
       ventasDomiciliario: {
-        select: { empleado: { select: { usuario: { select: { nombre: true } } } } },
+        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
         orderBy: { hora_asignacion: 'asc' },
+      },
+      pagos: {
+        include: {
+          empleado: { include: { usuario: { select: { nombre: true } } } },
+          detallePagos: { include: { metodoPago: true } },
+        },
       },
     },
   });
 
+  // También buscar ventas entregadas HOY que fueron pedidas AYER (borde de medianoche)
+  // Ampliar rango a 48h hacia atrás y filtrar por estado
+  const ventasRecientes = await prisma.venta.findMany({
+    where: {
+      fecha: { gte: new Date(inicio.getTime() - 24 * 60 * 60 * 1000), lt: inicio },
+      estado: { nombre_estado: 'entregado' },
+      ventasDomiciliario: {
+        some: { hora_asignacion: { gte: inicio, lt: fin } },
+      },
+    },
+    include: {
+      ventasDomiciliario: {
+        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
+        where: { hora_asignacion: { gte: inicio, lt: fin } },
+      },
+      pagos: {
+        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
+      },
+    },
+  });
+
+  const todasVentas = [...ventas, ...ventasRecientes];
+
   const resumen = {};
-  ventas.forEach((v) => {
-    // Identificar domi desde la asignación de despacho
-    const nombre = v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre;
-    if (!nombre) return; // venta sin domi asignado
+  todasVentas.forEach((v) => {
+    // Identificar domi: primero ventasDomiciliario, luego pagos, luego "Sin asignar"
+    const nombre =
+      v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre ||
+      v.pagos?.[0]?.empleado?.usuario?.nombre ||
+      null;
+
+    if (!nombre) return; // sin domi identificable, omitir
 
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;
     resumen[nombre].total += Number(v.total);
-    // Usar montos reales de la venta (siempre disponibles desde el pedido)
-    resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
-    resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
+
+    // Montos: preferir detallePagos si existen, fallback a columnas de venta
+    const detalles = v.pagos?.[0]?.detallePagos || [];
+    if (detalles.length > 0) {
+      detalles.forEach((dp) => {
+        if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
+        if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
+      });
+    } else {
+      resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
+      resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
+    }
   });
+
   return Object.values(resumen);
 };
 
