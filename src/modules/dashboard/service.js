@@ -181,17 +181,34 @@ const domiciliariosDia = async (fecha) => {
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
 
-  // Buscar ventas entregadas del día (por fecha del pedido)
-  // El domiciliario se identifica por ventasDomiciliario o pagos (cualquiera disponible)
-  const ventas = await prisma.venta.findMany({
+  // Estrategia: buscar ventasDomiciliario con hora_entrega HOY
+  // (creados por cambiarEstado desde hoy en adelante)
+  const registrosDomi = await prisma.ventaDomiciliario.findMany({
+    where: {
+      hora_entrega: { gte: inicio, lt: fin },
+    },
+    include: {
+      empleado: { include: { usuario: { select: { nombre: true } } } },
+      venta: {
+        select: { total: true, monto_efectivo: true, monto_transferencia: true,
+          pagos: { include: { detallePagos: { include: { metodoPago: true } } } } },
+      },
+    },
+  });
+
+  // Fallback: ventas entregadas del día por venta.fecha (para registros históricos)
+  const ventasFallback = await prisma.venta.findMany({
     where: {
       fecha: { gte: inicio, lt: fin },
       estado: { nombre_estado: 'entregado' },
+      // Que tengan algún ventasDomiciliario con hora_entrega fuera del rango o sin ella
+      NOT: { ventasDomiciliario: { some: { hora_entrega: { gte: inicio, lt: fin } } } },
     },
     include: {
       ventasDomiciliario: {
         include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
-        orderBy: { hora_asignacion: 'asc' },
+        orderBy: { id_venta_domiciliario: 'desc' },
+        take: 1,
       },
       pagos: {
         include: {
@@ -202,44 +219,37 @@ const domiciliariosDia = async (fecha) => {
     },
   });
 
-  // También buscar ventas entregadas HOY que fueron pedidas AYER (borde de medianoche)
-  // Ampliar rango a 48h hacia atrás y filtrar por estado
-  const ventasRecientes = await prisma.venta.findMany({
-    where: {
-      fecha: { gte: new Date(inicio.getTime() - 24 * 60 * 60 * 1000), lt: inicio },
-      estado: { nombre_estado: 'entregado' },
-      ventasDomiciliario: {
-        some: { hora_asignacion: { gte: inicio, lt: fin } },
-      },
-    },
-    include: {
-      ventasDomiciliario: {
-        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
-        where: { hora_asignacion: { gte: inicio, lt: fin } },
-      },
-      pagos: {
-        include: { empleado: { include: { usuario: { select: { nombre: true } } } } },
-      },
-    },
-  });
-
-  const todasVentas = [...ventas, ...ventasRecientes];
-
   const resumen = {};
-  todasVentas.forEach((v) => {
-    // Identificar domi: primero ventasDomiciliario, luego pagos, luego "Sin asignar"
-    const nombre =
-      v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre ||
-      v.pagos?.[0]?.empleado?.usuario?.nombre ||
-      null;
 
-    if (!nombre) return; // sin domi identificable, omitir
-
+  // Procesar registros con hora_entrega de hoy
+  registrosDomi.forEach((rd) => {
+    const nombre = rd.empleado?.usuario?.nombre;
+    if (!nombre) return;
+    const v = rd.venta;
     if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
     resumen[nombre].entregas++;
     resumen[nombre].total += Number(v.total);
+    const detalles = v.pagos?.[0]?.detallePagos || [];
+    if (detalles.length > 0) {
+      detalles.forEach((dp) => {
+        if (dp.metodoPago?.nombre === 'efectivo')      resumen[nombre].efectivo      += Number(dp.monto);
+        if (dp.metodoPago?.nombre === 'transferencia') resumen[nombre].transferencia += Number(dp.monto);
+      });
+    } else {
+      resumen[nombre].efectivo      += Number(v.monto_efectivo      || 0);
+      resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
+    }
+  });
 
-    // Montos: preferir detallePagos si existen, fallback a columnas de venta
+  // Procesar ventas sin hora_entrega registrada (fallback histórico)
+  ventasFallback.forEach((v) => {
+    const nombre =
+      v.ventasDomiciliario?.[0]?.empleado?.usuario?.nombre ||
+      v.pagos?.[0]?.empleado?.usuario?.nombre;
+    if (!nombre) return;
+    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
+    resumen[nombre].entregas++;
+    resumen[nombre].total += Number(v.total);
     const detalles = v.pagos?.[0]?.detallePagos || [];
     if (detalles.length > 0) {
       detalles.forEach((dp) => {
