@@ -92,7 +92,8 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
       precio_unitario: precioA[a.id_adicion],
       subtotal: precioA[a.id_adicion] * a.cantidad,
     }));
-    const itemSub = precioUnitItem * item.cantidad + adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const itemSub = (precioUnitItem + adicionPerUnit) * item.cantidad;
     subtotal += itemSub;
     return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
   });
@@ -129,7 +130,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({
             id_adicion: a.id_adicion, cantidad: a.cantidad,
-            precio_unitario: a.precio_unitario, subtotal: a.subtotal,
+            precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad,
           })) },
         })),
       },
@@ -391,7 +392,8 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       precio_unitario: precioA[a.id_adicion] || 0,
       subtotal: (precioA[a.id_adicion] || 0) * a.cantidad,
     }));
-    const itemSub = precioUnitItem * item.cantidad + adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const itemSub = (precioUnitItem + adicionPerUnit) * item.cantidad;
     subtotal += itemSub;
     return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
   });
@@ -422,7 +424,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
-          detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal })) },
+          detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },
         })),
       },
     },
