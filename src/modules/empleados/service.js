@@ -46,6 +46,9 @@ const actualizar = async (id, datos) => {
 
 const eliminar = async (id) => {
   const emp = await obtener(id);
+  // Bloquear eliminación de administradores
+  const usuario = await prisma.usuario.findUnique({ where: { id_usuario: emp.id_usuario }, include: { rol: true } });
+  if (usuario?.rol?.nombre === 'admin') throw { status: 403, message: 'No se puede eliminar un empleado con rol Administrador' };
   const domiciliosCount = await prisma.ventaDomiciliario.count({ where: { id_empleado: emp.id_empleado } }).catch(() => 0);
   if (domiciliosCount > 0) throw { status: 409, message: `No se puede eliminar: el empleado tiene ${domiciliosCount} domicilio(s) asignado(s)` };
   return prisma.$transaction(async (tx) => {

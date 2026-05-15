@@ -66,7 +66,10 @@ const actualizar = async (id, datos) => {
 };
 
 const eliminar = async (id) => {
-  await obtener(id);
+  const u = await obtener(id);
+  // Bloquear eliminación de administradores
+  const rol = await prisma.rol.findUnique({ where: { id_rol: u.id_rol } });
+  if (rol?.nombre === 'admin') throw { status: 403, message: 'No se puede eliminar un usuario con rol Administrador' };
   // Verificar ventas via cliente
   const cliente = await prisma.cliente.findUnique({ where: { id_usuario: id } });
   if (cliente) {
