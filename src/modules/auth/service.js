@@ -32,7 +32,7 @@ const login = async ({ email, contrasena }) => {
 // ── Register ────────────────────────────────────────────
 const register = async ({ nombre, email, contrasena, id_rol }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
-  if (existe) throw { status: 409, message: 'El email ya está registrado' };
+  if (existe) throw { status: 409, message: 'Ya existe una cuenta con ese correo electrónico. ¿Olvidaste tu contraseña?' };
 
   const hash = await bcrypt.hash(contrasena, 10);
   const rol  = await prisma.rol.findUnique({ where: { id_rol } });
@@ -149,6 +149,22 @@ const getPerfil = async (id_usuario) => {
 
 // ── Editar perfil ───────────────────────────────────────
 const editarPerfil = async (id_usuario, { nombre, email, telefono }) => {
+  // Validar email único si se está cambiando
+  if (email !== undefined) {
+    const emailExistente = await prisma.usuario.findFirst({
+      where: { email, NOT: { id_usuario } },
+    });
+    if (emailExistente) throw { status: 409, message: 'Ese correo electrónico ya está en uso por otra cuenta' };
+  }
+
+  // Validar teléfono único si se está cambiando (ignorar vacío)
+  if (telefono && telefono.trim() !== '') {
+    const telefonoExistente = await prisma.cliente.findFirst({
+      where: { telefono: telefono.trim(), NOT: { id_usuario } },
+    });
+    if (telefonoExistente) throw { status: 409, message: 'Ese número de teléfono ya está registrado en otra cuenta' };
+  }
+
   const data = {};
   if (nombre !== undefined) data.nombre = nombre;
   if (email  !== undefined) data.email  = email;
