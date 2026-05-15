@@ -1,0 +1,382 @@
+{
+  "fecha": "2026-05-15T19:57:12.186Z",
+  "roles": [
+    {
+      "id_rol": 1,
+      "nombre": "admin",
+      "descripcion": "Administrador del sistema",
+      "estado": 1
+    },
+    {
+      "id_rol": 3,
+      "nombre": "confirmador_domicilio",
+      "descripcion": "Confirma y gestiona el estado de los domicilios",
+      "estado": 1
+    },
+    {
+      "id_rol": 4,
+      "nombre": "cliente",
+      "descripcion": "Cliente de la tienda",
+      "estado": 1
+    },
+    {
+      "id_rol": 2,
+      "nombre": "domiciliario",
+      "descripcion": "Entrega de pedidos a domicilio",
+      "estado": 1
+    },
+    {
+      "id_rol": 5,
+      "nombre": "cocinero",
+      "descripcion": "Encargado de preparar los pedidos en cocina",
+      "estado": 1
+    }
+  ],
+  "permisos": [
+    {
+      "id_permiso": 101,
+      "nombre": "gestionar_cocina",
+      "descripcion": "Ver pedidos en cocina y marcarlos como listos"
+    },
+    {
+      "id_permiso": 81,
+      "nombre": "ver_dashboard",
+      "descripcion": "Ver el dashboard y estadísticas"
+    },
+    {
+      "id_permiso": 82,
+      "nombre": "ver_ventas",
+      "descripcion": "Ver lista de ventas y detalles"
+    },
+    {
+      "id_permiso": 83,
+      "nombre": "gestionar_ventas",
+      "descripcion": "Crear ventas desde el panel admin"
+    },
+    {
+      "id_permiso": 84,
+      "nombre": "cambiar_estado_venta",
+      "descripcion": "Cambiar el estado de una venta"
+    },
+    {
+      "id_permiso": 85,
+      "nombre": "anular_venta",
+      "descripcion": "Anular una venta"
+    },
+    {
+      "id_permiso": 86,
+      "nombre": "confirmar_domicilios",
+      "descripcion": "Confirmar o rechazar pedidos pendientes"
+    },
+    {
+      "id_permiso": 87,
+      "nombre": "gestionar_productos",
+      "descripcion": "Crear, editar y eliminar productos"
+    },
+    {
+      "id_permiso": 88,
+      "nombre": "gestionar_categorias",
+      "descripcion": "Crear, editar y eliminar categorías"
+    },
+    {
+      "id_permiso": 89,
+      "nombre": "gestionar_toppings",
+      "descripcion": "Crear, editar y eliminar toppings"
+    },
+    {
+      "id_permiso": 90,
+      "nombre": "gestionar_adiciones",
+      "descripcion": "Crear, editar y eliminar adiciones"
+    },
+    {
+      "id_permiso": 91,
+      "nombre": "ver_clientes",
+      "descripcion": "Ver lista de clientes"
+    },
+    {
+      "id_permiso": 92,
+      "nombre": "gestionar_clientes",
+      "descripcion": "Crear, editar y eliminar clientes"
+    },
+    {
+      "id_permiso": 93,
+      "nombre": "ver_empleados",
+      "descripcion": "Ver lista de empleados"
+    },
+    {
+      "id_permiso": 94,
+      "nombre": "gestionar_empleados",
+      "descripcion": "Crear, editar y eliminar empleados"
+    },
+    {
+      "id_permiso": 95,
+      "nombre": "ver_usuarios",
+      "descripcion": "Ver lista de usuarios"
+    },
+    {
+      "id_permiso": 96,
+      "nombre": "gestionar_usuarios",
+      "descripcion": "Crear, editar y eliminar usuarios"
+    },
+    {
+      "id_permiso": 97,
+      "nombre": "ver_roles",
+      "descripcion": "Ver lista de roles"
+    },
+    {
+      "id_permiso": 98,
+      "nombre": "gestionar_roles",
+      "descripcion": "Crear, editar roles y asignar permisos"
+    },
+    {
+      "id_permiso": 99,
+      "nombre": "ver_pedidos_domiciliario",
+      "descripcion": "Ver pedidos asignados al domiciliario"
+    },
+    {
+      "id_permiso": 100,
+      "nombre": "facturar_pedido",
+      "descripcion": "Facturar y entregar un pedido"
+    }
+  ],
+  "rolPermisos": [
+    {
+      "id_rol_permiso": 306,
+      "id_rol": 2,
+      "id_permiso": 99
+    },
+    {
+      "id_rol_permiso": 307,
+      "id_rol": 2,
+      "id_permiso": 100
+    },
+    {
+      "id_rol_permiso": 308,
+      "id_rol": 2,
+      "id_permiso": 82
+    },
+    {
+      "id_rol_permiso": 310,
+      "id_rol": 5,
+      "id_permiso": 101
+    },
+    {
+      "id_rol_permiso": 312,
+      "id_rol": 1,
+      "id_permiso": 85
+    },
+    {
+      "id_rol_permiso": 313,
+      "id_rol": 1,
+      "id_permiso": 84
+    },
+    {
+      "id_rol_permiso": 314,
+      "id_rol": 1,
+      "id_permiso": 86
+    },
+    {
+      "id_rol_permiso": 315,
+      "id_rol": 1,
+      "id_permiso": 100
+    },
+    {
+      "id_rol_permiso": 316,
+      "id_rol": 1,
+      "id_permiso": 90
+    },
+    {
+      "id_rol_permiso": 317,
+      "id_rol": 1,
+      "id_permiso": 88
+    },
+    {
+      "id_rol_permiso": 318,
+      "id_rol": 1,
+      "id_permiso": 92
+    },
+    {
+      "id_rol_permiso": 319,
+      "id_rol": 1,
+      "id_permiso": 101
+    },
+    {
+      "id_rol_permiso": 320,
+      "id_rol": 1,
+      "id_permiso": 94
+    },
+    {
+      "id_rol_permiso": 321,
+      "id_rol": 1,
+      "id_permiso": 87
+    },
+    {
+      "id_rol_permiso": 322,
+      "id_rol": 1,
+      "id_permiso": 98
+    },
+    {
+      "id_rol_permiso": 323,
+      "id_rol": 1,
+      "id_permiso": 89
+    },
+    {
+      "id_rol_permiso": 324,
+      "id_rol": 1,
+      "id_permiso": 96
+    },
+    {
+      "id_rol_permiso": 325,
+      "id_rol": 1,
+      "id_permiso": 83
+    },
+    {
+      "id_rol_permiso": 326,
+      "id_rol": 1,
+      "id_permiso": 91
+    },
+    {
+      "id_rol_permiso": 327,
+      "id_rol": 1,
+      "id_permiso": 81
+    },
+    {
+      "id_rol_permiso": 328,
+      "id_rol": 1,
+      "id_permiso": 93
+    },
+    {
+      "id_rol_permiso": 329,
+      "id_rol": 1,
+      "id_permiso": 99
+    },
+    {
+      "id_rol_permiso": 330,
+      "id_rol": 1,
+      "id_permiso": 97
+    },
+    {
+      "id_rol_permiso": 331,
+      "id_rol": 1,
+      "id_permiso": 95
+    },
+    {
+      "id_rol_permiso": 332,
+      "id_rol": 1,
+      "id_permiso": 82
+    },
+    {
+      "id_rol_permiso": 333,
+      "id_rol": 3,
+      "id_permiso": 81
+    },
+    {
+      "id_rol_permiso": 334,
+      "id_rol": 3,
+      "id_permiso": 82
+    },
+    {
+      "id_rol_permiso": 335,
+      "id_rol": 3,
+      "id_permiso": 83
+    },
+    {
+      "id_rol_permiso": 336,
+      "id_rol": 3,
+      "id_permiso": 84
+    },
+    {
+      "id_rol_permiso": 337,
+      "id_rol": 3,
+      "id_permiso": 85
+    },
+    {
+      "id_rol_permiso": 338,
+      "id_rol": 3,
+      "id_permiso": 86
+    },
+    {
+      "id_rol_permiso": 339,
+      "id_rol": 3,
+      "id_permiso": 91
+    },
+    {
+      "id_rol_permiso": 340,
+      "id_rol": 3,
+      "id_permiso": 93
+    },
+    {
+      "id_rol_permiso": 341,
+      "id_rol": 3,
+      "id_permiso": 95
+    }
+  ],
+  "usuarios": [
+    {
+      "id_usuario": 1,
+      "nombre": "Administrador",
+      "email": "samuel@gmail.com",
+      "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+      "id_rol": 1,
+      "estado": 1,
+      "rol_nombre": "admin"
+    },
+    {
+      "id_usuario": 2,
+      "nombre": "Carlos Domiciliario",
+      "email": "domi@gmail.com",
+      "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+      "id_rol": 2,
+      "estado": 1,
+      "rol_nombre": "domiciliario"
+    },
+    {
+      "id_usuario": 4,
+      "nombre": "Confirmador Domicilio",
+      "email": "confirmador@gmail.com",
+      "contrasena": "$2a$10$uXyElNzXwxbz4HP9UhDsgOQC0XNTCS7BqpDlsCPHk0cA6UXH0DWu2",
+      "id_rol": 3,
+      "estado": 1,
+      "rol_nombre": "confirmador_domicilio"
+    },
+    {
+      "id_usuario": 16,
+      "nombre": "Cocinero Principal",
+      "email": "cocina@gmail.com",
+      "contrasena": "$2a$10$FEZ6A1AIrfyWef5hzTpTNOaEM9jwTpeHPzgIKbR.44XcPqqSOPY/G",
+      "id_rol": 5,
+      "estado": 1,
+      "rol_nombre": "cocinero"
+    }
+  ],
+  "empleados": [
+    {
+      "id_empleado": 1,
+      "cargo": "Domiciliario",
+      "fecha_ingreso": "2026-04-20T00:00:00.000Z",
+      "estado": 1,
+      "email_usuario": "domi@gmail.com"
+    },
+    {
+      "id_empleado": 6,
+      "cargo": "Administrador",
+      "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+      "estado": 1,
+      "email_usuario": "samuel@gmail.com"
+    },
+    {
+      "id_empleado": 7,
+      "cargo": "Confirmador",
+      "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+      "estado": 1,
+      "email_usuario": "confirmador@gmail.com"
+    },
+    {
+      "id_empleado": 8,
+      "cargo": "Cocinero",
+      "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+      "estado": 1,
+      "email_usuario": "cocina@gmail.com"
+    }
+  ]
+}

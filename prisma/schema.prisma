@@ -75,9 +75,10 @@ model Cliente {
   telefono   String? @db.VarChar(20)
   estado     Int     @default(1) @db.SmallInt
 
-  usuario     Usuario     @relation(fields: [id_usuario], references: [id_usuario])
+  usuario     Usuario       @relation(fields: [id_usuario], references: [id_usuario])
   ventas      Venta[]
   direcciones Direccion[]
+  puntos      PuntosCliente?
 
   @@map("clientes")
 }
@@ -222,7 +223,9 @@ model Venta {
   monto_efectivo      Decimal? @db.Decimal(10, 2)
   monto_transferencia Decimal? @db.Decimal(10, 2)
   comprobante_url     String?  @db.Text
-  id_domiciliario     Int?     // empleado que realizó la entrega
+  id_domiciliario     Int?
+  puntos_usados       Int      @default(0)
+  descuento_puntos    Float    @default(0)
 
   cliente   Cliente    @relation(fields: [id_cliente], references: [id_cliente])
   estado    Estado     @relation(fields: [id_estado], references: [id_estado])
@@ -231,6 +234,7 @@ model Venta {
   detalleVentas      DetalleVenta[]
   pagos              Pago[]
   ventasDomiciliario VentaDomiciliario[]
+  movimientosPuntos  MovimientoPuntos[]
 
   @@map("ventas")
 }
@@ -374,4 +378,34 @@ model VentaDomiciliario {
   estadoDomicilio EstadoDomicilio @relation(fields: [id_estado_domicilio], references: [id_estado_domicilio])
 
   @@map("ventas_domiciliario")
+}
+
+// ─────────────────────────────────────────────
+// PUNTOS FIDELIDAD
+// ─────────────────────────────────────────────
+
+model PuntosCliente {
+  id_puntos   Int    @id @default(autoincrement())
+  id_cliente  Int    @unique
+  puntos      Int    @default(0)
+
+  cliente     Cliente          @relation(fields: [id_cliente], references: [id_cliente])
+  movimientos MovimientoPuntos[]
+
+  @@map("puntos_cliente")
+}
+
+model MovimientoPuntos {
+  id_movimiento Int      @id @default(autoincrement())
+  id_puntos     Int
+  id_venta      Int?
+  tipo          String   @db.VarChar(20)
+  puntos        Int
+  descripcion   String?  @db.VarChar(255)
+  fecha         DateTime @default(now())
+
+  puntosCliente PuntosCliente @relation(fields: [id_puntos], references: [id_puntos])
+  venta         Venta?        @relation(fields: [id_venta], references: [id_venta])
+
+  @@map("movimientos_puntos")
 }

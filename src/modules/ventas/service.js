@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { acumularPuntos, calcularDescuentoPuntos } = require('../puntos/service');
 
 const includeDetalle = {
   cliente:  { include: { usuario: { select: { nombre: true, email: true } } } },
@@ -52,7 +53,7 @@ const obtener = async (id) => {
   return v;
 };
 
-const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url }) => {
+const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
   // Si se envía nueva_direccion, crearla antes
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {
@@ -99,7 +100,9 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   });
 
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
-  const total           = subtotal + Number(costo_domicilio);
+  // Descuento de puntos solo aplica al subtotal de productos (nunca al domicilio)
+  const descuento       = Math.min(Number(descuento_puntos), subtotal);
+  const total           = Math.max(0, subtotal - descuento) + Number(costo_domicilio);
 
   // Calcular montos según método de pago
   let montoEfectivo = null;
@@ -122,6 +125,8 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
       monto_transferencia: montoTransfer,
       comprobante_url: comprobante_url || null,
       subtotal, total,
+      puntos_usados:   Number(puntos_usados) || 0,
+      descuento_puntos: descuento,
       detalleVentas: {
         create: itemsCalc.map((item) => ({
           id_producto: item.id_producto, cantidad: item.cantidad,
@@ -240,6 +245,26 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     return obtener(id);
   }
 
+  // Acumular puntos al marcar como entregado (en cualquier caso, con o sin método de pago)
+  if (estadoNombre === 'entregado') {
+    try {
+      const ventaCompleta = await prisma.venta.findUnique({
+        where: { id_venta: id },
+        select: { subtotal: true, puntos_usados: true, id_cliente: true },
+      });
+      if (ventaCompleta?.id_cliente) {
+        await acumularPuntos(
+          ventaCompleta.id_cliente,
+          id,
+          Number(ventaCompleta.subtotal),
+          ventaCompleta.puntos_usados || 0
+        );
+      }
+    } catch (e) {
+      console.error('Error acumulando puntos:', e.message);
+    }
+  }
+
   return ventaActualizada;
 };
 
@@ -310,12 +335,20 @@ const misVentas = async (id_usuario) => {
 };
 
 // Cliente crea su propio pedido (auto-crea perfil de cliente si no existe)
-const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url }) => {
+const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_a_usar = 0 }) => {
   let cliente = await prisma.cliente.findUnique({ where: { id_usuario } });
   if (!cliente) {
-    // Auto-crear perfil de cliente para cualquier usuario autenticado
     cliente = await prisma.cliente.create({ data: { id_usuario } });
   }
+
+  // Validar puntos si se quieren usar
+  const puntosUsar = Number(puntos_a_usar) || 0;
+  if (puntosUsar > 0) {
+    const registro = await prisma.puntosCliente.findUnique({ where: { id_cliente: cliente.id_cliente } });
+    if (!registro || registro.puntos < puntosUsar)
+      throw { status: 400, message: 'No tienes suficientes puntos para aplicar este descuento' };
+  }
+  const descuento_puntos = puntosUsar > 0 ? calcularDescuentoPuntos(puntosUsar) : 0;
 
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {
@@ -334,7 +367,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
     direccionId = dir.id_direccion;
   }
 
-  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url });
+  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });
 };
 
 const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia }) => {
