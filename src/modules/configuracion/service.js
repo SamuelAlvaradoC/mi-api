@@ -18,4 +18,17 @@ const tiempoEspera = async () => {
   return Number(val) || 30;
 };
 
-module.exports = { obtener, actualizar, tiempoEspera };
+const horario = async () => {
+  const [apertura, cierre, estado] = await Promise.all([
+    obtener('hora_apertura'),
+    obtener('hora_cierre'),
+    obtener('estado_tienda'),
+  ]);
+  return {
+    hora_apertura: Number(apertura) || 13,
+    hora_cierre:   Number(cierre)   || 20,
+    estado_tienda: estado           || 'schedule', // 'schedule' | 'open' | 'closed'
+  };
+};
+
+module.exports = { obtener, actualizar, tiempoEspera, horario };
