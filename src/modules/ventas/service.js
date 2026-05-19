@@ -8,7 +8,7 @@ const includeDetalle = {
   pagos:    { include: { detallePagos: { include: { metodoPago: true } } } },
   detalleVentas: {
     include: {
-      producto: true,
+      producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true } },
       detalleToppings:  { include: { topping: true } },
       detalleAdiciones: { include: { adicion: true } },
     },
