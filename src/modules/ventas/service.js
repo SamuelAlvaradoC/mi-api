@@ -95,12 +95,14 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     }));
     const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
     // Salsas extra: las primeras 2 son gratis, el resto $5.000 c/u
-    const totalSalsas    = (item.salsas || []).length;
-    const salsasExtra    = Math.max(0, totalSalsas - 2);
+    const salsasArr      = Array.isArray(item.salsas) ? item.salsas : [];
+    const salsasExtra    = Math.max(0, salsasArr.length - 2);
     const salsaExtraUnit = salsasExtra * 5000;
-    const itemSub = (precioUnitItem + adicionPerUnit + salsaExtraUnit) * item.cantidad;
+    // precio_unitario incluye: base + toppings extra + salsas extra (adiciones se guardan separado)
+    const precioUnitFinal = precioUnitItem + salsaExtraUnit;
+    const itemSub = (precioUnitFinal + adicionPerUnit) * item.cantidad;
     subtotal += itemSub;
-    return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
+    return { ...item, precio_unitario: precioUnitFinal, subtotal: precioUnitFinal * item.cantidad, adicionesCalc };
   });
 
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
@@ -430,13 +432,14 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       precio_unitario: precioA[a.id_adicion] || 0,
       subtotal: (precioA[a.id_adicion] || 0) * a.cantidad,
     }));
-    const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
-    const salsasArr    = Array.isArray(item.salsas) ? item.salsas : [];
-    const salsasCob    = Math.max(0, salsasArr.length - 2);
-    const salsaExtra   = salsasCob * 5000;
-    const itemSub = (precioUnitItem + adicionPerUnit + salsaExtra) * item.cantidad;
+    const adicionPerUnit  = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
+    const salsasArr2      = Array.isArray(item.salsas) ? item.salsas : [];
+    const salsasCob2      = Math.max(0, salsasArr2.length - 2);
+    const salsaExtra2     = salsasCob2 * 5000;
+    const precioUnitFinal2 = precioUnitItem + salsaExtra2;
+    const itemSub = (precioUnitFinal2 + adicionPerUnit) * item.cantidad;
     subtotal += itemSub;
-    return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
+    return { ...item, precio_unitario: precioUnitFinal2, subtotal: precioUnitFinal2 * item.cantidad, adicionesCalc };
   });
 
   const total = subtotal + Number(costo_domicilio || 0);
