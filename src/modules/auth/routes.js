@@ -7,8 +7,8 @@ const router = Router();
 // Públicos
 router.post('/login',               controller.login);
 router.post('/register',            controller.register);
-router.post('/recuperar',           controller.recuperarContrasena);
-router.post('/recuperar-contrasena', controller.recuperarContrasena);
+router.post('/recuperar',           controller.solicitarReset);      // usa email con código 6 dígitos
+router.post('/recuperar-contrasena', controller.solicitarReset);
 router.patch('/cambiar-contrasena',  controller.cambiarContrasena);
 
 // Recuperación con código de 6 dígitos (email vía Resend)
