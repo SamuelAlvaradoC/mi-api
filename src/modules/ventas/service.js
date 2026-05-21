@@ -431,7 +431,10 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       subtotal: (precioA[a.id_adicion] || 0) * a.cantidad,
     }));
     const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
-    const itemSub = (precioUnitItem + adicionPerUnit) * item.cantidad;
+    const salsasArr    = Array.isArray(item.salsas) ? item.salsas : [];
+    const salsasCob    = Math.max(0, salsasArr.length - 2);
+    const salsaExtra   = salsasCob * 5000;
+    const itemSub = (precioUnitItem + adicionPerUnit + salsaExtra) * item.cantidad;
     subtotal += itemSub;
     return { ...item, precio_unitario: precioUnitItem, subtotal: precioUnitItem * item.cantidad, adicionesCalc };
   });
@@ -461,6 +464,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
           id_producto: item.id_producto, cantidad: item.cantidad,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
+          salsas: Array.isArray(item.salsas) && item.salsas.length > 0 ? JSON.stringify(item.salsas) : null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },
         })),
