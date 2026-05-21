@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../../config/prisma');
-const { enviarCodigoRecuperacion } = require('../../utils/mailerGmail');
+const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailerGmail');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
 const resetTokens    = new Map(); // email → { token, expiry }
@@ -26,6 +26,14 @@ const login = async ({ email, contrasena }) => {
   );
 
   const { contrasena: _, ...datos } = usuario;
+
+  // Alerta de login solo a clientes y domiciliarios
+  const rolNombre = usuario.rol?.nombre || '';
+  if (['cliente', 'domiciliario'].includes(rolNombre)) {
+    enviarAlertaLogin(usuario.email, usuario.nombre)
+      .catch(e => console.error('Error email login:', e.message));
+  }
+
   return { token, usuario: datos };
 };
 
@@ -52,6 +60,13 @@ const register = async ({ nombre, email, contrasena, id_rol }) => {
     }
 
     const { contrasena: _, ...datos } = usuario;
+
+    // Enviar email de bienvenida (no bloquear si falla)
+    if (id_rol === 4 || rol?.nombre === 'cliente') {
+      enviarBienvenida(email, nombre)
+        .catch(e => console.error('Error email bienvenida:', e.message));
+    }
+
     return datos;
   });
 };
