@@ -99,10 +99,19 @@ const solicitarReset = async ({ email }) => {
 
   let emailEnviado = false;
   try {
+    console.log('=== INTENTANDO ENVIAR EMAIL ===');
+    console.log('Para:', email);
+    console.log('GMAIL_USER:', process.env.GMAIL_USER || 'NO DEFINIDO');
+    console.log('GMAIL_PASS:', process.env.GMAIL_PASS ? 'DEFINIDO' : 'NO DEFINIDO');
     await enviarCodigoRecuperacion(email, codigo);
     emailEnviado = true;
+    console.log('=== EMAIL ENVIADO OK ===');
   } catch (err) {
-    console.error('Error al enviar email de recuperación:', err?.message || err);
+    console.error('=== ERROR GMAIL ===');
+    console.error('Mensaje:', err?.message);
+    console.error('Código:', err?.code);
+    console.error('Respuesta:', err?.response);
+    console.error('===================');
   }
 
   const resp = {
