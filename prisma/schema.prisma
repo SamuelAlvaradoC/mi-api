@@ -122,6 +122,7 @@ model Producto {
   permite_toppings   Int      @default(0) @db.SmallInt
   max_toppings       Int?
   permite_chocolate  Boolean  @default(false)
+  permite_salsas     Boolean  @default(false)
   img                String?  @db.VarChar(255)
   estado             Int      @default(1) @db.SmallInt
 
@@ -247,6 +248,7 @@ model DetalleVenta {
   precio_unitario  Decimal @db.Decimal(10, 2)
   subtotal         Decimal @db.Decimal(10, 2)
   chocolate        String? @db.VarChar(20)
+  salsas           String? @db.Text
 
   venta    Venta    @relation(fields: [id_venta], references: [id_venta])
   producto Producto @relation(fields: [id_producto], references: [id_producto])
