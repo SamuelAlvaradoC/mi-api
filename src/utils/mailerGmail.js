@@ -7,6 +7,9 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
   tls: { rejectUnauthorized: false },
   family: 4,
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
 });
 
 const baseHTML = (contenido) => `
