@@ -6,6 +6,7 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
   tls: { rejectUnauthorized: false },
+  family: 4,
 });
 
 const baseHTML = (contenido) => `
