@@ -2,8 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../../config/prisma');
-const { enviarCodigoRecuperacion } = require('../../utils/mailer');
-const { enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailerGmail');
+const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailer');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
 const resetTokens    = new Map(); // email → { token, expiry }

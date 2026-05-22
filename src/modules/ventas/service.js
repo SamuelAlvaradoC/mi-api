@@ -1,6 +1,5 @@
 const prisma = require('../../config/prisma');
 const { acumularPuntos, calcularDescuentoPuntos } = require('../puntos/service');
-const { enviarPedidoConfirmado } = require('../../utils/mailerGmail');
 
 const includeDetalle = {
   cliente:  { include: { usuario: { select: { nombre: true, email: true } } } },
@@ -182,29 +181,6 @@ const cambiarEstado = async (id, datos, id_usuario) => {
   const ventaActualizada = await prisma.venta.update({
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });
-
-  // Al confirmar pedido (en_proceso) → notificar al cliente por email
-  if (estadoNombre === 'en_proceso') {
-    try {
-      const configTiempo = await prisma.configuracion.findUnique({ where: { clave: 'tiempo_espera' } });
-      const tiempoEspera = Number(configTiempo?.valor || 30);
-      const emailCliente = ventaActualizada.cliente?.usuario?.email;
-      const nombreCliente = ventaActualizada.cliente?.usuario?.nombre;
-      if (emailCliente && nombreCliente) {
-        const productos = (ventaActualizada.detalleVentas || []).map(d => ({
-          cantidad: d.cantidad, nombre: d.producto?.nombre || '—', subtotal: Number(d.subtotal || 0),
-        }));
-        const dir = ventaActualizada.direccion;
-        const direccionTexto = dir ? [dir.direccion_linea, dir.barrio, dir.ciudad].filter(Boolean).join(', ') : '';
-        enviarPedidoConfirmado(emailCliente, nombreCliente, {
-          id_venta: id, productos,
-          costo_domicilio: ventaActualizada.costo_domicilio,
-          total: ventaActualizada.total,
-          direccion: direccionTexto, tiempoEspera,
-        }).catch(e => console.error('Error email pedido confirmado:', e.message));
-      }
-    } catch (e) { console.error('Error al preparar email pedido:', e.message); }
-  }
 
   // Al coger (despachado) o entregar → guardar el domiciliario en la venta
   // Solo si quien actúa es un Domiciliario (nunca sobreescribir con id del admin)
