@@ -3,7 +3,9 @@
 // Cuando se activen domicilios desde Buenos Aires, calcular desde la sede más cercana al cliente.
 const ORIGEN = { lat: 6.2897, lng: -75.5557 };
 const TARIFA_BASE = 5500;
-const MUNICIPIOS_SUR = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas'];
+const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas', 'San Antonio de Prado'];
+const MUNICIPIOS_NORTE = ['Bello', 'Copacabana'];
+// Medellín usa tarifa norte $1.300/km
 
 const calcularDistanciaLinea = (lat, lng) => {
   const R = 6371;
@@ -17,10 +19,9 @@ const calcularDistanciaLinea = (lat, lng) => {
 
 const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
   const ORS_KEY = process.env.ORS_API_KEY;
-  const esSur = MUNICIPIOS_SUR.some((m) =>
-    (ciudad || '').toLowerCase().includes(m.toLowerCase())
-  );
-  const tarifa = esSur ? 1400 : 1300;
+  const esSur   = MUNICIPIOS_SUR.some((m) => (ciudad || '').toLowerCase().includes(m.toLowerCase()));
+  const esNorte = MUNICIPIOS_NORTE.some((m) => (ciudad || '').toLowerCase().includes(m.toLowerCase()));
+  const tarifa  = esSur ? 1400 : 1300;
 
   let distKm;
 
