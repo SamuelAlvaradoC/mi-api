@@ -67,4 +67,50 @@ router.patch('/horario', verifyToken, checkPermiso('ver_dashboard'), async (req,
   }
 });
 
+/* ── Estado tienda (computed open/closed) ─────────────────────── */
+// Público — calcula si está abierto considerando estado y horario
+router.get('/estado-tienda', async (req, res) => {
+  try {
+    const { hora_apertura, hora_cierre, estado_tienda } = await s.horario();
+
+    let abierto = false;
+    if (estado_tienda === 'open') {
+      abierto = true;
+    } else if (estado_tienda === 'closed') {
+      abierto = false;
+    } else {
+      const ahora = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      const hora  = ahora.getUTCHours() + ahora.getUTCMinutes() / 60;
+      abierto = hora >= hora_apertura && hora < hora_cierre;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        abierto,
+        estado:         estado_tienda,
+        hora_apertura,
+        hora_cierre,
+        horario: `${hora_apertura}:00 - ${hora_cierre}:00`,
+      },
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// Protegido — cambia solo el estado_tienda
+router.patch('/estado-tienda', verifyToken, checkPermiso('ver_dashboard'), async (req, res) => {
+  try {
+    const { estado } = req.body;
+    if (!['schedule', 'open', 'closed'].includes(estado)) {
+      return res.status(400).json({ success: false, message: 'Estado inválido. Usar: schedule, open, closed' });
+    }
+    await s.actualizar('estado_tienda', estado);
+    res.json({ success: true, data: { estado } });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
