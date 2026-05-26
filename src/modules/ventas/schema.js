@@ -47,6 +47,7 @@ const crearVentaSchema = z.object({
   monto_transferencia: z.number().min(0).optional().nullable(),
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
+  puntos_usados:       z.number().int().min(0).optional().default(0),
 });
 
 const estadoVentaSchema = z.object({

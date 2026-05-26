@@ -110,8 +110,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   });
 
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
+  // Auto-calcular descuento_puntos desde puntos_usados si no se envió explícitamente
+  const descuentoCalc   = Number(descuento_puntos) || (Number(puntos_usados) > 0 ? calcularDescuentoPuntos(Number(puntos_usados)) : 0);
   // Descuento de puntos solo aplica al subtotal de productos (nunca al domicilio)
-  const descuento       = Math.min(Number(descuento_puntos), subtotal);
+  const descuento       = Math.min(descuentoCalc, subtotal);
   const total           = Math.max(0, subtotal - descuento) + Number(costo_domicilio);
 
   // Calcular montos según método de pago
@@ -156,19 +158,22 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
 
   if (Number(puntos_usados) > 0) {
     try {
-      await prisma.puntosCliente.update({
-        where: { id_cliente: id_cliente },
-        data:  { puntos: { decrement: Number(puntos_usados) } },
-      });
-      await prisma.movimientoPuntos.create({
-        data: {
-          id_cliente:  id_cliente,
-          id_venta:    nuevaVenta.id_venta,
-          tipo:        'uso',
-          puntos:      -Number(puntos_usados),
-          descripcion: `Puntos usados en pedido #${nuevaVenta.id_venta}`,
-        },
-      });
+      const regPts = await prisma.puntosCliente.findUnique({ where: { id_cliente } });
+      if (regPts) {
+        await prisma.puntosCliente.update({
+          where: { id_cliente },
+          data:  { puntos: { decrement: Number(puntos_usados) } },
+        });
+        await prisma.movimientoPuntos.create({
+          data: {
+            id_puntos:   regPts.id_puntos,
+            id_venta:    nuevaVenta.id_venta,
+            tipo:        'uso',
+            puntos:      -Number(puntos_usados),
+            descripcion: `Puntos usados en pedido #${nuevaVenta.id_venta}`,
+          },
+        });
+      }
     } catch (e) { console.error('Error descontando puntos:', e.message); }
   }
 
@@ -177,7 +182,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
 
 const cambiarEstado = async (id, datos, id_usuario) => {
   const { id_estado, nombre_estado, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url } = datos;
-  await obtener(id);
+  const ventaActual = await obtener(id);
   let estadoId    = id_estado;
   let estadoNombre = nombre_estado || null;
   if (!estadoId && nombre_estado) {
@@ -190,6 +195,28 @@ const cambiarEstado = async (id, datos, id_usuario) => {
   if (estadoNombre === 'anulado') {
     const motivo = datos.motivo_anulacion || '';
     if (!String(motivo).trim()) throw { status: 400, message: 'El motivo de anulación es requerido' };
+  }
+
+  // Devolver puntos si se anula y la venta usó puntos
+  if (estadoNombre === 'anulado' && Number(ventaActual.puntos_usados) > 0 && ventaActual.estado?.nombre_estado !== 'anulado') {
+    try {
+      const regPts = await prisma.puntosCliente.findUnique({ where: { id_cliente: ventaActual.id_cliente } });
+      if (regPts) {
+        await prisma.puntosCliente.update({
+          where: { id_cliente: ventaActual.id_cliente },
+          data:  { puntos: { increment: Number(ventaActual.puntos_usados) } },
+        });
+        await prisma.movimientoPuntos.create({
+          data: {
+            id_puntos:   regPts.id_puntos,
+            id_venta:    id,
+            tipo:        'devolucion',
+            puntos:      Number(ventaActual.puntos_usados),
+            descripcion: `Devolución por anulación del pedido #${id}`,
+          },
+        });
+      }
+    } catch (e) { console.error('Error devolviendo puntos al anular:', e.message); }
   }
 
   const updateData = { id_estado: estadoId };
@@ -305,6 +332,29 @@ const anular = async (id, motivo_anulacion) => {
   }
   const venta = await obtener(id);
   if (venta.estado?.nombre_estado === 'anulado') throw { status: 400, message: 'La venta ya está anulada' };
+
+  if (Number(venta.puntos_usados) > 0) {
+    try {
+      const regPts = await prisma.puntosCliente.findUnique({ where: { id_cliente: venta.id_cliente } });
+      if (regPts) {
+        await prisma.puntosCliente.update({
+          where: { id_cliente: venta.id_cliente },
+          data:  { puntos: { increment: Number(venta.puntos_usados) } },
+        });
+        await prisma.movimientoPuntos.create({
+          data: {
+            id_puntos:   regPts.id_puntos,
+            id_venta:    id,
+            tipo:        'devolucion',
+            puntos:      Number(venta.puntos_usados),
+            descripcion: `Devolución por anulación del pedido #${id}`,
+          },
+        });
+        console.log('Puntos devueltos:', venta.puntos_usados, 'cliente:', venta.id_cliente);
+      }
+    } catch (e) { console.error('Error devolviendo puntos:', e.message); }
+  }
+
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });
   return prisma.venta.update({
     where: { id_venta: id },
