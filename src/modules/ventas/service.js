@@ -306,17 +306,24 @@ const cambiarEstado = async (id, datos, id_usuario) => {
   // Acumular puntos al marcar como entregado (en cualquier caso, con o sin método de pago)
   if (estadoNombre === 'entregado') {
     try {
-      const ventaCompleta = await prisma.venta.findUnique({
-        where: { id_venta: id },
-        select: { subtotal: true, puntos_usados: true, id_cliente: true },
+      const yaAcumulo = await prisma.movimientoPuntos.findFirst({
+        where: { id_venta: id, tipo: 'acumulacion' },
       });
-      if (ventaCompleta?.id_cliente) {
-        await acumularPuntos(
-          ventaCompleta.id_cliente,
-          id,
-          Number(ventaCompleta.subtotal),
-          ventaCompleta.puntos_usados || 0
-        );
+      if (yaAcumulo) {
+        console.log('Puntos ya acumulados para venta #' + id + ' — omitiendo');
+      } else {
+        const ventaCompleta = await prisma.venta.findUnique({
+          where: { id_venta: id },
+          select: { subtotal: true, puntos_usados: true, id_cliente: true },
+        });
+        if (ventaCompleta?.id_cliente) {
+          await acumularPuntos(
+            ventaCompleta.id_cliente,
+            id,
+            Number(ventaCompleta.subtotal),
+            ventaCompleta.puntos_usados || 0
+          );
+        }
       }
     } catch (e) {
       console.error('Error acumulando puntos:', e.message);
