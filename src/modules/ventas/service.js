@@ -126,7 +126,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     montoTransfer = Number(monto_transferencia) || 0;
   }
 
-  return prisma.venta.create({
+  const nuevaVenta = await prisma.venta.create({
     data: {
       id_cliente, id_estado: estadoPendiente?.id_estado || 1,
       id_direccion: direccionId, costo_domicilio, observaciones,
@@ -153,6 +153,26 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     },
     include: includeDetalle,
   });
+
+  if (Number(puntos_usados) > 0) {
+    try {
+      await prisma.puntosCliente.update({
+        where: { id_cliente: id_cliente },
+        data:  { puntos: { decrement: Number(puntos_usados) } },
+      });
+      await prisma.movimientoPuntos.create({
+        data: {
+          id_cliente:  id_cliente,
+          id_venta:    nuevaVenta.id_venta,
+          tipo:        'uso',
+          puntos:      -Number(puntos_usados),
+          descripcion: `Puntos usados en pedido #${nuevaVenta.id_venta}`,
+        },
+      });
+    } catch (e) { console.error('Error descontando puntos:', e.message); }
+  }
+
+  return nuevaVenta;
 };
 
 const cambiarEstado = async (id, datos, id_usuario) => {
