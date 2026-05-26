@@ -4,7 +4,7 @@ const incUsuario = { usuario: { select: { nombre: true, email: true, estado: tru
 
 const listar = () => prisma.cliente.findMany({ where: { estado: 1 }, include: incUsuario });
 
-const crear = async ({ nombre, email, contrasena, direccion, barrio, ciudad, telefono }) => {
+const crear = async ({ nombre, email, contrasena, telefono }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
   if (existe) throw { status: 409, message: 'El email ya está registrado' };
   const bcrypt = require('bcryptjs');
@@ -13,10 +13,12 @@ const crear = async ({ nombre, email, contrasena, direccion, barrio, ciudad, tel
     const usuario = await tx.usuario.create({
       data: { nombre, email, contrasena: hash, id_rol: 4, estado: 1 },
     });
-    return tx.cliente.create({
-      data: { id_usuario: usuario.id_usuario, direccion, barrio, ciudad, telefono },
+    const cliente = await tx.cliente.create({
+      data: { id_usuario: usuario.id_usuario, telefono: telefono || null },
       include: incUsuario,
     });
+    await tx.puntosCliente.create({ data: { id_cliente: cliente.id_cliente, puntos: 0 } });
+    return cliente;
   });
 };
 

@@ -52,7 +52,8 @@ const register = async ({ nombre, email, contrasena, id_rol }) => {
     });
 
     if (id_rol === 4 || rol?.nombre === 'cliente') {
-      await tx.cliente.create({ data: { id_usuario: usuario.id_usuario } });
+      const nuevoCliente = await tx.cliente.create({ data: { id_usuario: usuario.id_usuario } });
+      await tx.puntosCliente.create({ data: { id_cliente: nuevoCliente.id_cliente, puntos: 0 } });
     } else if (['domiciliario', 'confirmador_domicilio', 'admin'].includes(rol?.nombre)) {
       await tx.empleado.create({
         data: { id_usuario: usuario.id_usuario, cargo: rol.nombre, fecha_ingreso: new Date(), estado: 1 },
