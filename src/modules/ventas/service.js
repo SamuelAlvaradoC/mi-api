@@ -13,6 +13,15 @@ const includeDetalle = {
       detalleAdiciones: { include: { adicion: true } },
     },
   },
+  ventasDomiciliario: {
+    include: {
+      empleado: {
+        include: {
+          usuario: { select: { nombre: true, telefono: true } },
+        },
+      },
+    },
+  },
 };
 
 const listar = async ({ estado, fecha, id_domiciliario } = {}) => {
