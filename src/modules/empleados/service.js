@@ -40,8 +40,21 @@ const crear = async ({ nombre, email, contrasena, id_rol, cargo, fecha_ingreso }
 };
 
 const actualizar = async (id, datos) => {
-  await obtener(id);
-  return prisma.empleado.update({ where: { id_empleado: id }, data: datos, include: incUsuario });
+  const emp = await obtener(id);
+  const { nombre, email, estado, contrasena, ...empRest } = datos;
+  const usuarioDatos = {};
+  if (nombre !== undefined) usuarioDatos.nombre = nombre;
+  if (email  !== undefined) usuarioDatos.email  = email;
+  if (estado !== undefined) usuarioDatos.estado = estado;
+  if (Object.keys(usuarioDatos).length > 0) {
+    await prisma.usuario.update({ where: { id_usuario: emp.id_usuario }, data: usuarioDatos });
+  }
+  const empDatos = { ...empRest };
+  if (estado !== undefined) empDatos.estado = estado;
+  if (Object.keys(empDatos).length > 0) {
+    await prisma.empleado.update({ where: { id_empleado: id }, data: empDatos });
+  }
+  return obtener(id);
 };
 
 const eliminar = async (id) => {
@@ -58,8 +71,11 @@ const eliminar = async (id) => {
 };
 
 const cambiarEstado = async (id, estado) => {
-  await obtener(id);
-  return prisma.empleado.update({ where: { id_empleado: id }, data: { estado }, include: incUsuario });
+  const emp = await obtener(id);
+  return prisma.$transaction(async (tx) => {
+    await tx.usuario.update({ where: { id_usuario: emp.id_usuario }, data: { estado } });
+    return tx.empleado.update({ where: { id_empleado: id }, data: { estado }, include: incUsuario });
+  });
 };
 
 module.exports = { listar, buscar, obtener, crear, actualizar, eliminar, cambiarEstado };

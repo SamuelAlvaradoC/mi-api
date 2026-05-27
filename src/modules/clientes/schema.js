@@ -11,10 +11,12 @@ const crearClienteSchema = z.object({
 });
 
 const actualizarClienteSchema = z.object({
+  nombre:     z.string().min(2).max(100).optional(),
+  email:      z.string().email().optional(),
+  telefono:   z.string().max(20).optional(),
   direccion:  z.string().max(255).optional(),
   barrio:     z.string().max(100).optional(),
   ciudad:     z.string().max(100).optional(),
-  telefono:   z.string().max(20).optional(),
 });
 
 const crearDireccionSchema = z.object({

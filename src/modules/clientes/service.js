@@ -40,8 +40,15 @@ const obtener = async (id) => {
 };
 
 const actualizar = async (id, datos) => {
-  await obtener(id);
-  return prisma.cliente.update({ where: { id_cliente: id }, data: datos, include: incUsuario });
+  const cliente = await obtener(id);
+  const { nombre, email, ...clienteDatos } = datos;
+  if (nombre !== undefined || email !== undefined) {
+    const usuarioDatos = {};
+    if (nombre !== undefined) usuarioDatos.nombre = nombre;
+    if (email  !== undefined) usuarioDatos.email  = email;
+    await prisma.usuario.update({ where: { id_usuario: cliente.id_usuario }, data: usuarioDatos });
+  }
+  return prisma.cliente.update({ where: { id_cliente: id }, data: clienteDatos, include: incUsuario });
 };
 
 const eliminar = async (id) => {
