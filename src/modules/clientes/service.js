@@ -125,13 +125,10 @@ const detalleAdmin = async (id) => {
     where: { id_cliente: id },
     include: {
       usuario: { include: { rol: true } },
-      direcciones: true,
+      direcciones: { where: { estado: 1 }, orderBy: { id_direccion: 'asc' } },
       puntos: true,
       ventas: {
-        include: {
-          estado: true,
-          detalleVentas: { include: { producto: true } },
-        },
+        include: { estado: true },
         orderBy: { id_venta: 'desc' },
         take: 10,
       },
