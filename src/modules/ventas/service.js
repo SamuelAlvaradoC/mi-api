@@ -13,13 +13,9 @@ const includeDetalle = {
       detalleAdiciones: { include: { adicion: true } },
     },
   },
-  ventasDomiciliario: {
+  domiciliario: {
     include: {
-      empleado: {
-        include: {
-          usuario: { select: { nombre: true } },
-        },
-      },
+      usuario: { select: { nombre: true } },
     },
   },
 };
