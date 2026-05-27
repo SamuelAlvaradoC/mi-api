@@ -1,8 +1,12 @@
 const prisma = require('../../config/prisma');
 
-const incUsuario = { usuario: { select: { nombre: true, email: true, estado: true } } };
+const incUsuario  = { usuario: { select: { nombre: true, email: true, estado: true } } };
+const incListado  = {
+  usuario:    { select: { nombre: true, email: true, estado: true } },
+  direcciones: { take: 1, orderBy: { id_direccion: 'asc' } },
+};
 
-const listar = () => prisma.cliente.findMany({ include: incUsuario });
+const listar = () => prisma.cliente.findMany({ include: incListado });
 
 const crear = async ({ nombre, email, contrasena, telefono }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
@@ -120,7 +124,7 @@ const detalleAdmin = async (id) => {
   const c = await prisma.cliente.findUnique({
     where: { id_cliente: id },
     include: {
-      usuario: { select: { nombre: true, email: true, estado: true, fecha_registro: true, rol: true } },
+      usuario: { include: { rol: true } },
       direcciones: true,
       puntos: true,
       ventas: {
