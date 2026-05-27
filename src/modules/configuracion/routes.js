@@ -79,9 +79,10 @@ router.get('/estado-tienda', async (req, res) => {
     } else if (estado_tienda === 'closed') {
       abierto = false;
     } else {
-      const ahora = new Date(Date.now() - 5 * 60 * 60 * 1000);
-      const hora  = ahora.getUTCHours() + ahora.getUTCMinutes() / 60;
-      abierto = hora >= hora_apertura && hora < hora_cierre;
+      const ahora    = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+      const hora     = ahora.getHours() + ahora.getMinutes() / 60;
+      const esLunes  = ahora.getDay() === 1;
+      abierto = !esLunes && hora >= hora_apertura && hora < hora_cierre;
     }
 
     res.json({
