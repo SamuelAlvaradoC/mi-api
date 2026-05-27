@@ -17,7 +17,7 @@ const includeDetalle = {
     include: {
       empleado: {
         include: {
-          usuario: { select: { nombre: true, telefono: true } },
+          usuario: { select: { nombre: true } },
         },
       },
     },
