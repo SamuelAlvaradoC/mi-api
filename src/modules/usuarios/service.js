@@ -7,7 +7,6 @@ const select = {
 };
 
 const listar = () => prisma.usuario.findMany({
-  where: { estado: 1 },
   include: { rol: true, cliente: true, empleado: true },
   orderBy: { fecha_registro: 'desc' },
 });
@@ -84,13 +83,13 @@ const eliminar = async (id) => {
   });
 };
 
-const activarDesactivar = async (id) => {
-  const u     = await obtener(id);
-  const nuevo = u.estado ? 0 : 1;
+const activarDesactivar = async (id, estado) => {
+  await obtener(id);
+  const nuevoEstado = Number(estado);
   return prisma.$transaction(async (tx) => {
-    try { await tx.empleado.updateMany({ where: { id_usuario: id }, data: { estado: nuevo } }); } catch (_) {}
-    try { await tx.cliente.updateMany({ where: { id_usuario: id }, data: { estado: nuevo } }); } catch (_) {}
-    return tx.usuario.update({ where: { id_usuario: id }, data: { estado: nuevo }, select });
+    try { await tx.empleado.updateMany({ where: { id_usuario: id }, data: { estado: nuevoEstado } }); } catch (_) {}
+    try { await tx.cliente.updateMany({ where: { id_usuario: id }, data: { estado: nuevoEstado } }); } catch (_) {}
+    return tx.usuario.update({ where: { id_usuario: id }, data: { estado: nuevoEstado }, select });
   });
 };
 

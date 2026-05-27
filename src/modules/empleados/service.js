@@ -3,7 +3,7 @@ const prisma = require('../../config/prisma');
 
 const incUsuario = { usuario: { select: { nombre: true, email: true, rol: true } } };
 
-const listar = () => prisma.empleado.findMany({ where: { estado: 1 }, include: incUsuario });
+const listar = () => prisma.empleado.findMany({ include: incUsuario });
 
 const buscar = (q) => prisma.empleado.findMany({
   where: {

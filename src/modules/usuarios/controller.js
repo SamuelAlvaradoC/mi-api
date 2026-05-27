@@ -19,7 +19,10 @@ const eliminar = async (req, res, next) => {
   catch (e) { next(e); }
 };
 const activarDesactivar = async (req, res, next) => {
-  try { success(res, await service.activarDesactivar(Number(req.params.id)), 'Estado cambiado'); }
+  try {
+    const { estado } = req.body;
+    success(res, await service.activarDesactivar(Number(req.params.id), estado), 'Estado cambiado');
+  }
   catch (e) { next(e); }
 };
 const asignarRol = async (req, res, next) => {

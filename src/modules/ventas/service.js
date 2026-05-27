@@ -73,7 +73,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   }
 
   const productoIds = items.map((i) => i.id_producto);
-  const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds } } });
+  const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds }, estado: 1 } });
   // Guardar permite_toppings para calcular correctamente cuántos son gratis
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
     precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0
@@ -86,7 +86,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   let subtotal = 0;
   const itemsCalc = items.map((item) => {
     const pd = prodData[item.id_producto];
-    if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
+    if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no disponible` };
     // Si permite_toppings=0: ningún topping es gratis (todos se cobran a $2000)
     const maxTop = pd.permite_toppings ? (item.max_toppings != null ? item.max_toppings : pd.max_toppings) : 0;
     const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);

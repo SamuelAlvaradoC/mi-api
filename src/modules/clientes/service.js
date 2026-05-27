@@ -2,7 +2,7 @@ const prisma = require('../../config/prisma');
 
 const incUsuario = { usuario: { select: { nombre: true, email: true, estado: true } } };
 
-const listar = () => prisma.cliente.findMany({ where: { estado: 1 }, include: incUsuario });
+const listar = () => prisma.cliente.findMany({ include: incUsuario });
 
 const crear = async ({ nombre, email, contrasena, telefono }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
