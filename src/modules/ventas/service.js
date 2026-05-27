@@ -13,11 +13,6 @@ const includeDetalle = {
       detalleAdiciones: { include: { adicion: true } },
     },
   },
-  domiciliario: {
-    include: {
-      usuario: { select: { nombre: true } },
-    },
-  },
 };
 
 const listar = async ({ estado, fecha, id_domiciliario } = {}) => {
@@ -55,7 +50,12 @@ const filtrar = (estadoId) => prisma.venta.findMany({
 const obtener = async (id) => {
   const v = await prisma.venta.findUnique({ where: { id_venta: id }, include: includeDetalle });
   if (!v) throw { status: 404, message: 'Venta no encontrada' };
-  return v;
+  if (!v.id_domiciliario) return { ...v, nombreDomiciliario: null };
+  const empleado = await prisma.empleado.findUnique({
+    where: { id_empleado: v.id_domiciliario },
+    include: { usuario: { select: { nombre: true } } },
+  });
+  return { ...v, nombreDomiciliario: empleado?.usuario?.nombre || null };
 };
 
 const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
