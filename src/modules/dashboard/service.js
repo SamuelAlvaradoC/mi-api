@@ -109,15 +109,9 @@ const ventasPorSemana = async (fecha) => {
 };
 
 const productosMasVendidos = async () => {
-  const estadosExcluidos = await prisma.estado.findMany({
-    where: { nombre_estado: { in: ['anulado', 'pendiente'] } },
-    select: { id_estado: true },
-  });
-  const idsExcluidos = estadosExcluidos.map((e) => e.id_estado);
-
   const agrupados = await prisma.detalleVenta.groupBy({
     by: ['id_producto'],
-    where: { venta: { id_estado: { notIn: idsExcluidos } } },
+    where: { venta: { estado: { nombre_estado: 'entregado' } } },
     _sum:   { cantidad: true },
     _count: { id_producto: true },
     orderBy: { _sum: { cantidad: 'desc' } },
