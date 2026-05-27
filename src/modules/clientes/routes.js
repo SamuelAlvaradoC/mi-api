@@ -19,6 +19,7 @@ router.get('/:id/historial-pedidos',   verifyToken, ver,       controller.histor
 router.get('/:id/toppings-favoritos',  verifyToken, ver,       controller.toppingsFavoritos);
 router.get('/:id/adiciones-favoritas', verifyToken, ver,       controller.adicionesFavoritas);
 router.get('/:id/perfil',              verifyToken, ver,       controller.perfil);
+router.get('/:id/detalle',             verifyToken, ver,       controller.detalleAdmin);
 router.get('/:id/direcciones',         verifyToken, ver,       controller.listarDirecciones);
 router.post('/:id/direcciones',        verifyToken, gestionar, controller.crearDireccion);
 

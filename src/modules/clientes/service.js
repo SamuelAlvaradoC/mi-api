@@ -109,6 +109,27 @@ const adicionesFavoritas = async (id) => {
   return agrupados.map((r) => ({ adicion: map[r.id_adicion], cantidad_total: r._sum.cantidad }));
 };
 
+const detalleAdmin = async (id) => {
+  const c = await prisma.cliente.findUnique({
+    where: { id_cliente: id },
+    include: {
+      usuario: { select: { nombre: true, email: true, estado: true, fecha_registro: true, rol: true } },
+      direcciones: true,
+      puntos: true,
+      ventas: {
+        include: {
+          estado: true,
+          detalleVentas: { include: { producto: true } },
+        },
+        orderBy: { id_venta: 'desc' },
+        take: 10,
+      },
+    },
+  });
+  if (!c) throw { status: 404, message: 'Cliente no encontrado' };
+  return c;
+};
+
 const perfil = async (id) => {
   const c = await prisma.cliente.findUnique({
     where: { id_cliente: id },
@@ -125,4 +146,4 @@ const listarDirecciones = async (id) => { await obtener(id); return prisma.direc
 const crearDireccion    = async (id, datos) => { await obtener(id); return prisma.direccion.create({ data: { ...datos, id_cliente: id, estado: 1 } }); };
 
 module.exports = { listar, crear, buscar, obtener, actualizar, eliminar, cambiarEstado,
-  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, listarDirecciones, crearDireccion };
+  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, detalleAdmin, listarDirecciones, crearDireccion };
