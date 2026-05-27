@@ -3,7 +3,8 @@ const prisma = require('../../config/prisma');
 const incUsuario  = { usuario: { select: { nombre: true, email: true, estado: true } } };
 const incListado  = {
   usuario:    { select: { nombre: true, email: true, estado: true } },
-  direcciones: { take: 1, orderBy: { id_direccion: 'asc' } },
+  puntos:     true,
+  _count:     { select: { ventas: true } },
 };
 
 const listar = () => prisma.cliente.findMany({ include: incListado });
