@@ -25,7 +25,7 @@ const baseHTML = (contenido) => `
   <div style="background:#f9f9f9;padding:16px;text-align:center;border-top:1px solid #f0f0f0;">
     <p style="color:#aaa;font-size:11px;margin:0;">
       © 2026 ChocoFreseo · Cl. 90 #50d-35, Aranjuez, Medellín<br/>
-      WhatsApp: 300 608 31 66 · Lunes a domingo 1PM - 8PM
+      WhatsApp: 315 991 46 24 · Lunes a domingo 1PM - 8PM
     </p>
   </div>
 </div>`;
@@ -155,7 +155,7 @@ const enviarPedidoConfirmado = async (email, nombre, pedido) => {
         <p style="margin:0;font-size:13px;color:#166534;">📍 Entrega en: <strong>${direccion}</strong></p>
       </div>` : ''}
       <div style="text-align:center;margin-top:20px;">
-        <a href="https://wa.me/573006083166"
+        <a href="https://wa.me/573159914624"
           style="display:inline-block;background:#25D366;color:white;text-decoration:none;
             padding:10px 24px;border-radius:8px;font-weight:700;font-size:13px;">
           💬 ¿Dudas? Escríbenos por WhatsApp

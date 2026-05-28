@@ -24,7 +24,7 @@ const baseHTML = (contenido) => `
     border-top:1px solid #f0f0f0;">
     <p style="color:#aaa;font-size:11px;margin:0;">
       © 2026 ChocoFreseo · Cl. 90 #50d-35, Aranjuez, Medellín<br/>
-      WhatsApp: 300-608-31-66 · Lunes a domingo 1PM - 8PM
+      WhatsApp: 315-991-46-24 · Lunes a domingo 1PM - 8PM
     </p>
   </div>
 </div>
