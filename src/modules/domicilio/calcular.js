@@ -3,7 +3,7 @@
 // Cuando se activen domicilios desde Buenos Aires, calcular desde la sede más cercana al cliente.
 const ORIGEN = { lat: 6.2897, lng: -75.5557 };
 const TARIFA_BASE = 5500;
-const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas', 'San Antonio de Prado'];
+const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas'];
 const MUNICIPIOS_NORTE = ['Bello', 'Copacabana'];
 // Medellín usa tarifa norte $1.300/km
 
