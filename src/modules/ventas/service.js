@@ -224,6 +224,32 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     } catch (e) { console.error('Error devolviendo puntos al anular:', e.message); }
   }
 
+  if (estadoNombre === 'anulado' && ventaActual.estado?.nombre_estado === 'entregado') {
+    try {
+      const movAcumulacion = await prisma.movimientoPuntos.findFirst({
+        where: { id_venta: id, tipo: 'acumulacion' },
+      });
+      if (movAcumulacion) {
+        const regPtsAcum = await prisma.puntosCliente.findUnique({ where: { id_cliente: ventaActual.id_cliente } });
+        if (regPtsAcum) {
+          await prisma.puntosCliente.update({
+            where: { id_cliente: ventaActual.id_cliente },
+            data: { puntos: { decrement: movAcumulacion.puntos } },
+          });
+          await prisma.movimientoPuntos.create({
+            data: {
+              id_puntos: regPtsAcum.id_puntos,
+              id_venta: id,
+              tipo: 'devolucion',
+              puntos: -movAcumulacion.puntos,
+              descripcion: `Reversión por anulación de pedido #${id} (estaba entregado)`,
+            },
+          });
+        }
+      }
+    } catch (e) { console.error('Error revirtiendo puntos acumulados al anular:', e.message); }
+  }
+
   const updateData = { id_estado: estadoId };
   if (metodo_pago)                              updateData.metodo_pago         = metodo_pago;
   if (comprobante_url)                          updateData.comprobante_url     = comprobante_url;
@@ -365,6 +391,32 @@ const anular = async (id, motivo_anulacion) => {
         console.log('Puntos devueltos:', venta.puntos_usados, 'cliente:', venta.id_cliente);
       }
     } catch (e) { console.error('Error devolviendo puntos:', e.message); }
+  }
+
+  if (venta.estado?.nombre_estado === 'entregado') {
+    try {
+      const movAcumulacion = await prisma.movimientoPuntos.findFirst({
+        where: { id_venta: id, tipo: 'acumulacion' },
+      });
+      if (movAcumulacion) {
+        const regPtsAcum = await prisma.puntosCliente.findUnique({ where: { id_cliente: venta.id_cliente } });
+        if (regPtsAcum) {
+          await prisma.puntosCliente.update({
+            where: { id_cliente: venta.id_cliente },
+            data: { puntos: { decrement: movAcumulacion.puntos } },
+          });
+          await prisma.movimientoPuntos.create({
+            data: {
+              id_puntos: regPtsAcum.id_puntos,
+              id_venta: id,
+              tipo: 'devolucion',
+              puntos: -movAcumulacion.puntos,
+              descripcion: `Reversión por anulación de pedido #${id} (estaba entregado)`,
+            },
+          });
+        }
+      }
+    } catch (e) { console.error('Error revirtiendo puntos acumulados al anular:', e.message); }
   }
 
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });

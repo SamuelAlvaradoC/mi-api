@@ -129,9 +129,15 @@ const detalleAdmin = async (id) => {
       direcciones: { where: { estado: 1 }, orderBy: { id_direccion: 'asc' } },
       puntos: true,
       ventas: {
-        include: { estado: true },
+        select: {
+          id_venta: true,
+          total: true,
+          fecha: true,
+          motivo_anulacion: true,
+          estado: { select: { nombre_estado: true } },
+        },
         orderBy: { id_venta: 'desc' },
-        take: 10,
+        take: 2,
       },
     },
   });

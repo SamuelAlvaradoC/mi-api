@@ -74,6 +74,15 @@ const crearMiDireccion = async (req, res, next) => {
     if (!cliente) cliente = await prisma.cliente.create({ data: { id_usuario: req.user.id_usuario } });
     const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng } = req.body;
     if (!direccion_linea?.trim()) throw { status: 400, message: 'La dirección es requerida' };
+    const existente = await prisma.direccion.findFirst({
+      where: {
+        id_cliente: cliente.id_cliente,
+        direccion_linea,
+        barrio: barrio || null,
+        ciudad: ciudad || null,
+      },
+    });
+    if (existente) { return success(res, existente); }
     const dir = await prisma.direccion.create({
       data: { id_cliente: cliente.id_cliente, direccion_linea, barrio, ciudad, departamento: departamento || null, referencia: referencia || null, lat: lat || null, lng: lng || null, estado: 1 },
     });
