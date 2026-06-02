@@ -2,7 +2,7 @@ const prisma = require('../../config/prisma');
 const { acumularPuntos, calcularDescuentoPuntos } = require('../puntos/service');
 
 const includeDetalle = {
-  cliente:  { include: { usuario: { select: { nombre: true, email: true } } } },
+  cliente:  { select: { id_cliente: true, telefono: true, ciudad: true, barrio: true, usuario: { select: { nombre: true, email: true } } } },
   estado:   true,
   direccion: true,
   pagos:    { include: { detallePagos: { include: { metodoPago: true } } } },
