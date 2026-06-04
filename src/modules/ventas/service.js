@@ -1,5 +1,5 @@
 const prisma = require('../../config/prisma');
-const { acumularPuntos, calcularDescuentoPuntos } = require('../puntos/service');
+const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos } = require('../puntos/service');
 const { getIo } = require('../../socket');
 
 const includeDetalle = {
@@ -368,6 +368,17 @@ const cambiarEstado = async (id, datos, id_usuario) => {
       const io = getIo();
       if (io) {
         const ventaParaImprimir = await obtener(id);
+        const puntos_usados_val = ventaParaImprimir.puntos_usados || 0;
+        const puntos_ganados_val = puntos_usados_val > 0
+          ? 0
+          : Math.floor(Number(ventaParaImprimir.subtotal || 0) / 500);
+        let puntos_actuales_val = 0;
+        try {
+          if (ventaParaImprimir.id_cliente) {
+            const reg = await obtenerPuntos(ventaParaImprimir.id_cliente);
+            puntos_actuales_val = reg.puntos || 0;
+          }
+        } catch (_) {}
         io.emit('pedido_listo', {
           id_venta:       ventaParaImprimir.id_venta,
           cliente:        ventaParaImprimir.cliente?.usuario?.nombre || '—',
@@ -383,7 +394,10 @@ const cambiarEstado = async (id, datos, id_usuario) => {
           monto_efectivo: ventaParaImprimir.monto_efectivo,
           monto_transferencia: ventaParaImprimir.monto_transferencia,
           observaciones:  ventaParaImprimir.observaciones,
-          puntos_usados:  ventaParaImprimir.puntos_usados,
+          puntos_usados:   puntos_usados_val,
+          puntos_ganados:  puntos_ganados_val,
+          puntos_actuales: puntos_actuales_val,
+          puntosTotal:     puntos_actuales_val,
           detalleVentas:  ventaParaImprimir.detalleVentas,
           fecha:          ventaParaImprimir.fecha,
         });

@@ -222,9 +222,9 @@ async function imprimirComanda(venta) {
 
   const metodoPago = { efectivo: 'Efectivo', transferencia: 'Transferencia', mixto: 'Mixto' }[venta.metodo_pago] || venta.metodo_pago || '-';
   const puntosUsados  = venta.puntos_usados || 0;
-  const puntosGanados = venta.puntosGanados !== undefined
-    ? venta.puntosGanados
-    : (puntosUsados > 0 ? 0 : Math.floor(Number(venta.subtotal || 0) / 500));
+  const puntosGanados = (venta.puntosGanados ?? venta.puntos_ganados)
+    ?? (puntosUsados > 0 ? 0 : Math.floor(Number(venta.subtotal || 0) / 500));
+  const puntosTotal   = venta.puntosTotal ?? null;
 
   const fecha = (() => {
     try {
@@ -296,16 +296,17 @@ async function imprimirComanda(venta) {
     Buffer.from(venta.observaciones ? `Obs: ${venta.observaciones}\n` : ''),
 
     // Puntos
-    Buffer.from(puntosGanados > 0 || puntosUsados > 0
+    Buffer.from(puntosGanados > 0 || puntosUsados > 0 || puntosTotal !== null
       ? '================================\n' +
         (puntosUsados  > 0 ? `Puntos usados: -${puntosUsados} pts\n`   : '') +
-        (puntosGanados > 0 ? `Puntos ganados: +${puntosGanados} pts\n` : '')
+        (puntosGanados > 0 ? `Puntos ganados: +${puntosGanados} pts\n` : '') +
+        (puntosTotal   !== null ? `Total puntos: ${puntosTotal} pts\n`  : '')
       : ''),
 
     // Footer
     Buffer.from(CENTRAR + NEGRITA_ON),
     Buffer.from('================================\n'),
-    Buffer.from('!Gracias por tu pedido!\n'),
+    Buffer.from('¡Gracias por tu pedido!\n', 'latin1'),
     Buffer.from(NEGRITA_OFF),
     Buffer.from('ChocoFreseo es Puro Freseo\n'),
 
