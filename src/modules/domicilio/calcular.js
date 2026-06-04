@@ -1,6 +1,6 @@
 // Sede Aranjuez (origen principal para cálculo de domicilio)
-// Sede Buenos Aires: Carrera 29 #42-49 — lat: 6.2372, lng: -75.5688
-// Cuando se activen domicilios desde Buenos Aires, calcular desde la sede más cercana al cliente.
+// Sede La Milagrosa: Carrera 29 #42-49 — lat: 6.2372, lng: -75.5688
+// Cuando se activen domicilios desde La Milagrosa, calcular desde la sede más cercana al cliente.
 const ORIGEN = { lat: 6.2897, lng: -75.5557 };
 const TARIFA_BASE = 5500;
 const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas'];
