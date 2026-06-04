@@ -398,7 +398,7 @@ const cambiarEstado = async (id, datos, id_usuario) => {
           descuento_puntos: ventaParaImprimir.descuento_puntos || 0,
           puntos_ganados:   puntos_ganados_val,
           puntos_actuales:  puntos_actuales_val,
-          puntosTotal:      puntos_actuales_val,
+          puntosTotal:      puntos_actuales_val + puntos_ganados_val,
           detalleVentas:  ventaParaImprimir.detalleVentas,
           fecha:          ventaParaImprimir.fecha,
         });
