@@ -3,40 +3,47 @@
   Instrucciones de instalación y uso
 ============================================================
 
-REQUISITOS PREVIOS
-------------------
-1. Node.js instalado (https://nodejs.org) — versión 16 o superior
-2. Impresora térmica conectada y configurada en Windows
-3. Acceso a internet (para conectarse al servidor)
+INSTALACIÓN (hacer UNA sola vez, la primera vez)
+--------------------------------------------------
+1. Conecta la impresora térmica al PC y enciéndela.
+2. Haz doble clic en INSTALAR.bat y espera a que termine.
+   → Instala Node.js automáticamente si no está
+   → Instala las dependencias del sistema
+   → Configura el inicio automático con Windows
+   → Crea un acceso directo en el escritorio
+3. Cuando diga "INSTALACION COMPLETADA", ya está listo.
 
 
 CONFIGURACIÓN INICIAL (solo una vez)
 --------------------------------------
-1. Abre el archivo impresor.js con el Bloc de notas
+1. Abre el archivo impresor.js con el Bloc de notas.
 2. Busca la línea:
        const NOMBRE_IMPRESORA = 'IMPRESORA_TERMICA';
    y cambia 'IMPRESORA_TERMICA' por el nombre exacto de tu impresora.
 
-   Para ver el nombre exacto de tu impresora:
+   Para ver el nombre exacto:
    → Panel de control → Dispositivos e impresoras
    → Clic derecho en tu impresora → Ver propiedades de impresora
-   → El nombre que aparece arriba es el que debes copiar
+   → El nombre que aparece arriba es el que debes copiar exacto
 
    Ejemplo:
        const NOMBRE_IMPRESORA = 'POS-80C';
 
-3. Guarda el archivo.
+3. Guarda el archivo y cierra el Bloc de notas.
 
 
 USO DIARIO
 -----------
-1. Haz doble clic en INICIAR_IMPRESOR.bat
-2. Espera a que diga "Conectado al servidor ChocoFreseo"
-3. ¡Listo! Cada vez que un pedido pase a estado "Listo"
-   se imprimirá automáticamente.
+Después de la instalación, el sistema se inicia solo al encender el PC.
+No necesitas hacer nada.
 
-Deja la ventana abierta mientras el local esté operando.
-Puedes minimizarla, pero NO la cierres.
+Si necesitas iniciarlo manualmente:
+→ Doble clic en "ChocoFreseo Impresor" en el escritorio
+→ O doble clic en INICIAR_IMPRESOR.bat
+
+Espera a que diga "Conectado al servidor ChocoFreseo".
+Cada pedido marcado como "Listo" se imprimirá automáticamente.
+Deja la ventana abierta (puedes minimizarla).
 
 
 SOLUCIÓN DE PROBLEMAS
@@ -47,24 +54,30 @@ SOLUCIÓN DE PROBLEMAS
   → El script reconecta solo, espera unos minutos
 
 ● "Error al imprimir"
-  → Verifica que el nombre de la impresora sea exactamente correcto
+  → Verifica que el nombre en impresor.js sea exactamente igual
+    al nombre en Panel de control → Dispositivos e impresoras
   → Verifica que la impresora esté encendida y con papel
-  → Verifica que la impresora no tenga trabajos atascados
+  → Verifica que no haya trabajos atascados en la cola
 
 ● La ventana se cierra sola
-  → Doble clic en INICIAR_IMPRESOR.bat para volver a iniciar
-  → Si falla npm install, verifica que Node.js esté instalado
+  → Doble clic en INICIAR_IMPRESOR.bat para reiniciar
+  → Revisa el archivo logs.txt para ver el error
+
+● Ver historial de impresiones:
+  → Abre el archivo logs.txt de esta carpeta
 
 
 ARCHIVOS EN ESTA CARPETA
 --------------------------
-impresor.js          → Script principal (no borrar)
+INSTALAR.bat         → Instalador (ejecutar la primera vez)
+INICIAR_IMPRESOR.bat → Iniciar manualmente si es necesario
+impresor.js          → Script principal (no borrar ni mover)
 package.json         → Configuración de dependencias (no borrar)
-INICIAR_IMPRESOR.bat → Acceso directo para iniciar
 INSTRUCCIONES.txt    → Este archivo
+logs.txt             → Registro de actividad (se crea automáticamente)
 node_modules/        → Dependencias (se crea automáticamente)
 
 
 ============================================================
-  Soporte: WhatsApp 315-991-46-24
+  Soporte técnico: Samuel — WhatsApp 315-991-46-24
 ============================================================

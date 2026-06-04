@@ -1,5 +1,5 @@
 const { io } = require('socket.io-client');
-const printer = require('node-printer');
+const printer = require('@thiagoelg/node-printer');
 const fs      = require('fs');
 const path    = require('path');
 
@@ -118,26 +118,24 @@ function imprimirComanda(venta) {
       } catch { return '—'; }
     })();
 
-    const dirCompleta = [
-      venta.direccion,
-      venta.barrio,
-      venta.ciudad,
-    ].filter(Boolean).join(', ');
+    const barrioYciudad = [venta.barrio, venta.ciudad].filter(Boolean).join(', ');
 
     const texto = [
       '',
       '         CHOCOFRESEO',
       '        NIT 71799618-9',
-      '  Cl. 90 #50D-35, Aranjuez',
-      ' Cra. 29 #42-49, Buenos Aires',
+      '  Cl. 90 #50D-35, Aranjuez, Medellín',
+      ' Cra. 29 #42-49, Buenos Aires, Medellín',
       '    WhatsApp: 315-991-46-24',
+      '   Mar-Dom 1:00 PM - 8:00 PM',
       linea,
       `PEDIDO #${venta.id_venta}`,
       `Fecha: ${fecha}`,
       linea,
       `Cliente: ${venta.cliente || '—'}`,
       `Tel: ${venta.telefono || '—'}`,
-      `Dir: ${dirCompleta || '—'}`,
+      `Dir: ${venta.direccion || '—'}`,
+      barrioYciudad ? `     ${barrioYciudad}` : null,
       venta.referencia ? `Ref: ${venta.referencia}` : null,
       linea,
       'PRODUCTOS:',
@@ -156,7 +154,7 @@ function imprimirComanda(venta) {
       venta.puntos_usados > 0 ? `Puntos usados: -${venta.puntos_usados} pts` : null,
       puntosGanados > 0     ? `Puntos ganados: +${puntosGanados} pts`       : null,
       linea,
-      '     Gracias por tu pedido!',
+      '   ¡Gracias por tu pedido!',
       '  ChocoFreseo es Puro Freseo',
       '',
       '',

@@ -20,9 +20,8 @@ if %errorlevel% neq 0 (
   powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.11.0/node-v20.11.0-x64.msi' -OutFile '%TEMP%\nodejs.msi'"
   echo  [!] Instalando Node.js...
   msiexec /i "%TEMP%\nodejs.msi" /quiet /norestart
-  echo  [!] Node.js instalado. Continuando...
-  REM Refrescar PATH
-  call refreshenv >nul 2>&1
+  echo  [!] Node.js instalado. Actualizando PATH...
+  set "PATH=%ProgramFiles%\nodejs;%APPDATA%\npm;%PATH%"
 ) else (
   echo  [OK] Node.js encontrado:
   node --version
