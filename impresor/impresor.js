@@ -1,5 +1,7 @@
 const { io } = require('socket.io-client');
 const printer = require('node-printer');
+const fs      = require('fs');
+const path    = require('path');
 
 // ═══════════════════════════════════════════════════════════
 // CONFIGURACIÓN — CAMBIAR ANTES DE USAR
@@ -8,14 +10,23 @@ const NOMBRE_IMPRESORA = 'IMPRESORA_TERMICA'; // ← Cambiar por el nombre real 
 const URL_BACKEND      = 'https://mi-api-qpjo.onrender.com';
 // ═══════════════════════════════════════════════════════════
 
-console.log('');
-console.log('  ==========================================');
-console.log('   CHOCOFRESEO - SISTEMA DE IMPRESIÓN');
-console.log('  ==========================================');
-console.log('');
-console.log('  Impresora :', NOMBRE_IMPRESORA);
-console.log('  Servidor  :', URL_BACKEND);
-console.log('');
+function log(msg) {
+  const timestamp = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const linea = `[${timestamp}] ${msg}\n`;
+  console.log(msg);
+  try {
+    fs.appendFileSync(path.join(__dirname, 'logs.txt'), linea, 'utf8');
+  } catch (_) {}
+}
+
+log('');
+log('  ==========================================');
+log('   CHOCOFRESEO - SISTEMA DE IMPRESIÓN');
+log('  ==========================================');
+log('');
+log('  Impresora : ' + NOMBRE_IMPRESORA);
+log('  Servidor  : ' + URL_BACKEND);
+log('');
 
 const socket = io(URL_BACKEND, {
   reconnection: true,
@@ -24,29 +35,41 @@ const socket = io(URL_BACKEND, {
 });
 
 socket.on('connect', () => {
-  console.log('  ✅ Conectado al servidor ChocoFreseo');
-  console.log('  ⏳ Esperando pedidos listos...\n');
+  log('  ✅ Conectado al servidor ChocoFreseo');
+  log('  ⏳ Esperando pedidos listos...');
 });
 
 socket.on('disconnect', () => {
-  console.log('  ❌ Desconectado — reconectando...');
+  log('  ❌ Desconectado — reconectando...');
 });
 
 socket.on('connect_error', (e) => {
-  console.log('  ⚠️  Error de conexión:', e.message);
+  log('  ⚠️  Error de conexión: ' + e.message);
 });
 
 socket.on('pedido_listo', async (venta) => {
-  console.log(`\n  🎉 PEDIDO LISTO: #${venta.id_venta}`);
-  console.log(`     Cliente : ${venta.cliente}`);
-  console.log(`     Total   : $${Number(venta.total || 0).toLocaleString('es-CO')}`);
-  console.log('     Imprimiendo...');
+  log('');
+  log('  🎉 PEDIDO LISTO: #' + venta.id_venta);
+  log('     Cliente : ' + venta.cliente);
+  log('     Total   : $' + Number(venta.total || 0).toLocaleString('es-CO'));
+  log('     Imprimiendo...');
 
   try {
     await imprimirComanda(venta);
-    console.log('     ✅ Impreso correctamente\n');
+    log('     ✅ Impreso correctamente');
   } catch (e) {
-    console.log('     ❌ Error al imprimir:', e.message, '\n');
+    log('     ❌ Error al imprimir: ' + e.message);
+  }
+});
+
+socket.on('reimprimir', async (venta) => {
+  log('');
+  log('  🔄 REIMPRESIÓN: #' + venta.id_venta);
+  try {
+    await imprimirComanda(venta);
+    log('     ✅ Reimpreso correctamente');
+  } catch (e) {
+    log('     ❌ Error al reimprimir: ' + e.message);
   }
 });
 
@@ -68,8 +91,8 @@ function imprimirComanda(venta) {
       })();
 
       let lineas = `${d.cantidad}x ${d.producto?.nombre || '—'}`;
-      if (salsas)   lineas += `\n   Salsas: ${salsas}`;
-      if (toppings) lineas += `\n   Toppings: ${toppings}`;
+      if (salsas)    lineas += `\n   Salsas: ${salsas}`;
+      if (toppings)  lineas += `\n   Toppings: ${toppings}`;
       if (adiciones) lineas += `\n   +${adiciones}`;
       if (d.chocolate) lineas += `\n   Chocolate: ${d.chocolate}`;
       return lineas;
@@ -137,14 +160,15 @@ function imprimirComanda(venta) {
       data:    texto,
       printer: NOMBRE_IMPRESORA,
       type:    'RAW',
-      success: (jobID) => { console.log(`     Job ID: ${jobID}`); resolve(jobID); },
+      success: (jobID) => { log('     Job ID: ' + jobID); resolve(jobID); },
       error:   (err)   => reject(new Error(err)),
     });
   });
 }
 
 process.on('SIGINT', () => {
-  console.log('\n  👋 Cerrando sistema de impresión...');
+  log('');
+  log('  👋 Cerrando sistema de impresión...');
   socket.disconnect();
   process.exit(0);
 });
