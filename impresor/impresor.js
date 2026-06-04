@@ -221,10 +221,11 @@ async function imprimirComanda(venta) {
   }).join('\n');
 
   const metodoPago = { efectivo: 'Efectivo', transferencia: 'Transferencia', mixto: 'Mixto' }[venta.metodo_pago] || venta.metodo_pago || '-';
-  const puntosUsados  = venta.puntos_usados || 0;
-  const puntosGanados = (venta.puntosGanados ?? venta.puntos_ganados)
+  const puntosUsados    = venta.puntos_usados || 0;
+  const descuentoPesos  = Number(venta.descuento_puntos) || (puntosUsados * 12.5);
+  const puntosGanados   = (venta.puntosGanados ?? venta.puntos_ganados)
     ?? (puntosUsados > 0 ? 0 : Math.floor(Number(venta.subtotal || 0) / 500));
-  const puntosTotal   = venta.puntosTotal ?? null;
+  const puntosTotal     = venta.puntosTotal ?? null;
 
   const fecha = (() => {
     try {
@@ -279,6 +280,9 @@ async function imprimirComanda(venta) {
 
     // Totales
     Buffer.from(`Subtotal: $${Number(venta.subtotal || 0).toLocaleString('es-CO')}\n`),
+    Buffer.from(descuentoPesos > 0
+      ? `Desc. puntos (${puntosUsados} pts): -$${descuentoPesos.toLocaleString('es-CO')}\n`
+      : ''),
     Buffer.from(`Domicilio: $${Number(venta.costo_domicilio || 0).toLocaleString('es-CO')}\n`),
     Buffer.from(NEGRITA_ON),
     Buffer.from(`TOTAL: $${Number(venta.total || 0).toLocaleString('es-CO')}\n`),
