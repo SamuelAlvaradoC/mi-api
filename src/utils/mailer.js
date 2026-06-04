@@ -47,7 +47,7 @@ const enviarBienvenida = async (email, nombre) => {
       <div style="background:#fff5f5;border-radius:10px;padding:16px;
         margin-bottom:20px;border-left:4px solid #CA0B0B;">
         <p style="margin:0;font-size:13px;color:#555;">
-          🍓 Fresas con crema · 🍫 Fondues · 🍪 Brownies y más<br/>
+          🍟 Chocopatatas · 🍓 Fresas con crema · 🍫 ChocoBowls y más<br/>
           <strong style="color:#CA0B0B;">Domicilios todos los días de 1PM a 8PM</strong>
         </p>
       </div>
