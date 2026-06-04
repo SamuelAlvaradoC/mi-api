@@ -130,7 +130,7 @@ const enviarCodigoRecuperacion = async (email, codigo) => {
           ${codigo}
         </h1>
         <p style="color:#888;font-size:12px;margin:8px 0 0;">
-          Válido por 15 minutos
+          Válido por 5 minutos
         </p>
       </div>
       <p style="color:#888;font-size:12px;text-align:center;">
