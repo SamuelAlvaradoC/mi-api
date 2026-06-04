@@ -96,7 +96,7 @@ const solicitarReset = async ({ email }) => {
   if (!usuario) return { mensaje: 'Si el email existe, recibirás un código en breve.' };
 
   const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-  resetTokens.set(email, { token: codigo, expiry: Date.now() + 15 * 60_000 }); // 15 min
+  resetTokens.set(email, { token: codigo, expiry: Date.now() + 5 * 60_000 }); // 5 min
 
   let emailEnviado = false;
   try {
