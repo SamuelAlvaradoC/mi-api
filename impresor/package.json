@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "socket.io-client": "^4.7.0",
-    "@thiagoelg/node-printer": "^2.0.0"
+    "jimp": "^0.22.10"
   }
 }
