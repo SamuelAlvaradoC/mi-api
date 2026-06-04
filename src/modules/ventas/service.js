@@ -1,5 +1,6 @@
 const prisma = require('../../config/prisma');
 const { acumularPuntos, calcularDescuentoPuntos } = require('../puntos/service');
+const { getIo } = require('../../socket');
 
 const includeDetalle = {
   cliente:  { select: { id_cliente: true, telefono: true, ciudad: true, barrio: true, usuario: { select: { nombre: true, email: true } } } },
@@ -359,6 +360,35 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     } catch (e) {
       console.error('Error acumulando puntos:', e.message);
     }
+  }
+
+  // Notificar al impresor cuando pasa a 'listo'
+  if (estadoNombre === 'listo') {
+    try {
+      const io = getIo();
+      if (io) {
+        const ventaParaImprimir = await obtener(id);
+        io.emit('pedido_listo', {
+          id_venta:       ventaParaImprimir.id_venta,
+          cliente:        ventaParaImprimir.cliente?.usuario?.nombre || '—',
+          telefono:       ventaParaImprimir.cliente?.telefono || '—',
+          direccion:      ventaParaImprimir.direccion?.direccion_linea || '—',
+          barrio:         ventaParaImprimir.direccion?.barrio || '',
+          ciudad:         ventaParaImprimir.direccion?.ciudad || '',
+          referencia:     ventaParaImprimir.direccion?.referencia || '',
+          total:          ventaParaImprimir.total,
+          subtotal:       ventaParaImprimir.subtotal,
+          costo_domicilio: ventaParaImprimir.costo_domicilio,
+          metodo_pago:    ventaParaImprimir.metodo_pago,
+          monto_efectivo: ventaParaImprimir.monto_efectivo,
+          monto_transferencia: ventaParaImprimir.monto_transferencia,
+          observaciones:  ventaParaImprimir.observaciones,
+          puntos_usados:  ventaParaImprimir.puntos_usados,
+          detalleVentas:  ventaParaImprimir.detalleVentas,
+          fecha:          ventaParaImprimir.fecha,
+        });
+      }
+    } catch(e) { console.error('Error emitiendo pedido_listo:', e.message); }
   }
 
   return ventaActualizada;

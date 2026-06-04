@@ -1,0 +1,13 @@
+{
+  "name": "chocofreseo-impresor",
+  "version": "1.0.0",
+  "description": "Script de impresión automática ChocoFreseo",
+  "main": "impresor.js",
+  "scripts": {
+    "start": "node impresor.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.0",
+    "node-printer": "^0.0.3"
+  }
+}

@@ -1,0 +1,70 @@
+============================================================
+  CHOCOFRESEO — SISTEMA DE IMPRESIÓN AUTOMÁTICA
+  Instrucciones de instalación y uso
+============================================================
+
+REQUISITOS PREVIOS
+------------------
+1. Node.js instalado (https://nodejs.org) — versión 16 o superior
+2. Impresora térmica conectada y configurada en Windows
+3. Acceso a internet (para conectarse al servidor)
+
+
+CONFIGURACIÓN INICIAL (solo una vez)
+--------------------------------------
+1. Abre el archivo impresor.js con el Bloc de notas
+2. Busca la línea:
+       const NOMBRE_IMPRESORA = 'IMPRESORA_TERMICA';
+   y cambia 'IMPRESORA_TERMICA' por el nombre exacto de tu impresora.
+
+   Para ver el nombre exacto de tu impresora:
+   → Panel de control → Dispositivos e impresoras
+   → Clic derecho en tu impresora → Ver propiedades de impresora
+   → El nombre que aparece arriba es el que debes copiar
+
+   Ejemplo:
+       const NOMBRE_IMPRESORA = 'POS-80C';
+
+3. Guarda el archivo.
+
+
+USO DIARIO
+-----------
+1. Haz doble clic en INICIAR_IMPRESOR.bat
+2. Espera a que diga "Conectado al servidor ChocoFreseo"
+3. ¡Listo! Cada vez que un pedido pase a estado "Listo"
+   se imprimirá automáticamente.
+
+Deja la ventana abierta mientras el local esté operando.
+Puedes minimizarla, pero NO la cierres.
+
+
+SOLUCIÓN DE PROBLEMAS
+----------------------
+● "Error de conexión" al iniciar
+  → Verifica que tengas internet
+  → El servidor puede tardar 30-60 seg en despertar (Render free tier)
+  → El script reconecta solo, espera unos minutos
+
+● "Error al imprimir"
+  → Verifica que el nombre de la impresora sea exactamente correcto
+  → Verifica que la impresora esté encendida y con papel
+  → Verifica que la impresora no tenga trabajos atascados
+
+● La ventana se cierra sola
+  → Doble clic en INICIAR_IMPRESOR.bat para volver a iniciar
+  → Si falla npm install, verifica que Node.js esté instalado
+
+
+ARCHIVOS EN ESTA CARPETA
+--------------------------
+impresor.js          → Script principal (no borrar)
+package.json         → Configuración de dependencias (no borrar)
+INICIAR_IMPRESOR.bat → Acceso directo para iniciar
+INSTRUCCIONES.txt    → Este archivo
+node_modules/        → Dependencias (se crea automáticamente)
+
+
+============================================================
+  Soporte: WhatsApp 315-991-46-24
+============================================================
