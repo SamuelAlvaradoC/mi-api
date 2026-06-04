@@ -104,6 +104,10 @@ function imprimirComanda(venta) {
       mixto:         'Mixto',
     }[venta.metodo_pago] || venta.metodo_pago || '—';
 
+    const puntosGanados = venta.puntosGanados !== undefined
+      ? venta.puntosGanados
+      : (venta.puntos_usados > 0 ? 0 : Math.floor(Number(venta.subtotal || 0) / 500));
+
     const fecha = (() => {
       try {
         return new Date(venta.fecha || Date.now()).toLocaleString('es-CO', {
@@ -148,6 +152,9 @@ function imprimirComanda(venta) {
         ? `  Efectivo: $${Number(venta.monto_efectivo || 0).toLocaleString('es-CO')}\n  Transfer: $${Number(venta.monto_transferencia || 0).toLocaleString('es-CO')}`
         : null,
       venta.observaciones ? `Obs: ${venta.observaciones}` : null,
+      (puntosGanados > 0 || venta.puntos_usados > 0) ? linea : null,
+      venta.puntos_usados > 0 ? `Puntos usados: -${venta.puntos_usados} pts` : null,
+      puntosGanados > 0     ? `Puntos ganados: +${puntosGanados} pts`       : null,
       linea,
       '     Gracias por tu pedido!',
       '  ChocoFreseo es Puro Freseo',
