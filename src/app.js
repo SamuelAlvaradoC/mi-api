@@ -1,8 +1,15 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// ── Seguridad HTTP ──────────────────────────────────────
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
+
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -14,6 +21,27 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+
+// ── Rate limiting ───────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Demasiados intentos. Espera 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login',           authLimiter);
+app.use('/api/auth/solicitar-reset', authLimiter);
+app.use('/api/auth/verificar-reset', authLimiter);
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { success: false, message: 'Demasiadas solicitudes. Intenta más tarde.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', generalLimiter);
 
 // Health check
 app.get('/', (req, res) => res.json({ success: true, data: null, message: 'ChocoAdmin API running' }));
