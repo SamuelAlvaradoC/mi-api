@@ -253,7 +253,7 @@ async function imprimirComanda(venta) {
     Buffer.from('Cl. 90 #50D-35, Aranjuez, Medellin\n'),
     Buffer.from('Cra. 29 #42-49, Buenos Aires, Medellin\n'),
     Buffer.from('WhatsApp: 315-991-46-24\n'),
-    Buffer.from('Mar-Dom 1:00 PM - 8:00 PM\n'),
+    Buffer.from('Todos los dias 1:00 PM - 8:00 PM\n'),
 
     Buffer.from(IZQUIERDA),
     Buffer.from('================================\n'),
