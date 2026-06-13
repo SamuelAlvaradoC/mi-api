@@ -1,11 +1,11 @@
 // Sede Aranjuez (origen principal para cálculo de domicilio)
 // Sede La Milagrosa: Carrera 29 #42-49 — lat: 6.2372, lng: -75.5688
 // Cuando se activen domicilios desde La Milagrosa, calcular desde la sede más cercana al cliente.
-const ORIGEN = { lat: 6.2897, lng: -75.5557 };
+const ORIGEN = { lat: 6.281914, lng: -75.560668 };
 // TARIFA_BASE se calcula dinámicamente según distancia (ver tarifaBase en calcularCostoDomicilio)
-const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas'];
-const MUNICIPIOS_NORTE = ['Bello', 'Copacabana'];
-// Medellín usa tarifa norte $1.300/km
+// Zona determinada por lat del cliente vs ORIGEN.lat
+// (no por el texto "ciudad" que el cliente ingresa)
+// Sur: lat_cliente < ORIGEN.lat  |  Norte: lat_cliente >= ORIGEN.lat
 
 const calcularDistanciaLinea = (lat, lng) => {
   const R = 6371;
@@ -19,9 +19,10 @@ const calcularDistanciaLinea = (lat, lng) => {
 
 const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
   const ORS_KEY = process.env.ORS_API_KEY;
-  const esSur   = MUNICIPIOS_SUR.some((m) => (ciudad || '').toLowerCase().includes(m.toLowerCase()));
-  const esNorte = MUNICIPIOS_NORTE.some((m) => (ciudad || '').toLowerCase().includes(m.toLowerCase()));
-  const tarifa  = esSur ? 1400 : 1300;
+  // Zona determinada por latitud del cliente vs ORIGEN.lat
+  // (no por el texto "ciudad" que el cliente ingresa)
+  const esSur  = lat < ORIGEN.lat;
+  const tarifa = 1300; // ambas zonas iguales ahora
 
   let distKm;
 
@@ -33,7 +34,6 @@ const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
         headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           coordinates: [[ORIGEN.lng, ORIGEN.lat], [lng, lat]],
-          preference: 'shortest',
         }),
       });
       if (!resp.ok) throw new Error('ORS HTTP ' + resp.status);
@@ -48,9 +48,9 @@ const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
     distKm = calcularDistanciaLinea(lat, lng) * 1.3;
   }
 
-  const tarifaBase = distKm <= 2 ? 5000 : 5500;
+  const tarifaBase  = distKm <= 2 ? 5000 : 5500;
   const costoExacto = tarifaBase + distKm * tarifa;
-  const costo = Math.round(costoExacto / 1000) * 1000;
+  const costo       = Math.round(costoExacto / 1000) * 1000;
   return {
     costo,
     distKm: Math.round(distKm * 10) / 10,
