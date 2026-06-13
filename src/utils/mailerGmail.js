@@ -113,6 +113,9 @@ const enviarCodigoRecuperacion = async (email, codigo) => {
 // 4. PEDIDO CONFIRMADO — Notificación al cliente
 const enviarPedidoConfirmado = async (email, nombre, pedido) => {
   const { id_venta, productos = [], costo_domicilio = 0, total = 0, direccion = '', tiempo_espera = 30 } = pedido;
+  const esLejos = costo_domicilio > 8000;
+  const rMin = esLejos ? tiempo_espera + 20 : tiempo_espera;
+  const rMax = esLejos ? tiempo_espera + 40 : tiempo_espera + 20;
 
   const productosHTML = productos.map(p => `
     <tr>
@@ -134,7 +137,7 @@ const enviarPedidoConfirmado = async (email, nombre, pedido) => {
         Hola <strong>${nombre}</strong>, estamos preparando tu pedido con amor.
       </p>
       <div style="background:#fff5f5;border-radius:20px;padding:10px 20px;display:inline-block;margin-bottom:20px;">
-        <span style="color:#CA0B0B;font-weight:700;font-size:14px;">⏱️ Tiempo estimado: ~${tiempo_espera} minutos</span>
+        <span style="color:#CA0B0B;font-weight:700;font-size:14px;">⏱️ Tiempo estimado: ${rMin}–${rMax} min</span>
       </div>
       <div style="background:#f9f9f9;border-radius:10px;padding:16px;margin-bottom:20px;text-align:center;">
         <p style="color:#888;font-size:12px;margin:0 0 4px;">Número de pedido</p>
