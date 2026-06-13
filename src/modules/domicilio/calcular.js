@@ -2,7 +2,7 @@
 // Sede La Milagrosa: Carrera 29 #42-49 — lat: 6.2372, lng: -75.5688
 // Cuando se activen domicilios desde La Milagrosa, calcular desde la sede más cercana al cliente.
 const ORIGEN = { lat: 6.2897, lng: -75.5557 };
-const TARIFA_BASE = 5500;
+// TARIFA_BASE se calcula dinámicamente según distancia (ver tarifaBase en calcularCostoDomicilio)
 const MUNICIPIOS_SUR   = ['Itagüí', 'Envigado', 'Sabaneta', 'La Estrella', 'Caldas'];
 const MUNICIPIOS_NORTE = ['Bello', 'Copacabana'];
 // Medellín usa tarifa norte $1.300/km
@@ -41,8 +41,9 @@ const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
     distKm = calcularDistanciaLinea(lat, lng) * 1.3;
   }
 
-  const costoExacto = TARIFA_BASE + distKm * tarifa;
-  const costo = Math.round(costoExacto / 1000) * 1000; // redondear al millar más cercano
+  const tarifaBase = distKm <= 2 ? 5000 : 5500;
+  const costoExacto = tarifaBase + distKm * tarifa;
+  const costo = Math.round(costoExacto / 1000) * 1000;
   return {
     costo,
     distKm: Math.round(distKm * 10) / 10,
