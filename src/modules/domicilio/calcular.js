@@ -27,11 +27,18 @@ const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
 
   if (ORS_KEY) {
     try {
-      const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${ORIGEN.lng},${ORIGEN.lat}&end=${lng},${lat}`;
-      const resp = await fetch(url);
+      const url = 'https://api.openrouteservice.org/v2/directions/driving-car';
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coordinates: [[ORIGEN.lng, ORIGEN.lat], [lng, lat]],
+          preference: 'shortest',
+        }),
+      });
       if (!resp.ok) throw new Error('ORS HTTP ' + resp.status);
       const data = await resp.json();
-      distKm = data.features[0].properties.segments[0].distance / 1000;
+      distKm = data.routes[0].summary.distance / 1000;
       console.log('ORS distancia real:', distKm.toFixed(2), 'km →', ciudad);
     } catch (e) {
       console.error('ORS falló, usando línea recta:', e.message);
