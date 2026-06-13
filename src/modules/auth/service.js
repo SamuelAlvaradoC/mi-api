@@ -53,7 +53,16 @@ const register = async ({ nombre, email, contrasena, id_rol }) => {
 
     if (id_rol === 4 || rol?.nombre === 'cliente') {
       const nuevoCliente = await tx.cliente.create({ data: { id_usuario: usuario.id_usuario } });
-      await tx.puntosCliente.create({ data: { id_cliente: nuevoCliente.id_cliente, puntos: 0 } });
+      const puntosReg = await tx.puntosCliente.create({ data: { id_cliente: nuevoCliente.id_cliente, puntos: 200 } });
+      await tx.movimientoPuntos.create({
+        data: {
+          id_puntos:   puntosReg.id_puntos,
+          id_venta:    null,
+          tipo:        'acumulacion',
+          puntos:      200,
+          descripcion: '¡Bienvenido! 200 puntos de regalo por registrarte',
+        },
+      });
     } else if (['domiciliario', 'confirmador_domicilio', 'admin'].includes(rol?.nombre)) {
       await tx.empleado.create({
         data: { id_usuario: usuario.id_usuario, cargo: rol.nombre, fecha_ingreso: new Date(), estado: 1 },

@@ -18,38 +18,13 @@ const calcularDistanciaLinea = (lat, lng) => {
 };
 
 const calcularCostoDomicilio = async (lat, lng, ciudad = '') => {
-  const ORS_KEY = process.env.ORS_API_KEY;
-  // Zona determinada por latitud del cliente vs ORIGEN.lat
-  // (no por el texto "ciudad" que el cliente ingresa)
   const esSur  = lat < ORIGEN.lat;
-  const tarifa = 1300; // ambas zonas iguales ahora
+  const tarifa = 1300;
 
-  let distKm;
+  // Línea recta × 1.2 (más predecible para motos que rutas de carro)
+  const distKm = calcularDistanciaLinea(lat, lng) * 1.2;
 
-  if (ORS_KEY) {
-    try {
-      const url = 'https://api.openrouteservice.org/v2/directions/driving-car';
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          coordinates: [[ORIGEN.lng, ORIGEN.lat], [lng, lat]],
-        }),
-      });
-      if (!resp.ok) throw new Error('ORS HTTP ' + resp.status);
-      const data = await resp.json();
-      distKm = data.routes[0].summary.distance / 1000;
-      console.log('ORS distancia real:', distKm.toFixed(2), 'km →', ciudad);
-    } catch (e) {
-      console.error('ORS falló, usando línea recta:', e.message);
-      distKm = calcularDistanciaLinea(lat, lng) * 1.3;
-    }
-  } else {
-    distKm = calcularDistanciaLinea(lat, lng) * 1.3;
-  }
-
-  const tarifaBase  = distKm <= 2 ? 5000 : 5500;
-  const costoExacto = tarifaBase + distKm * tarifa;
+  const costoExacto = 5500 + distKm * tarifa;
   const costo       = Math.round(costoExacto / 1000) * 1000;
   return {
     costo,
