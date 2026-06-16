@@ -10,10 +10,13 @@ const crearProductoSchema = z.object({
   max_toppings:      z.number().int().min(0).optional().nullable(),
   permite_chocolate: z.union([z.boolean(), z.number().int().min(0).max(1)]).optional().default(false),
   permite_salsas:    z.union([z.boolean(), z.number().int().min(0).max(1)]).optional().default(false),
+  es_bowl:           z.union([z.boolean(), z.number().int().min(0).max(1)]).optional().default(false),
   img:               z.string().max(255).optional().nullable(),
 });
 
-const actualizarProductoSchema = crearProductoSchema.partial();
+const actualizarProductoSchema = crearProductoSchema.partial().extend({
+  estado: z.number().int().min(0).max(1).optional(),
+});
 
 const crearCategoriaSchema = z.object({
   nombre:      z.string().min(2).max(100),
