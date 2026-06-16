@@ -29,6 +29,7 @@ const crear = (datos) => prisma.producto.create({
     estado: 1,
     permite_chocolate: datos.permite_chocolate ? true : false,
     permite_salsas:    datos.permite_salsas    ? true : false,
+    es_bowl:           datos.es_bowl           ? true : false,
   },
   include: inc,
 });
@@ -38,6 +39,7 @@ const actualizar = async (id, datos) => {
   const data = { ...datos };
   if (data.permite_chocolate !== undefined) data.permite_chocolate = data.permite_chocolate ? true : false;
   if (data.permite_salsas    !== undefined) data.permite_salsas    = data.permite_salsas    ? true : false;
+  if (data.es_bowl           !== undefined) data.es_bowl           = data.es_bowl           ? true : false;
   return prisma.producto.update({ where: { id_producto: id }, data, include: inc });
 };
 

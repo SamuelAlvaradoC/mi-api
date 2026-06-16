@@ -123,6 +123,7 @@ model Producto {
   max_toppings       Int?
   permite_chocolate  Boolean  @default(false)
   permite_salsas     Boolean  @default(false)
+  es_bowl            Boolean  @default(false)
   img                String?  @db.VarChar(255)
   estado             Int      @default(1) @db.SmallInt
 
