@@ -7,6 +7,7 @@ const includeDetalle = {
   estado:   true,
   direccion: true,
   pagos:    { include: { detallePagos: { include: { metodoPago: true } } } },
+  movimientosPuntos: true,
   detalleVentas: {
     include: {
       producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true } },
@@ -94,7 +95,8 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     const pd = prodData[item.id_producto];
     if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no disponible` };
     // Si permite_toppings=0: ningún topping es gratis (todos se cobran a $2000)
-    const maxTop = pd.permite_toppings ? (item.max_toppings != null ? item.max_toppings : pd.max_toppings) : 0;
+    // max_toppings SIEMPRE viene de la BD (pd), nunca del cliente — evita manipulación de precio
+    const maxTop = pd.permite_toppings ? pd.max_toppings : 0;
     const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);
     const toppingExtra = Math.max(0, totalTop - maxTop) * 2000;
     const precioUnitItem = pd.precio + toppingExtra;
@@ -608,7 +610,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   const itemsCalc = items.map((item) => {
     const pd = prodData[item.id_producto];
     if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
-    const maxTop = pd.permite_toppings ? (item.max_toppings != null ? item.max_toppings : pd.max_toppings) : 0;
+    const maxTop = pd.permite_toppings ? pd.max_toppings : 0;
     const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);
     const toppingExtra = Math.max(0, totalTop - maxTop) * 2000;
     const precioUnitItem = pd.precio + toppingExtra;
