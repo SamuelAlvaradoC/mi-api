@@ -77,6 +77,13 @@ app.use((err, req, res, next) => {
       message: 'Error de validación',
     });
   }
+  if (err.code === 'P2002') {
+    const campo = err.meta?.target?.[0] || 'campo';
+    return res.status(409).json({ success: false, data: null, message: `Ya existe un registro con ese ${campo}` });
+  }
+  if (err.code === 'P2025') {
+    return res.status(404).json({ success: false, data: null, message: 'El registro no existe' });
+  }
   console.error(err);
   const status = err.status || 500;
   res.status(status).json({ success: false, data: null, message: err.message || 'Error interno del servidor' });
