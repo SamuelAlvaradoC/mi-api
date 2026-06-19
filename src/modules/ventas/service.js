@@ -10,7 +10,7 @@ const includeDetalle = {
   movimientosPuntos: true,
   detalleVentas: {
     include: {
-      producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true } },
+      producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true, es_bowl: true } },
       detalleToppings:  { include: { topping: true } },
       detalleAdiciones: { include: { adicion: true } },
     },
