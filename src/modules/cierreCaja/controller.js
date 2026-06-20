@@ -12,6 +12,13 @@ const crearBase = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+const actualizarBase = async (req, res, next) => {
+  try {
+    const data = await service.upsertBase(req.user.id_usuario, req.body.base_inicial);
+    success(res, data, 'Base inicial actualizada');
+  } catch (e) { next(e); }
+};
+
 const agregarGasto = async (req, res, next) => {
   try {
     const data = await service.agregarGasto(req.user.id_usuario, req.body);
@@ -27,4 +34,4 @@ const resumen = async (req, res, next) => {
   try { success(res, await service.resumenDia()); } catch (e) { next(e); }
 };
 
-module.exports = { hoy, crearBase, agregarGasto, eliminarGasto, resumen };
+module.exports = { hoy, crearBase, actualizarBase, agregarGasto, eliminarGasto, resumen };

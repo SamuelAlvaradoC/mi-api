@@ -31,6 +31,24 @@ const crearBase = async (id_usuario, base_inicial) => {
   });
 };
 
+const upsertBase = async (id_usuario, base_inicial) => {
+  const valor = Number(base_inicial);
+  if (isNaN(valor) || valor < 0) throw { status: 400, message: 'La base inicial debe ser un número válido' };
+
+  const existente = await obtenerCierreHoy();
+  if (existente) {
+    return prisma.cierreCaja.update({
+      where: { id_cierre: existente.id_cierre },
+      data: { base_inicial: valor },
+      include: { gastos: true },
+    });
+  }
+  return prisma.cierreCaja.create({
+    data: { base_inicial: valor, creado_por: id_usuario },
+    include: { gastos: true },
+  });
+};
+
 const obtenerOcrearCierre = async (id_usuario) => {
   const existente = await obtenerCierreHoy();
   if (existente) return existente;
@@ -69,12 +87,13 @@ const resumenDia = async () => {
   // evitar restar costo_domicilio dos veces sobre dinero real.
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: estadoEntregado?.id_estado },
-    select: { monto_efectivo: true, monto_transferencia: true, costo_domicilio: true },
+    select: { monto_efectivo: true, monto_transferencia: true, costo_domicilio: true, puntos_usados: true },
   });
 
   const total_efectivo      = ventas.reduce((s, v) => s + Number(v.monto_efectivo || 0), 0);
   const total_transferencia = ventas.reduce((s, v) => s + Number(v.monto_transferencia || 0), 0);
   const total_domicilios    = ventas.reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
+  const total_puntos_usados = ventas.reduce((s, v) => s + Number(v.puntos_usados || 0), 0);
   const total_ventas        = total_efectivo + total_transferencia;
   const efectivo_sin_domicilios = total_efectivo - total_domicilios;
 
@@ -99,6 +118,7 @@ const resumenDia = async () => {
     efectivo_sin_domicilios,
     total_transferencia,
     total_domicilios,
+    total_puntos_usados,
     gastos,
     gastos_por_tipo,
     total_gastos,
@@ -106,4 +126,4 @@ const resumenDia = async () => {
   };
 };
 
-module.exports = { obtenerCierreHoy, crearBase, agregarGasto, eliminarGasto, resumenDia };
+module.exports = { obtenerCierreHoy, crearBase, upsertBase, agregarGasto, eliminarGasto, resumenDia };
