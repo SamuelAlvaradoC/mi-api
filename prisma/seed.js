@@ -22,43 +22,23 @@ async function main() {
   console.log(`✓ Roles: ${roles.length} disponibles`);
 
   // ── Permisos (upsert por nombre único) ─────────────────
+  // Lista depurada: solo los permisos realmente usados por checkPermiso()/checkPermisoAny()
+  // en las rutas, más los conceptuales que el negocio pidió mantener (ver_reportes).
+  // NO agregar de vuelta el set legacy en notación punto (clientes.ver, productos.crear, etc.)
+  // — se eliminaron el 2026 por duplicar/no usarse, ver commit "limpiar permisos duplicados".
   const permisosList = [
-    // Auth
-    'auth.perfil', 'auth.editar-perfil', 'auth.cambiar-contrasena', 'auth.desactivar-cuenta',
-    // Roles
-    'roles.listar', 'roles.crear', 'roles.editar', 'roles.eliminar', 'roles.asignar-permisos',
-    'permisos.listar',
-    // Dashboard
-    'dashboard.ver',
-    // Usuarios
-    'usuarios.listar', 'usuarios.ver', 'usuarios.crear', 'usuarios.editar', 'usuarios.eliminar',
-    'usuarios.activar-desactivar', 'usuarios.asignar-rol',
-    // Clientes
-    'clientes.listar', 'clientes.ver', 'clientes.editar', 'clientes.eliminar',
-    'clientes.buscar', 'clientes.estado', 'clientes.historial', 'clientes.favoritos', 'clientes.perfil',
-    // Empleados
-    'empleados.listar', 'empleados.ver', 'empleados.editar', 'empleados.estado',
-    'empleados.crear', 'empleados.eliminar', 'empleados.buscar',
-    // Productos
-    'productos.listar', 'productos.ver', 'productos.crear', 'productos.editar',
-    'productos.estado', 'productos.eliminar',
-    // Categorías
-    'categorias.listar', 'categorias.crear', 'categorias.editar', 'categorias.eliminar', 'categorias.estado',
-    // Toppings
-    'toppings.listar', 'toppings.ver', 'toppings.crear', 'toppings.editar', 'toppings.eliminar', 'toppings.estado',
-    // Adiciones
-    'adiciones.listar', 'adiciones.ver', 'adiciones.crear', 'adiciones.editar', 'adiciones.eliminar', 'adiciones.estado',
-    // Ventas
-    'ventas.listar', 'ventas.ver', 'ventas.crear', 'ventas.estado', 'ventas.anular',
-    'ventas.filtrar', 'ventas.comprobante',
-    // Pagos
+    'ver_dashboard', 'ver_ventas', 'gestionar_ventas',
+    'cambiar_estado_venta', 'anular_venta', 'ver_clientes',
+    'gestionar_clientes', 'ver_empleados', 'gestionar_empleados',
+    'ver_usuarios', 'gestionar_usuarios', 'gestionar_productos',
+    'gestionar_categorias', 'gestionar_toppings',
+    'gestionar_adiciones', 'gestionar_roles', 'ver_reportes',
+    'ver_pedidos_domiciliario', 'facturar_pedido',
+    'confirmar_domicilios', 'gestionar_cocina', 'ver_cierre_caja',
+    // En uso real por checkPermiso() aunque no están en la lista de negocio de 22:
+    'ver_roles',
     'pagos.crear', 'pagos.ver',
-    // Métodos pago
     'metodos_pago.listar', 'metodos_pago.crear', 'metodos_pago.editar', 'metodos_pago.estado',
-    // Domicilios
-    'domicilios.listar', 'domicilios.ver', 'domicilios.asignar', 'domicilios.estado', 'domicilios.filtrar',
-    // Cierre de caja
-    'ver_cierre_caja',
   ];
 
   for (const nombre of permisosList) {
