@@ -10,7 +10,7 @@ const { execFile }   = require('child_process');
 // ═══════════════════════════════════════════════════════════
 // CONFIGURACIÓN — CAMBIAR ANTES DE USAR
 // ═══════════════════════════════════════════════════════════
-const NOMBRE_IMPRESORA = 'POS Printer 203DPI Series';
+const NOMBRE_IMPRESORA = 'POS Printer 203DPI  Series';
 const URL_BACKEND      = 'https://mi-api-qpjo.onrender.com';
 // ═══════════════════════════════════════════════════════════
 
