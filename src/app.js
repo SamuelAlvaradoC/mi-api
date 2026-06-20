@@ -50,6 +50,7 @@ app.get('/', (req, res) => res.json({ success: true, data: null, message: 'Choco
 app.use('/api/auth',          require('./modules/auth/routes'));
 app.use('/api/roles',         require('./modules/roles/routes'));
 app.use('/api/dashboard',     require('./modules/dashboard/routes'));
+app.use('/api/cierre-caja',   require('./modules/cierreCaja/routes'));
 app.use('/api/usuarios',      require('./modules/usuarios/routes'));
 app.use('/api/categorias',    require('./modules/categorias/routes'));
 app.use('/api/toppings',      require('./modules/toppings/routes'));

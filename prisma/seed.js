@@ -57,6 +57,8 @@ async function main() {
     'metodos_pago.listar', 'metodos_pago.crear', 'metodos_pago.editar', 'metodos_pago.estado',
     // Domicilios
     'domicilios.listar', 'domicilios.ver', 'domicilios.asignar', 'domicilios.estado', 'domicilios.filtrar',
+    // Cierre de caja
+    'ver_cierre_caja',
   ];
 
   for (const nombre of permisosList) {
@@ -82,6 +84,21 @@ async function main() {
     });
   }
   console.log(`✓ RolPermisos: admin tiene ${todosPermisos.length} permisos`);
+
+  // ── Rol confirmador_domicilio → permiso cierre de caja ─
+  const rolConfirmador = await prisma.rol.findFirst({ where: { nombre: 'confirmador_domicilio' } });
+  const permisoCierreCaja = await prisma.permiso.findFirst({ where: { nombre: 'ver_cierre_caja' } });
+  if (rolConfirmador && permisoCierreCaja) {
+    const yaTiene = await prisma.rolPermiso.findFirst({
+      where: { id_rol: rolConfirmador.id_rol, id_permiso: permisoCierreCaja.id_permiso },
+    });
+    if (!yaTiene) {
+      await prisma.rolPermiso.create({
+        data: { id_rol: rolConfirmador.id_rol, id_permiso: permisoCierreCaja.id_permiso },
+      });
+    }
+    console.log('✓ RolPermisos: confirmador_domicilio tiene ver_cierre_caja');
+  }
 
   // ── Estados de venta ───────────────────────────────────
   const estadosVenta = ['pendiente', 'en_proceso', 'listo', 'entregado', 'anulado'];

@@ -29,6 +29,10 @@ io.on('connection', (socket) => {
     io.emit('reimprimir', venta);
   });
 
+  socket.on('imprimir_cierre', (datos) => {
+    io.emit('imprimir_cierre', datos);
+  });
+
   socket.on('disconnect', () => {
     console.log('Socket desconectado:', socket.id);
   });

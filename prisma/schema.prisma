@@ -62,6 +62,7 @@ model Usuario {
   cliente  Cliente?
   empleado Empleado?
   resenas  Resena[]
+  cierresCaja CierreCaja[]
 
   @@map("usuarios")
 }
@@ -396,6 +397,31 @@ model PuntosCliente {
   movimientos MovimientoPuntos[]
 
   @@map("puntos_cliente")
+}
+
+// ─────────────────────────────────────────────
+// CIERRE DE CAJA
+// ─────────────────────────────────────────────
+
+model CierreCaja {
+  id_cierre      Int      @id @default(autoincrement())
+  fecha          DateTime @default(now())
+  base_inicial   Float    @default(0)
+  creado_por     Int
+  usuario        Usuario  @relation(fields: [creado_por], references: [id_usuario])
+  gastos         GastoDia[]
+  @@map("cierre_caja")
+}
+
+model GastoDia {
+  id_gasto    Int        @id @default(autoincrement())
+  id_cierre   Int
+  cierre      CierreCaja @relation(fields: [id_cierre], references: [id_cierre])
+  tipo        String     // 'domiciliario', 'empleado', 'insumos'
+  descripcion String     // nombre empleado/domi o descripción insumo
+  valor       Float
+  fecha       DateTime   @default(now())
+  @@map("gasto_dia")
 }
 
 model MovimientoPuntos {

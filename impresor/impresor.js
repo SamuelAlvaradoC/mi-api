@@ -186,6 +186,13 @@ socket.on('reimprimir', async (venta) => {
   try    { await imprimirComanda(venta); log('     [OK] Reimpreso correctamente'); }
   catch (e) { log('     [X] Error al reimprimir: ' + e.message); }
 });
+
+socket.on('imprimir_cierre', async (datos) => {
+  log('');
+  log('  CIERRE DE CAJA: ' + datos.fecha);
+  try    { await imprimirCierre(datos); log('     [OK] Cierre impreso correctamente'); }
+  catch (e) { log('     [X] Error imprimiendo cierre: ' + e.message); }
+});
 // ────────────────────────────────────────────────────────────
 
 // ── Comanda ──────────────────────────────────────────────────
@@ -316,6 +323,66 @@ async function imprimirComanda(venta) {
 
     Buffer.from(CORTE),
   ].filter(b => b.length > 0);
+
+  await imprimirRaw(Buffer.concat(partes), NOMBRE_IMPRESORA);
+}
+// ────────────────────────────────────────────────────────────
+
+// ── Cierre de caja ───────────────────────────────────────────
+async function imprimirCierre(datos) {
+  const linea = '================================';
+
+  const partes = [
+    Buffer.from(INIT + LATIN1),
+    Buffer.from(CENTRAR + NEGRITA_ON + DOBLE_ALTO),
+    Buffer.from('CHOCOFRESEO\n'),
+    Buffer.from(NORMAL + NEGRITA_OFF),
+    Buffer.from('CIERRE DE CAJA\n'),
+    Buffer.from(datos.fecha + '\n'),
+    Buffer.from(IZQUIERDA),
+    Buffer.from(linea + '\n'),
+    Buffer.from('Base inicial: $' +
+      Number(datos.base_inicial).toLocaleString('es-CO') + '\n'),
+    Buffer.from(linea + '\n'),
+    Buffer.from(NEGRITA_ON + 'INGRESOS\n' + NEGRITA_OFF),
+    Buffer.from('Total ventas: $' +
+      Number(datos.total_ventas).toLocaleString('es-CO') + '\n'),
+    Buffer.from('Efectivo total: $' +
+      Number(datos.total_efectivo).toLocaleString('es-CO') + '\n'),
+    Buffer.from('Efec sin domicilios: $' +
+      Number(datos.efectivo_sin_domicilios).toLocaleString('es-CO') + '\n'),
+    Buffer.from('Transferencias: $' +
+      Number(datos.total_transferencia).toLocaleString('es-CO') + '\n'),
+    Buffer.from('Total domicilios: $' +
+      Number(datos.total_domicilios).toLocaleString('es-CO') + '\n'),
+    Buffer.from(linea + '\n'),
+    Buffer.from(NEGRITA_ON + 'GASTOS\n' + NEGRITA_OFF),
+  ];
+
+  if (datos.gastos && datos.gastos.length > 0) {
+    for (const g of datos.gastos) {
+      partes.push(Buffer.from(
+        g.tipo.toUpperCase() + ' - ' + g.descripcion + ': $' +
+        Number(g.valor).toLocaleString('es-CO') + '\n'
+      ));
+    }
+  } else {
+    partes.push(Buffer.from('Sin gastos registrados\n'));
+  }
+
+  partes.push(
+    Buffer.from('Total gastos: $' +
+      Number(datos.total_gastos).toLocaleString('es-CO') + '\n'),
+    Buffer.from(linea + '\n'),
+    Buffer.from(NEGRITA_ON + CENTRAR),
+    Buffer.from('SALDO FINAL: $' +
+      Number(datos.saldo_final).toLocaleString('es-CO') + '\n'),
+    Buffer.from(NEGRITA_OFF + IZQUIERDA),
+    Buffer.from(linea + '\n'),
+    Buffer.from(CENTRAR),
+    Buffer.from('ChocoFreseo es Puro Freseo\n'),
+    Buffer.from(CORTE)
+  );
 
   await imprimirRaw(Buffer.concat(partes), NOMBRE_IMPRESORA);
 }
