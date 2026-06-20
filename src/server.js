@@ -24,6 +24,11 @@ setIo(io);
 
 io.on('connection', (socket) => {
   console.log('Socket conectado:', socket.id);
+
+  socket.on('reimprimir', (venta) => {
+    io.emit('reimprimir', venta);
+  });
+
   socket.on('disconnect', () => {
     console.log('Socket desconectado:', socket.id);
   });
