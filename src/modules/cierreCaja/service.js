@@ -2,16 +2,17 @@ const prisma = require('../../config/prisma');
 
 const TIPOS_GASTO = ['domiciliario', 'empleado', 'insumos'];
 
-// Rango del día actual en horario Colombia (UTC-5), mismo criterio que dashboard/service.js
-const rangoHoy = () => {
-  const fechaCO = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
+// Rango del día (hoy por defecto, o el `fecha` recibido) en horario Colombia (UTC-5),
+// mismo criterio que dashboard/service.js
+const rangoHoy = (fecha) => {
+  const fechaCO = fecha || new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const inicio  = new Date(fechaCO + 'T05:00:00.000Z');
   const fin     = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
   return { fechaCO, inicio, fin };
 };
 
-const obtenerCierreHoy = async () => {
-  const { inicio, fin } = rangoHoy();
+const obtenerCierreHoy = async (fecha) => {
+  const { inicio, fin } = rangoHoy(fecha);
   return prisma.cierreCaja.findFirst({
     where: { fecha: { gte: inicio, lt: fin } },
     include: { gastos: { orderBy: { fecha: 'asc' } } },
@@ -79,8 +80,8 @@ const eliminarGasto = async (id_gasto) => {
   return { id_gasto: id };
 };
 
-const resumenDia = async () => {
-  const { fechaCO, inicio, fin } = rangoHoy();
+const resumenDia = async (fecha) => {
+  const { fechaCO, inicio, fin } = rangoHoy(fecha);
   const estadoEntregado = await prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } });
 
   // Cálculo propio e independiente del dashboard (que ya neta los domicilios) para
@@ -97,7 +98,7 @@ const resumenDia = async () => {
   const total_ventas        = total_efectivo + total_transferencia;
   const efectivo_sin_domicilios = total_efectivo - total_domicilios;
 
-  const cierre        = await obtenerCierreHoy();
+  const cierre        = await obtenerCierreHoy(fecha);
   const base_inicial  = cierre ? Number(cierre.base_inicial) : 0;
   const gastos        = cierre ? cierre.gastos : [];
   const total_gastos  = gastos.reduce((s, g) => s + Number(g.valor), 0);

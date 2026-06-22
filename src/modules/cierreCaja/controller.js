@@ -2,7 +2,7 @@ const service = require('./service');
 const { success } = require('../../utils/response');
 
 const hoy = async (req, res, next) => {
-  try { success(res, await service.obtenerCierreHoy()); } catch (e) { next(e); }
+  try { success(res, await service.obtenerCierreHoy(req.query.fecha)); } catch (e) { next(e); }
 };
 
 const crearBase = async (req, res, next) => {
@@ -31,7 +31,7 @@ const eliminarGasto = async (req, res, next) => {
 };
 
 const resumen = async (req, res, next) => {
-  try { success(res, await service.resumenDia()); } catch (e) { next(e); }
+  try { success(res, await service.resumenDia(req.query.fecha)); } catch (e) { next(e); }
 };
 
 module.exports = { hoy, crearBase, actualizarBase, agregarGasto, eliminarGasto, resumen };
