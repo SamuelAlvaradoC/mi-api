@@ -333,8 +333,6 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     } catch (pagoErr) {
       console.error('Error creando pago detallado:', pagoErr.message);
     }
-    // Re-fetch para incluir los pagos recién creados en la respuesta
-    return obtener(id);
   }
 
   // Acumular puntos al marcar como entregado (en cualquier caso, con o sin método de pago)
@@ -362,6 +360,8 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     } catch (e) {
       console.error('Error acumulando puntos:', e.message);
     }
+    // Re-fetch para incluir pagos y movimientos de puntos recién creados en la respuesta
+    return obtener(id);
   }
 
   // Notificar al impresor cuando pasa a 'listo'
