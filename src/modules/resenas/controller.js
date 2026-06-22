@@ -1,9 +1,10 @@
 const service = require('./service');
+const { crearResenaSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const crear = async (req, res, next) => {
   try {
-    const datos = req.body;
+    const datos = crearResenaSchema.parse(req.body);
     const id_usuario = req.user?.id_usuario || null;
     const resena = await service.crear({ ...datos, id_usuario });
     success(res, resena, 'Reseña registrada', 201);

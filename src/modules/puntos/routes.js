@@ -1,6 +1,7 @@
 const router  = require('express').Router();
 const prisma  = require('../../config/prisma');
 const verifyToken = require('../../middlewares/verifyToken');
+const checkPermiso = require('../../middlewares/checkPermiso');
 const s = require('./service');
 
 const ok = (res, data) => res.json({ success: true, data });
@@ -14,8 +15,9 @@ router.get('/mis-puntos', verifyToken, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// Admin ve puntos de cualquier cliente
-router.get('/cliente/:id_cliente', verifyToken, async (req, res, next) => {
+// Admin ve puntos de cualquier cliente — antes solo exigía estar logueado, lo que
+// permitía a cualquier cliente consultar los puntos de otro cliente por id (IDOR)
+router.get('/cliente/:id_cliente', verifyToken, checkPermiso('ver_clientes'), async (req, res, next) => {
   try {
     ok(res, await s.obtenerPuntos(Number(req.params.id_cliente)));
   } catch (e) { next(e); }

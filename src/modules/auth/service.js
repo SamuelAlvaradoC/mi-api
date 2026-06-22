@@ -5,10 +5,23 @@ const prisma = require('../../config/prisma');
 const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailer');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
-const resetTokens    = new Map(); // email → { token, expiry }
-const blacklistTokens = new Set(); // tokens invalidados por logout
+const resetTokens      = new Map(); // email → { token, expiry }
+const blacklistTokens  = new Set(); // tokens invalidados por logout
+const intentosFallidos = new Map(); // email → cantidad de códigos incorrectos seguidos
 
 const isBlacklisted = (token) => blacklistTokens.has(token);
+
+// Purga periódica de tokens ya expirados en la blacklist, para que el Set
+// no crezca indefinidamente con tokens que de todas formas jwt.verify ya rechazaría
+setInterval(() => {
+  for (const token of blacklistTokens) {
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+    } catch (e) {
+      if (e.name === 'TokenExpiredError') blacklistTokens.delete(token);
+    }
+  }
+}, 60 * 60 * 1000); // cada hora
 
 // ── Login ───────────────────────────────────────────────
 const login = async ({ email, contrasena }) => {
@@ -137,10 +150,22 @@ const solicitarReset = async ({ email }) => {
 // ── Verificar código y cambiar contraseña ───────────────
 const verificarReset = async ({ email, codigo, nueva_password }) => {
   const entry = resetTokens.get(email);
-  if (!entry || entry.token !== codigo || entry.expiry <= Date.now()) {
+  if (!entry || entry.expiry <= Date.now()) {
     throw { status: 400, message: 'Código inválido o expirado' };
   }
 
+  if (entry.token !== codigo) {
+    const intentos = (intentosFallidos.get(email) || 0) + 1;
+    if (intentos >= 3) {
+      resetTokens.delete(email);
+      intentosFallidos.delete(email);
+      throw { status: 429, message: 'Código inválido 3 veces. Solicita uno nuevo.' };
+    }
+    intentosFallidos.set(email, intentos);
+    throw { status: 400, message: 'Código inválido o expirado' };
+  }
+
+  intentosFallidos.delete(email);
   const hash = await bcrypt.hash(nueva_password, 10);
   await prisma.usuario.update({ where: { email }, data: { contrasena: hash } });
   resetTokens.delete(email);
