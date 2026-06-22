@@ -229,22 +229,26 @@ const cambiarEstado = async (id, datos, id_usuario) => {
 
   if (estadoNombre === 'anulado' && ventaActual.estado?.nombre_estado === 'entregado') {
     try {
-      const movAcumulacion = await prisma.movimientoPuntos.findFirst({
-        where: { id_venta: id, tipo: 'acumulacion' },
-      });
-      if (movAcumulacion) {
-        const regPtsAcum = await prisma.puntosCliente.findUnique({ where: { id_cliente: ventaActual.id_cliente } });
-        if (regPtsAcum) {
+      const regPtsAcum = await prisma.puntosCliente.findUnique({ where: { id_cliente: ventaActual.id_cliente } });
+      if (regPtsAcum) {
+        // Igual que en el retroceso de estado: se mira el último movimiento neto
+        // (acumulacion/reversion), no solo "¿existe una acumulacion?", para no
+        // revertir dos veces si la venta ya había retrocedido y vuelto a entregarse.
+        const ultimoMovimiento = await prisma.movimientoPuntos.findFirst({
+          where: { id_puntos: regPtsAcum.id_puntos, id_venta: id, tipo: { in: ['acumulacion', 'reversion'] } },
+          orderBy: { id_movimiento: 'desc' },
+        });
+        if (ultimoMovimiento?.tipo === 'acumulacion') {
           await prisma.puntosCliente.update({
             where: { id_cliente: ventaActual.id_cliente },
-            data: { puntos: { decrement: movAcumulacion.puntos } },
+            data: { puntos: { decrement: ultimoMovimiento.puntos } },
           });
           await prisma.movimientoPuntos.create({
             data: {
               id_puntos: regPtsAcum.id_puntos,
               id_venta: id,
               tipo: 'devolucion',
-              puntos: -movAcumulacion.puntos,
+              puntos: -ultimoMovimiento.puntos,
               descripcion: `Reversión por anulación de pedido #${id} (estaba entregado)`,
             },
           });
