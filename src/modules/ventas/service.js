@@ -253,6 +253,40 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     } catch (e) { console.error('Error revirtiendo puntos acumulados al anular:', e.message); }
   }
 
+  const estadoAnterior = ventaActual.estado?.nombre_estado;
+
+  // Si retrocede de entregado a cualquier otro estado que no sea anulado
+  // (anulado ya tiene su propia lógica de reversión arriba). Se revierte el último
+  // movimiento neto (acumulacion u reversion) para que, si ya se había revertido
+  // antes, no se vuelva a descontar dos veces.
+  if (estadoAnterior === 'entregado' && estadoNombre !== 'entregado' && estadoNombre !== 'anulado') {
+    try {
+      const ultimoMov = await prisma.movimientoPuntos.findFirst({
+        where: { id_venta: id, tipo: { in: ['acumulacion', 'reversion'] } },
+        orderBy: { id_movimiento: 'desc' },
+      });
+      if (ultimoMov?.tipo === 'acumulacion') {
+        const ptsCliente = await prisma.puntosCliente.findUnique({ where: { id_cliente: ventaActual.id_cliente } });
+        if (ptsCliente) {
+          await prisma.puntosCliente.update({
+            where: { id_puntos: ptsCliente.id_puntos },
+            data: { puntos: { decrement: ultimoMov.puntos } },
+          });
+          await prisma.movimientoPuntos.create({
+            data: {
+              id_puntos:   ptsCliente.id_puntos,
+              id_venta:    id,
+              tipo:        'reversion',
+              puntos:      -ultimoMov.puntos,
+              descripcion: `Reversión por retroceso de estado de entregado a ${estadoNombre}`,
+            },
+          });
+          console.log('Puntos revertidos por retroceso:', ultimoMov.puntos);
+        }
+      }
+    } catch (e) { console.error('Error revirtiendo puntos por retroceso de estado:', e.message); }
+  }
+
   const updateData = { id_estado: estadoId };
   if (metodo_pago)                              updateData.metodo_pago         = metodo_pago;
   if (comprobante_url)                          updateData.comprobante_url     = comprobante_url;
@@ -338,10 +372,14 @@ const cambiarEstado = async (id, datos, id_usuario) => {
   // Acumular puntos al marcar como entregado (en cualquier caso, con o sin método de pago)
   if (estadoNombre === 'entregado') {
     try {
-      const yaAcumulo = await prisma.movimientoPuntos.findFirst({
-        where: { id_venta: id, tipo: 'acumulacion' },
+      // Se mira el último movimiento (acumulacion/reversion), no solo "¿existe una
+      // acumulacion?", porque si la venta ya retrocedió y se revirtió antes, debe
+      // poder volver a acumular al re-entregarse.
+      const ultimoMov = await prisma.movimientoPuntos.findFirst({
+        where: { id_venta: id, tipo: { in: ['acumulacion', 'reversion'] } },
+        orderBy: { id_movimiento: 'desc' },
       });
-      if (yaAcumulo) {
+      if (ultimoMov?.tipo === 'acumulacion') {
         console.log('Puntos ya acumulados para venta #' + id + ' — omitiendo');
       } else {
         const ventaCompleta = await prisma.venta.findUnique({
