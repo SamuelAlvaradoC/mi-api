@@ -81,8 +81,7 @@ router.get('/estado-tienda', async (req, res) => {
     } else {
       const ahora    = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
       const hora     = ahora.getHours() + ahora.getMinutes() / 60;
-      const esLunes  = ahora.getDay() === 1;
-      abierto = !esLunes && hora >= hora_apertura && hora < hora_cierre;
+      abierto = hora >= hora_apertura && hora < hora_cierre;
     }
 
     res.json({
