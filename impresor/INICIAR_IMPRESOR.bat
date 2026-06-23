@@ -21,6 +21,13 @@ echo  Iniciando sistema de impresion...
 echo  Presiona Ctrl+C para detener.
 echo.
 
+schtasks /query /tn "ChocoFreseo Impresor" >nul 2>nul
+if %errorlevel% neq 0 (
+  echo  [!] Tarea automatica no encontrada.
+  echo      Ejecuta INSTALAR.bat como administrador.
+  echo.
+)
+
 node impresor.js
 
 pause

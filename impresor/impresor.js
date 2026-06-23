@@ -370,14 +370,22 @@ async function imprimirCierre(datos) {
     partes.push(Buffer.from('Sin gastos registrados\n'));
   }
 
+  // Acepta efectivo_en_caja (nombre actual) o saldo_final (nombre viejo, por compatibilidad)
+  const efectivoEnCaja = datos.efectivo_en_caja ?? datos.saldo_final;
+  const puntosUsadosHoy = Number(datos.total_puntos_usados || 0);
+  const equivDescuento  = puntosUsadosHoy * 12.5;
+
   partes.push(
     Buffer.from('Total gastos: $' +
       Number(datos.total_gastos).toLocaleString('es-CO') + '\n'),
     Buffer.from(linea + '\n'),
     Buffer.from(NEGRITA_ON + CENTRAR),
-    Buffer.from('SALDO FINAL: $' +
-      Number(datos.saldo_final).toLocaleString('es-CO') + '\n'),
+    Buffer.from('EFECTIVO EN CAJA: $' +
+      Number(efectivoEnCaja).toLocaleString('es-CO') + '\n'),
     Buffer.from(NEGRITA_OFF + IZQUIERDA),
+    Buffer.from(linea + '\n'),
+    Buffer.from('Puntos usados hoy: ' + puntosUsadosHoy + ' pts\n'),
+    Buffer.from('Equiv. descuento: $' + equivDescuento.toLocaleString('es-CO') + '\n'),
     Buffer.from(linea + '\n'),
     Buffer.from(CENTRAR),
     Buffer.from('ChocoFreseo es Puro Freseo\n'),
