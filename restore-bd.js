@@ -115,6 +115,35 @@ async function restore() {
     prisma.configuracion.createMany({ data: leer('configuracion'), skipDuplicates: true })
   );
 
+  // 12. Cierre de caja (con sus gastos anidados) — createMany no soporta nested
+  // writes, así que se restaura registro por registro
+  if (fs.existsSync(path.join(DIR, 'cierre_caja.json'))) {
+    try {
+      const cierres = leer('cierre_caja');
+      let count = 0;
+      for (const c of cierres) {
+        const gastos = c.gastos || [];
+        const { gastos: _, ...cierreSinGastos } = c;
+        await prisma.cierreCaja.create({
+          data: {
+            ...cierreSinGastos,
+            gastos: { create: gastos.map(g => {
+              const { id_cierre: __, ...gSinCierre } = g;
+              return gSinCierre;
+            }) },
+          },
+        });
+        count++;
+      }
+      console.log('✅ cierre_caja →', count, 'registros');
+    } catch (e) {
+      console.log('❌ cierre_caja →', e.message);
+      throw e;
+    }
+  } else {
+    console.log('⏭️  cierre_caja → no existe en este backup, omitido');
+  }
+
   // Sincronizar secuencias de autoincremento para evitar conflictos de PK
   console.log('\n🔧 Sincronizando secuencias de autoincremento...');
   const secuencias = [
@@ -129,6 +158,8 @@ async function restore() {
     ['toppings_id_topping_seq',           'toppings',     'id_topping'],
     ['adiciones_id_adicion_seq',          'adiciones',    'id_adicion'],
     ['configuraciones_id_seq',            'configuraciones', 'id'],
+    ['cierre_caja_id_cierre_seq',          'cierre_caja',  'id_cierre'],
+    ['gasto_dia_id_gasto_seq',             'gasto_dia',    'id_gasto'],
   ];
 
   for (const [seq, tabla, col] of secuencias) {

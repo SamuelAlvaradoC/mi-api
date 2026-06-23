@@ -86,6 +86,16 @@ async function backup() {
     orderBy: { id: 'asc' },
   }));
 
+  // Cierre de caja
+  await exportar('cierre_caja', () => prisma.cierreCaja.findMany({
+    include: { gastos: true },
+    orderBy: { id_cierre: 'asc' },
+  }));
+
+  await exportar('gastos_dia', () => prisma.gastoDia.findMany({
+    orderBy: { id_gasto: 'asc' },
+  }));
+
   // Resumen
   fs.writeFileSync(
     path.join(dir, '_resumen.json'),
