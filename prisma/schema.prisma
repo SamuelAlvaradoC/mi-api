@@ -229,6 +229,8 @@ model Venta {
   id_domiciliario     Int?
   puntos_usados       Int      @default(0)
   descuento_puntos    Float    @default(0)
+  nombre_cliente      String?  @db.VarChar(100)
+  telefono_cliente    String?  @db.VarChar(20)
 
   cliente   Cliente    @relation(fields: [id_cliente], references: [id_cliente])
   estado    Estado     @relation(fields: [id_estado], references: [id_estado])

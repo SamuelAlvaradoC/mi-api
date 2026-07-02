@@ -117,6 +117,11 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     return { ...item, precio_unitario: precioUnitFinal, subtotal: precioUnitFinal * item.cantidad, adicionesCalc };
   });
 
+  const clienteSnap = await prisma.cliente.findUnique({
+    where: { id_cliente },
+    select: { telefono: true, usuario: { select: { nombre: true } } },
+  });
+
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
   // Auto-calcular descuento_puntos desde puntos_usados si no se envió explícitamente
   const descuentoCalc   = Number(descuento_puntos) || (Number(puntos_usados) > 0 ? calcularDescuentoPuntos(Number(puntos_usados)) : 0);
@@ -139,6 +144,8 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   const nuevaVenta = await prisma.venta.create({
     data: {
       id_cliente, id_estado: estadoPendiente?.id_estado || 1,
+      nombre_cliente:  clienteSnap?.usuario?.nombre || null,
+      telefono_cliente: clienteSnap?.telefono || null,
       id_direccion: direccionId, costo_domicilio, observaciones,
       metodo_pago:         metodo_pago   || null,
       monto_efectivo:      montoEfectivo,
