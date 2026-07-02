@@ -615,7 +615,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });
 };
 
-const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia }) => {
+const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {
   const venta = await obtener(id);
   const estadoActual = venta.estado?.nombre_estado;
 
@@ -623,6 +623,10 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   if (estadoActual === 'anulado') {
     throw { status: 400, message: 'No se puede editar una venta anulada' };
   }
+
+  const snapData = {};
+  if (nombre_cliente !== undefined)   snapData.nombre_cliente   = nombre_cliente   || null;
+  if (telefono_cliente !== undefined) snapData.telefono_cliente = telefono_cliente || null;
 
   // Entregadas: solo se permite cambiar el método de pago (no los productos)
   if (estadoActual === 'entregado') {
@@ -635,7 +639,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
 
     await prisma.venta.update({
       where: { id_venta: id },
-      data: { metodo_pago: metodoFinal, monto_efectivo: montoEf, monto_transferencia: montoTr },
+      data: { metodo_pago: metodoFinal, monto_efectivo: montoEf, monto_transferencia: montoTr, ...snapData },
     });
     return obtener(id);
   }
@@ -702,6 +706,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       metodo_pago: metodoFinal,
       monto_efectivo: montoEf,
       monto_transferencia: montoTr,
+      ...snapData,
       detalleVentas: {
         create: itemsCalc.map((item) => ({
           id_producto: item.id_producto, cantidad: item.cantidad,
