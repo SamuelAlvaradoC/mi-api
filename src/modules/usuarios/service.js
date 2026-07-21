@@ -64,11 +64,11 @@ const actualizar = async (id, datos) => {
   return prisma.usuario.update({ where: { id_usuario: id }, data: datos, select });
 };
 
+const SUPER_ADMIN_ID = 1;
+
 const eliminar = async (id) => {
+  if (id === SUPER_ADMIN_ID) throw { status: 403, message: 'No se puede eliminar al Super Admin' };
   const u = await obtener(id);
-  // Bloquear eliminación de administradores
-  const rol = await prisma.rol.findUnique({ where: { id_rol: u.id_rol } });
-  if (rol?.nombre === 'admin') throw { status: 403, message: 'No se puede eliminar un usuario con rol Administrador' };
   // Verificar ventas via cliente
   const cliente = await prisma.cliente.findUnique({ where: { id_usuario: id } });
   if (cliente) {
@@ -84,6 +84,7 @@ const eliminar = async (id) => {
 };
 
 const activarDesactivar = async (id, estado) => {
+  if (id === SUPER_ADMIN_ID) throw { status: 403, message: 'No se puede cambiar el estado del Super Admin' };
   await obtener(id);
   const nuevoEstado = Number(estado);
   return prisma.$transaction(async (tx) => {
@@ -94,6 +95,7 @@ const activarDesactivar = async (id, estado) => {
 };
 
 const asignarRol = async (id, id_rol) => {
+  if (id === SUPER_ADMIN_ID) throw { status: 403, message: 'No se puede cambiar el rol del Super Admin' };
   await obtener(id);
   const rol = await prisma.rol.findUnique({ where: { id_rol } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
