@@ -30,13 +30,12 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/auth/login',                authLimiter);
-app.use('/api/auth/solicitar-reset',      authLimiter);
-app.use('/api/auth/verificar-reset',      authLimiter);
-// Alias usados por React/Flutter para el mismo flujo de solicitarReset — sin esto
-// quedaban sin límite y permitían bypassear el rate limit de /solicitar-reset
-app.use('/api/auth/recuperar',            authLimiter);
-app.use('/api/auth/recuperar-contrasena', authLimiter);
+// Rutas de auth SIN rate limit (desactivado temporalmente)
+// app.use('/api/auth/login',                authLimiter);
+// app.use('/api/auth/solicitar-reset',      authLimiter);
+// app.use('/api/auth/verificar-reset',      authLimiter);
+// app.use('/api/auth/recuperar',            authLimiter);
+// app.use('/api/auth/recuperar-contrasena', authLimiter);
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -45,7 +44,8 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api', generalLimiter);
+// Límite general de /api SIN rate limit (desactivado temporalmente)
+// app.use('/api', generalLimiter);
 
 // Health check
 app.get('/', (req, res) => res.json({ success: true, data: null, message: 'ChocoAdmin API running' }));
