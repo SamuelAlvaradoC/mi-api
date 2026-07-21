@@ -1,0 +1,44 @@
+[
+  {
+    "id_cierre": 1,
+    "fecha": "2026-06-20T17:41:36.641Z",
+    "base_inicial": 20000,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 2,
+    "fecha": "2026-06-22T18:02:20.076Z",
+    "base_inicial": 0,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 3,
+    "fecha": "2026-06-23T17:30:01.843Z",
+    "base_inicial": 20000,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 4,
+    "fecha": "2026-06-28T16:39:07.062Z",
+    "base_inicial": 0,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 5,
+    "fecha": "2026-06-30T19:19:04.858Z",
+    "base_inicial": 20000,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 6,
+    "fecha": "2026-07-02T03:56:59.692Z",
+    "base_inicial": 20000,
+    "creado_por": 1,
+    "gastos": []
+  }
+]

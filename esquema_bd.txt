@@ -1,0 +1,291 @@
+=== ESQUEMA BASE DE DATOS CHOCOFRESEO ===
+
+
+┌─────────────────────────────────
+│ TABLA: _PRISMA_MIGRATIONS
+└─────────────────────────────────
+  id                       character varying(36)NOT NULL [PK]
+  checksum                 character varying(64)NOT NULL
+  finished_at              timestamp with time zoneNULL
+  migration_name           character varying(255)NOT NULL
+  logs                     text                NULL
+  rolled_back_at           timestamp with time zoneNULL
+  started_at               timestamp with time zoneNOT NULL DEFAULT: now()
+  applied_steps_count      integer             NOT NULL DEFAULT: 0
+
+┌─────────────────────────────────
+│ TABLA: ADICIONES
+└─────────────────────────────────
+  id_adicion               integer             NOT NULL [PK] DEFAULT: nextval('adiciones_id_adicion_seq'::regclass)
+  nombre                   character varying(100)NOT NULL
+  descripcion              character varying(150)NULL
+  img                      character varying(255)NULL
+  gramaje                  character varying(50)NULL
+  precio                   numeric             NOT NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: CATEGORIAS
+└─────────────────────────────────
+  id_categoria             integer             NOT NULL [PK] DEFAULT: nextval('categorias_id_categoria_seq'::regclass)
+  nombre                   character varying(100)NOT NULL
+  descripcion              character varying(150)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: CIERRE_CAJA
+└─────────────────────────────────
+  id_cierre                integer             NOT NULL [PK] DEFAULT: nextval('cierre_caja_id_cierre_seq'::regclass)
+  fecha                    timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+  base_inicial             double precision    NOT NULL DEFAULT: 0
+  creado_por               integer             NOT NULL [FK -> usuarios.id_usuario]
+
+┌─────────────────────────────────
+│ TABLA: CLIENTES
+└─────────────────────────────────
+  id_cliente               integer             NOT NULL [PK] DEFAULT: nextval('clientes_id_cliente_seq'::regclass)
+  id_usuario               integer             NOT NULL [FK -> usuarios.id_usuario]
+  direccion                character varying(255)NULL
+  barrio                   character varying(100)NULL
+  ciudad                   character varying(100)NULL
+  telefono                 character varying(20)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: CONFIGURACIONES
+└─────────────────────────────────
+  id                       integer             NOT NULL [PK] DEFAULT: nextval('configuraciones_id_seq'::regclass)
+  clave                    text                NOT NULL
+  valor                    text                NOT NULL
+  descripcion              text                NULL
+
+┌─────────────────────────────────
+│ TABLA: DETALLE_ADICION
+└─────────────────────────────────
+  id_detalle_adicion       integer             NOT NULL [PK] DEFAULT: nextval('detalle_adicion_id_detalle_adicion_seq'::regclass)
+  id_detalle_venta         integer             NOT NULL [FK -> detalle_venta.id_detalle_venta]
+  id_adicion               integer             NOT NULL [FK -> adiciones.id_adicion]
+  cantidad                 integer             NOT NULL
+  precio_unitario          numeric             NOT NULL
+  subtotal                 numeric             NOT NULL
+
+┌─────────────────────────────────
+│ TABLA: DETALLE_PAGOS
+└─────────────────────────────────
+  id_detalle_pago          integer             NOT NULL [PK] DEFAULT: nextval('detalle_pagos_id_detalle_pago_seq'::regclass)
+  id_pago                  integer             NOT NULL [FK -> pagos.id_pago]
+  id_metodo_pago           integer             NOT NULL [FK -> metodos_pago.id_metodo_pago]
+  monto                    numeric             NOT NULL
+  comprobante              text                NULL
+  referencia               character varying(100)NULL
+
+┌─────────────────────────────────
+│ TABLA: DETALLE_TOPPING
+└─────────────────────────────────
+  id_detalle_topping       integer             NOT NULL [PK] DEFAULT: nextval('detalle_topping_id_detalle_topping_seq'::regclass)
+  id_detalle_venta         integer             NOT NULL [FK -> detalle_venta.id_detalle_venta]
+  id_topping               integer             NOT NULL [FK -> toppings.id_topping]
+  cantidad                 integer             NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: DETALLE_VENTA
+└─────────────────────────────────
+  id_detalle_venta         integer             NOT NULL [PK] DEFAULT: nextval('detalle_venta_id_detalle_venta_seq'::regclass)
+  id_venta                 integer             NOT NULL [FK -> ventas.id_venta]
+  id_producto              integer             NOT NULL [FK -> productos.id_producto]
+  cantidad                 integer             NOT NULL
+  precio_unitario          numeric             NOT NULL
+  subtotal                 numeric             NOT NULL
+  chocolate                character varying(20)NULL
+  salsas                   text                NULL
+
+┌─────────────────────────────────
+│ TABLA: DIRECCIONES
+└─────────────────────────────────
+  id_direccion             integer             NOT NULL [PK] DEFAULT: nextval('direcciones_id_direccion_seq'::regclass)
+  id_cliente               integer             NOT NULL [FK -> clientes.id_cliente]
+  direccion_linea          character varying(255)NOT NULL
+  barrio                   character varying(100)NULL
+  ciudad                   character varying(100)NULL
+  departamento             character varying(100)NULL
+  lat                      numeric             NULL
+  lng                      numeric             NULL
+  referencia               character varying(255)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: EMPLEADOS
+└─────────────────────────────────
+  id_empleado              integer             NOT NULL [PK] DEFAULT: nextval('empleados_id_empleado_seq'::regclass)
+  id_usuario               integer             NOT NULL [FK -> usuarios.id_usuario]
+  cargo                    character varying(50)NOT NULL
+  fecha_ingreso            date                NOT NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: ESTADOS
+└─────────────────────────────────
+  id_estado                integer             NOT NULL [PK] DEFAULT: nextval('estados_id_estado_seq'::regclass)
+  nombre_estado            character varying(50)NOT NULL
+  descripcion              character varying(150)NULL
+
+┌─────────────────────────────────
+│ TABLA: ESTADOS_DOMICILIO
+└─────────────────────────────────
+  id_estado_domicilio      integer             NOT NULL [PK] DEFAULT: nextval('estados_domicilio_id_estado_domicilio_seq'::regclass)
+  nombre_estado            character varying(50)NOT NULL
+  descripcion              character varying(150)NULL
+
+┌─────────────────────────────────
+│ TABLA: GASTO_DIA
+└─────────────────────────────────
+  id_gasto                 integer             NOT NULL [PK] DEFAULT: nextval('gasto_dia_id_gasto_seq'::regclass)
+  id_cierre                integer             NOT NULL [FK -> cierre_caja.id_cierre]
+  tipo                     text                NOT NULL
+  descripcion              text                NOT NULL
+  valor                    double precision    NOT NULL
+  fecha                    timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+
+┌─────────────────────────────────
+│ TABLA: METODOS_PAGO
+└─────────────────────────────────
+  id_metodo_pago           integer             NOT NULL [PK] DEFAULT: nextval('metodos_pago_id_metodo_pago_seq'::regclass)
+  nombre                   character varying(50)NOT NULL
+  descripcion              character varying(150)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: MOVIMIENTOS_PUNTOS
+└─────────────────────────────────
+  id_movimiento            integer             NOT NULL [PK] DEFAULT: nextval('movimientos_puntos_id_movimiento_seq'::regclass)
+  id_puntos                integer             NOT NULL [FK -> puntos_cliente.id_puntos]
+  id_venta                 integer             NULL [FK -> ventas.id_venta]
+  tipo                     character varying(20)NOT NULL
+  puntos                   integer             NOT NULL
+  descripcion              character varying(255)NULL
+  fecha                    timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+
+┌─────────────────────────────────
+│ TABLA: PAGOS
+└─────────────────────────────────
+  id_pago                  integer             NOT NULL [PK] DEFAULT: nextval('pagos_id_pago_seq'::regclass)
+  id_venta                 integer             NOT NULL [FK -> ventas.id_venta]
+  id_empleado              integer             NOT NULL [FK -> empleados.id_empleado]
+  fecha_pago               timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+  total_pagado             numeric             NOT NULL
+
+┌─────────────────────────────────
+│ TABLA: PERMISOS
+└─────────────────────────────────
+  id_permiso               integer             NOT NULL [PK] DEFAULT: nextval('permisos_id_permiso_seq'::regclass)
+  nombre                   character varying(100)NOT NULL
+  descripcion              character varying(150)NULL
+
+┌─────────────────────────────────
+│ TABLA: PRODUCTOS
+└─────────────────────────────────
+  id_producto              integer             NOT NULL [PK] DEFAULT: nextval('productos_id_producto_seq'::regclass)
+  id_categoria             integer             NOT NULL [FK -> categorias.id_categoria]
+  nombre                   character varying(100)NOT NULL
+  descripcion              text                NULL
+  tamano                   character varying(20)NULL
+  precio                   numeric             NOT NULL
+  permite_toppings         smallint            NOT NULL DEFAULT: 0
+  max_toppings             integer             NULL
+  permite_chocolate        boolean             NOT NULL DEFAULT: false
+  permite_salsas           boolean             NOT NULL DEFAULT: false
+  img                      character varying(255)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+  es_bowl                  boolean             NOT NULL DEFAULT: false
+
+┌─────────────────────────────────
+│ TABLA: PUNTOS_CLIENTE
+└─────────────────────────────────
+  id_puntos                integer             NOT NULL [PK] DEFAULT: nextval('puntos_cliente_id_puntos_seq'::regclass)
+  id_cliente               integer             NOT NULL [FK -> clientes.id_cliente]
+  puntos                   integer             NOT NULL DEFAULT: 0
+
+┌─────────────────────────────────
+│ TABLA: RESENAS
+└─────────────────────────────────
+  id_resena                integer             NOT NULL [PK] DEFAULT: nextval('resenas_id_resena_seq'::regclass)
+  sede                     character varying(50)NOT NULL
+  frecuencia               character varying(50)NOT NULL
+  calificacion_atencion    integer             NOT NULL
+  calificacion_producto    integer             NOT NULL
+  recomendaria             character varying(20)NOT NULL
+  tiempo_adecuado          character varying(30)NOT NULL
+  lo_que_gusto             text                NULL
+  producto_deseado         text                NULL
+  mejora                   text                NULL
+  fecha                    timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+  id_usuario               integer             NULL [FK -> usuarios.id_usuario]
+
+┌─────────────────────────────────
+│ TABLA: ROL_PERMISOS
+└─────────────────────────────────
+  id_rol_permiso           integer             NOT NULL [PK] DEFAULT: nextval('rol_permisos_id_rol_permiso_seq'::regclass)
+  id_rol                   integer             NOT NULL [FK -> roles.id_rol]
+  id_permiso               integer             NOT NULL [FK -> permisos.id_permiso]
+
+┌─────────────────────────────────
+│ TABLA: ROLES
+└─────────────────────────────────
+  id_rol                   integer             NOT NULL [PK] DEFAULT: nextval('roles_id_rol_seq'::regclass)
+  nombre                   character varying(50)NOT NULL
+  descripcion              character varying(150)NULL
+  estado                   integer             NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: TOPPINGS
+└─────────────────────────────────
+  id_topping               integer             NOT NULL [PK] DEFAULT: nextval('toppings_id_topping_seq'::regclass)
+  nombre                   character varying(100)NOT NULL
+  descripcion              character varying(150)NULL
+  img                      character varying(255)NULL
+  gramaje                  character varying(50)NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+
+┌─────────────────────────────────
+│ TABLA: USUARIOS
+└─────────────────────────────────
+  id_usuario               integer             NOT NULL [PK] DEFAULT: nextval('usuarios_id_usuario_seq'::regclass)
+  id_rol                   integer             NOT NULL [FK -> roles.id_rol]
+  nombre                   character varying(100)NOT NULL
+  email                    character varying(100)NOT NULL
+  contrasena               character varying(255)NOT NULL
+  estado                   smallint            NOT NULL DEFAULT: 1
+  fecha_registro           timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+
+┌─────────────────────────────────
+│ TABLA: VENTAS
+└─────────────────────────────────
+  id_venta                 integer             NOT NULL [PK] DEFAULT: nextval('ventas_id_venta_seq'::regclass)
+  id_cliente               integer             NOT NULL [FK -> clientes.id_cliente]
+  id_estado                integer             NOT NULL [FK -> estados.id_estado]
+  id_direccion             integer             NULL [FK -> direcciones.id_direccion]
+  fecha                    timestamp without time zoneNOT NULL DEFAULT: CURRENT_TIMESTAMP
+  motivo_anulacion         text                NULL
+  subtotal                 numeric             NOT NULL
+  costo_domicilio          numeric             NOT NULL DEFAULT: 0
+  total                    numeric             NOT NULL
+  observaciones            text                NULL
+  metodo_pago              character varying(20)NULL
+  monto_efectivo           numeric             NULL
+  monto_transferencia      numeric             NULL
+  comprobante_url          text                NULL
+  id_domiciliario          integer             NULL
+  puntos_usados            integer             NOT NULL DEFAULT: 0
+  descuento_puntos         double precision    NOT NULL DEFAULT: 0
+
+┌─────────────────────────────────
+│ TABLA: VENTAS_DOMICILIARIO
+└─────────────────────────────────
+  id_venta_domiciliario    integer             NOT NULL [PK] DEFAULT: nextval('ventas_domiciliario_id_venta_domiciliario_seq'::regclass)
+  id_empleado              integer             NOT NULL [FK -> empleados.id_empleado]
+  id_venta                 integer             NOT NULL [FK -> ventas.id_venta]
+  id_estado_domicilio      integer             NOT NULL [FK -> estados_domicilio.id_estado_domicilio]
+  hora_asignacion          timestamp without time zoneNULL
+  hora_salida              timestamp without time zoneNULL
+  hora_entrega             timestamp without time zoneNULL
+  observaciones            character varying(255)NULL

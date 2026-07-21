@@ -1,0 +1,29 @@
+[
+  {
+    "id_usuario": 1,
+    "id_rol": 1,
+    "nombre": "Esneyder",
+    "email": "esneider@outlook.com",
+    "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+    "estado": 1,
+    "fecha_registro": "2026-07-13T00:00:00.000Z"
+  },
+  {
+    "id_usuario": 2,
+    "id_rol": 1,
+    "nombre": "Samuel",
+    "email": "samuelalvaradocorrea@gmail.com",
+    "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+    "estado": 1,
+    "fecha_registro": "2026-07-13T00:00:00.000Z"
+  },
+  {
+    "id_usuario": 3,
+    "id_rol": 3,
+    "nombre": "Confirmador",
+    "email": "neider8020@gmail.com",
+    "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+    "estado": 1,
+    "fecha_registro": "2026-07-13T00:00:00.000Z"
+  }
+]

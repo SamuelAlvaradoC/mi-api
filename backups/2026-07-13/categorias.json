@@ -1,0 +1,56 @@
+[
+  {
+    "id_categoria": 1,
+    "nombre": "Bebidas",
+    "descripcion": "bebidas dulces pero refrescantes",
+    "estado": 1
+  },
+  {
+    "id_categoria": 3,
+    "nombre": "Con crema",
+    "descripcion": "Productos con crema",
+    "estado": 1
+  },
+  {
+    "id_categoria": 4,
+    "nombre": "Krispi",
+    "descripcion": "Productos con cereal",
+    "estado": 1
+  },
+  {
+    "id_categoria": 5,
+    "nombre": "Mix",
+    "descripcion": "Combinacion de productos",
+    "estado": 1
+  },
+  {
+    "id_categoria": 6,
+    "nombre": "Nachos",
+    "descripcion": "Variedad de choconachos",
+    "estado": 1
+  },
+  {
+    "id_categoria": 14,
+    "nombre": "Spaguettis",
+    "descripcion": "pancakes en forma de spaguetti bañados en chocolate negro derretido, acomáñado de crema antigravedad, junto con una fruta y un topping a elección",
+    "estado": 1
+  },
+  {
+    "id_categoria": 15,
+    "nombre": "Bowls",
+    "descripcion": "Bowls",
+    "estado": 1
+  },
+  {
+    "id_categoria": 16,
+    "nombre": "Chocopatatas",
+    "descripcion": "wafle con forma de patatas",
+    "estado": 1
+  },
+  {
+    "id_categoria": 17,
+    "nombre": "Con Chocolate",
+    "descripcion": "Productos Con Chocolate",
+    "estado": 1
+  }
+]
