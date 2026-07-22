@@ -49,6 +49,10 @@ const actualizar = async (id, datos) => {
   const empDatos = { ...empRest };
   if (estado !== undefined) empDatos.estado = estado;
   if (empDatos.fecha_ingreso) empDatos.fecha_ingreso = new Date(empDatos.fecha_ingreso);
+  // Sincronizar id_rol en Usuario cuando cambia el cargo
+  if (empDatos.cargo && ROL_POR_CARGO[empDatos.cargo]) {
+    usuarioDatos.id_rol = ROL_POR_CARGO[empDatos.cargo];
+  }
   await prisma.$transaction(async (tx) => {
     if (Object.keys(usuarioDatos).length > 0) {
       await tx.usuario.update({ where: { id_usuario: emp.id_usuario }, data: usuarioDatos });

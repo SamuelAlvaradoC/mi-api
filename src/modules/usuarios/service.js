@@ -61,7 +61,15 @@ const crear = async (datos) => {
 const actualizar = async (id, datos) => {
   await obtener(id);
   if (datos.contrasena) datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
-  return prisma.usuario.update({ where: { id_usuario: id }, data: datos, select });
+  const usuario = await prisma.usuario.update({ where: { id_usuario: id }, data: datos, select });
+  // Sincronizar cargo en Empleado cuando cambia el rol
+  if (datos.id_rol !== undefined) {
+    const nuevoCargo = CARGO_MAP[usuario.rol?.nombre];
+    if (nuevoCargo) {
+      await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+    }
+  }
+  return usuario;
 };
 
 const SUPER_ADMIN_ID = 1;
