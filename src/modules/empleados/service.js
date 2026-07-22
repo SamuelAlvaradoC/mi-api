@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/prisma');
 
-const incUsuario = { usuario: { select: { nombre: true, email: true, rol: true } } };
+const incUsuario = { usuario: { select: { nombre: true, email: true, estado: true, fecha_registro: true, rol: true } } };
 
 const listar = () => prisma.empleado.findMany({ include: incUsuario });
 
@@ -46,14 +46,17 @@ const actualizar = async (id, datos) => {
   if (nombre !== undefined) usuarioDatos.nombre = nombre;
   if (email  !== undefined) usuarioDatos.email  = email;
   if (estado !== undefined) usuarioDatos.estado = estado;
-  if (Object.keys(usuarioDatos).length > 0) {
-    await prisma.usuario.update({ where: { id_usuario: emp.id_usuario }, data: usuarioDatos });
-  }
   const empDatos = { ...empRest };
   if (estado !== undefined) empDatos.estado = estado;
-  if (Object.keys(empDatos).length > 0) {
-    await prisma.empleado.update({ where: { id_empleado: id }, data: empDatos });
-  }
+  if (empDatos.fecha_ingreso) empDatos.fecha_ingreso = new Date(empDatos.fecha_ingreso);
+  await prisma.$transaction(async (tx) => {
+    if (Object.keys(usuarioDatos).length > 0) {
+      await tx.usuario.update({ where: { id_usuario: emp.id_usuario }, data: usuarioDatos });
+    }
+    if (Object.keys(empDatos).length > 0) {
+      await tx.empleado.update({ where: { id_empleado: id }, data: empDatos });
+    }
+  });
   return obtener(id);
 };
 
