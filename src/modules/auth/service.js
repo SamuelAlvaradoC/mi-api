@@ -115,7 +115,7 @@ const recuperarContrasena = async ({ email }) => {
 // ── Solicitar reset con código de 6 dígitos ─────────────
 const solicitarReset = async ({ email }) => {
   const usuario = await prisma.usuario.findUnique({ where: { email } });
-  if (!usuario) return { mensaje: 'Si el email existe, recibirás un código en breve.' };
+  if (!usuario) throw { status: 404, message: 'No existe una cuenta registrada con este correo.' };
 
   const codigo = Math.floor(100000 + Math.random() * 900000).toString();
   resetTokens.set(email, { token: codigo, expiry: Date.now() + 5 * 60_000 }); // 5 min
