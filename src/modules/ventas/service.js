@@ -40,17 +40,7 @@ const listar = async ({ estado, fecha, id_domiciliario } = {}) => {
   }
 
   const orderBy = estado ? { id_venta: 'asc' } : { fecha: 'desc' };
-  const ventas = await prisma.venta.findMany({ where, include: includeDetalle, orderBy });
-
-  const domiIds = [...new Set(ventas.map((v) => v.id_domiciliario).filter(Boolean))];
-  if (!domiIds.length) return ventas.map((v) => ({ ...v, nombreDomiciliario: null }));
-
-  const empleados = await prisma.empleado.findMany({
-    where: { id_empleado: { in: domiIds } },
-    include: { usuario: { select: { nombre: true } } },
-  });
-  const domiMap = Object.fromEntries(empleados.map((e) => [e.id_empleado, e.usuario?.nombre || null]));
-  return ventas.map((v) => ({ ...v, nombreDomiciliario: domiMap[v.id_domiciliario] || null }));
+  return prisma.venta.findMany({ where, include: includeDetalle, orderBy });
 };
 
 const filtrar = (estadoId) => prisma.venta.findMany({
