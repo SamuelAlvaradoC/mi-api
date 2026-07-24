@@ -34,56 +34,58 @@ const misPedidos = async (id_usuario) => {
   });
 };
 
-// Domiciliario auto-asigna un pedido: busca por id_venta (FK), crea si no existe,
-// y cambia el estado de la venta a 'despachado' para que aparezca en mis-despachos.
+// Domiciliario auto-asigna un pedido.
+// IMPORTANTE: la actualización de venta (id_domiciliario + estado) va FUERA de cualquier
+// transacción con ventaDomiciliario. Si la tabla estados_domicilio está vacía y el
+// create de ventaDomiciliario falla por FK, el $transaction anterior revertía TAMBIÉN
+// el venta.update, dejando id_domiciliario=null y haciendo desaparecer el pedido.
 const coger = async (id_venta, id_usuario) => {
   const empleado = await prisma.empleado.findUnique({ where: { id_usuario } });
   if (!empleado) throw { status: 404, message: 'Empleado no encontrado para este usuario' };
 
-  // Buscar por FK id_venta, no por PK id_venta_domiciliario
   const domicilio = await prisma.ventaDomiciliario.findFirst({ where: { id_venta } });
-
   if (domicilio?.id_empleado && domicilio.id_empleado !== empleado.id_empleado) {
     throw { status: 409, message: 'Este pedido ya fue tomado por otro domiciliario' };
   }
 
-  const estadoEnCamino = await prisma.estadoDomicilio.findFirst({
-    where: { nombre_estado: { in: ['en_camino', 'en camino', 'asignado', 'recogido'] } },
-  });
   const estadoDespachado = await prisma.estado.findFirst({ where: { nombre_estado: 'despachado' } });
 
-  return prisma.$transaction(async (tx) => {
-    let domi;
-    if (domicilio) {
-      domi = await tx.ventaDomiciliario.update({
-        where: { id_venta_domiciliario: domicilio.id_venta_domiciliario },
-        data: {
-          id_empleado:         empleado.id_empleado,
-          hora_asignacion:     new Date(),
-          id_estado_domicilio: estadoEnCamino?.id_estado_domicilio ?? domicilio.id_estado_domicilio,
-        },
-        include: inc,
-      });
-    } else {
-      domi = await tx.ventaDomiciliario.create({
-        data: {
-          id_venta,
-          id_empleado:         empleado.id_empleado,
-          hora_asignacion:     new Date(),
-          id_estado_domicilio: estadoEnCamino?.id_estado_domicilio ?? 1,
-        },
-        include: inc,
-      });
-    }
-    // Marcar la venta como 'despachado' y asignar domiciliario para que aparezca en mis-despachos
-    if (estadoDespachado) {
-      await tx.venta.update({
-        where: { id_venta },
-        data: { id_estado: estadoDespachado.id_estado, id_domiciliario: empleado.id_empleado },
-      });
-    }
-    return domi;
+  // Paso 1 (crítico): actualizar la venta — garantiza que aparezca en mis-despachos.
+  // Se hace ANTES e INDEPENDIENTE del ventaDomiciliario para que ningún error secundario
+  // revierta este cambio.
+  await prisma.venta.update({
+    where: { id_venta },
+    data: {
+      id_domiciliario: empleado.id_empleado,
+      ...(estadoDespachado && { id_estado: estadoDespachado.id_estado }),
+    },
   });
+
+  // Paso 2 (secundario): crear/actualizar ventaDomiciliario para el tracking de domicilios.
+  // Si falla (p.ej. tabla estados_domicilio vacía), se ignora — el pedido ya está asignado.
+  try {
+    const estadoEnCamino = await prisma.estadoDomicilio.findFirst({
+      where: { nombre_estado: { in: ['en_camino', 'en camino', 'asignado', 'recogido'] } },
+    });
+    if (estadoEnCamino) {
+      if (domicilio) {
+        return await prisma.ventaDomiciliario.update({
+          where: { id_venta_domiciliario: domicilio.id_venta_domiciliario },
+          data: { id_empleado: empleado.id_empleado, hora_asignacion: new Date(), id_estado_domicilio: estadoEnCamino.id_estado_domicilio },
+          include: inc,
+        });
+      } else {
+        return await prisma.ventaDomiciliario.create({
+          data: { id_venta, id_empleado: empleado.id_empleado, hora_asignacion: new Date(), id_estado_domicilio: estadoEnCamino.id_estado_domicilio },
+          include: inc,
+        });
+      }
+    }
+  } catch (e) {
+    console.error('[coger] ventaDomiciliario no actualizado (no crítico):', e.message);
+  }
+
+  return { id_venta, id_empleado: empleado.id_empleado };
 };
 
 // Marcar como despachado (salió a entregar)

@@ -318,16 +318,18 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     where: { id_venta: id }, data: updateData, include: includeDetalle,
   });
 
-  // Al coger (despachado) o entregar → guardar el domiciliario en la venta
-  // Solo si quien actúa es un Domiciliario (nunca sobreescribir con id del admin)
-  if ((estadoNombre === 'despachado' || estadoNombre === 'entregado') && id_usuario) {
+  // Al coger (despachado) → guardar el domiciliario en la venta.
+  // Se verifica por rol (no por cargo) para no fallar cuando el cargo tiene typos/valores incorrectos.
+  if (estadoNombre === 'despachado' && id_usuario) {
     try {
-      const empleado = await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } });
-      const esDomiciliario = empleado?.cargo?.toLowerCase().includes('domiciliario');
-      if (empleado && esDomiciliario) {
+      const usuario = await prisma.usuario.findUnique({
+        where: { id_usuario: Number(id_usuario) },
+        include: { rol: true, empleado: true },
+      });
+      if (usuario?.rol?.nombre === 'domiciliario' && usuario.empleado) {
         await prisma.venta.update({
           where: { id_venta: id },
-          data: { id_domiciliario: empleado.id_empleado },
+          data: { id_domiciliario: usuario.empleado.id_empleado },
         });
       }
     } catch (e) {
