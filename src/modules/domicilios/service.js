@@ -34,25 +34,55 @@ const misPedidos = async (id_usuario) => {
   });
 };
 
-// Domiciliario auto-asigna un pedido (crea registro si no existe, o actualiza si ya hay uno sin empleado)
-const coger = async (id_venta_domiciliario, id_usuario) => {
+// Domiciliario auto-asigna un pedido: busca por id_venta (FK), crea si no existe,
+// y cambia el estado de la venta a 'despachado' para que aparezca en mis-despachos.
+const coger = async (id_venta, id_usuario) => {
   const empleado = await prisma.empleado.findUnique({ where: { id_usuario } });
   if (!empleado) throw { status: 404, message: 'Empleado no encontrado para este usuario' };
-  const domicilio = await obtener(id_venta_domiciliario);
-  if (domicilio.id_empleado && domicilio.id_empleado !== empleado.id_empleado) {
+
+  // Buscar por FK id_venta, no por PK id_venta_domiciliario
+  const domicilio = await prisma.ventaDomiciliario.findFirst({ where: { id_venta } });
+
+  if (domicilio?.id_empleado && domicilio.id_empleado !== empleado.id_empleado) {
     throw { status: 409, message: 'Este pedido ya fue tomado por otro domiciliario' };
   }
+
   const estadoEnCamino = await prisma.estadoDomicilio.findFirst({
     where: { nombre_estado: { in: ['en_camino', 'en camino', 'asignado', 'recogido'] } },
   });
-  return prisma.ventaDomiciliario.update({
-    where: { id_venta_domiciliario: id_venta_domiciliario },
-    data:  {
-      id_empleado:         empleado.id_empleado,
-      hora_asignacion:     new Date(),
-      id_estado_domicilio: estadoEnCamino?.id_estado_domicilio ?? domicilio.id_estado_domicilio,
-    },
-    include: inc,
+  const estadoDespachado = await prisma.estado.findFirst({ where: { nombre_estado: 'despachado' } });
+
+  return prisma.$transaction(async (tx) => {
+    let domi;
+    if (domicilio) {
+      domi = await tx.ventaDomiciliario.update({
+        where: { id_venta_domiciliario: domicilio.id_venta_domiciliario },
+        data: {
+          id_empleado:         empleado.id_empleado,
+          hora_asignacion:     new Date(),
+          id_estado_domicilio: estadoEnCamino?.id_estado_domicilio ?? domicilio.id_estado_domicilio,
+        },
+        include: inc,
+      });
+    } else {
+      domi = await tx.ventaDomiciliario.create({
+        data: {
+          id_venta,
+          id_empleado:         empleado.id_empleado,
+          hora_asignacion:     new Date(),
+          id_estado_domicilio: estadoEnCamino?.id_estado_domicilio ?? 1,
+        },
+        include: inc,
+      });
+    }
+    // Marcar la venta como 'despachado' y asignar domiciliario para que aparezca en mis-despachos
+    if (estadoDespachado) {
+      await tx.venta.update({
+        where: { id_venta },
+        data: { id_estado: estadoDespachado.id_estado, id_domiciliario: empleado.id_empleado },
+      });
+    }
+    return domi;
   });
 };
 
