@@ -62,7 +62,10 @@ const misDirecciones = async (req, res, next) => {
     const prisma = require('../../config/prisma');
     let cliente = await prisma.cliente.findUnique({ where: { id_usuario: req.user.id_usuario } });
     if (!cliente) cliente = await prisma.cliente.create({ data: { id_usuario: req.user.id_usuario } });
-    const dirs = await prisma.direccion.findMany({ where: { id_cliente: cliente.id_cliente, estado: 1 } });
+    const dirs = await prisma.direccion.findMany({
+      where: { id_cliente: cliente.id_cliente, estado: 1 },
+      include: { barrioRel: { select: { id_barrio: true, nombre: true, precio_domicilio: true } } },
+    });
     success(res, dirs);
   } catch (err) { next(err); }
 };
@@ -72,7 +75,7 @@ const crearMiDireccion = async (req, res, next) => {
     const prisma = require('../../config/prisma');
     let cliente = await prisma.cliente.findUnique({ where: { id_usuario: req.user.id_usuario } });
     if (!cliente) cliente = await prisma.cliente.create({ data: { id_usuario: req.user.id_usuario } });
-    const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng } = req.body;
+    const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng, id_barrio } = req.body;
     if (!direccion_linea?.trim()) throw { status: 400, message: 'La dirección es requerida' };
     const existente = await prisma.direccion.findFirst({
       where: {
@@ -84,7 +87,19 @@ const crearMiDireccion = async (req, res, next) => {
     });
     if (existente) { return success(res, existente); }
     const dir = await prisma.direccion.create({
-      data: { id_cliente: cliente.id_cliente, direccion_linea, barrio, ciudad, departamento: departamento || null, referencia: referencia || null, lat: lat || null, lng: lng || null, estado: 1 },
+      data: {
+        id_cliente: cliente.id_cliente,
+        direccion_linea,
+        barrio:      barrio      || null,
+        ciudad:      ciudad      || null,
+        departamento: departamento || null,
+        referencia:  referencia  || null,
+        lat:         lat         || null,
+        lng:         lng         || null,
+        id_barrio:   id_barrio   ? Number(id_barrio) : null,
+        estado: 1,
+      },
+      include: { barrioRel: { select: { id_barrio: true, nombre: true, precio_domicilio: true } } },
     });
     success(res, dir, 'Dirección creada', 201);
   } catch (err) { next(err); }
