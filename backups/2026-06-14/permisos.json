@@ -1,0 +1,107 @@
+[
+  {
+    "id_permiso": 81,
+    "nombre": "ver_dashboard",
+    "descripcion": "Ver el dashboard y estadísticas"
+  },
+  {
+    "id_permiso": 82,
+    "nombre": "ver_ventas",
+    "descripcion": "Ver lista de ventas y detalles"
+  },
+  {
+    "id_permiso": 83,
+    "nombre": "gestionar_ventas",
+    "descripcion": "Crear ventas desde el panel admin"
+  },
+  {
+    "id_permiso": 84,
+    "nombre": "cambiar_estado_venta",
+    "descripcion": "Cambiar el estado de una venta"
+  },
+  {
+    "id_permiso": 85,
+    "nombre": "anular_venta",
+    "descripcion": "Anular una venta"
+  },
+  {
+    "id_permiso": 86,
+    "nombre": "confirmar_domicilios",
+    "descripcion": "Confirmar o rechazar pedidos pendientes"
+  },
+  {
+    "id_permiso": 87,
+    "nombre": "gestionar_productos",
+    "descripcion": "Crear, editar y eliminar productos"
+  },
+  {
+    "id_permiso": 88,
+    "nombre": "gestionar_categorias",
+    "descripcion": "Crear, editar y eliminar categorías"
+  },
+  {
+    "id_permiso": 89,
+    "nombre": "gestionar_toppings",
+    "descripcion": "Crear, editar y eliminar toppings"
+  },
+  {
+    "id_permiso": 90,
+    "nombre": "gestionar_adiciones",
+    "descripcion": "Crear, editar y eliminar adiciones"
+  },
+  {
+    "id_permiso": 91,
+    "nombre": "ver_clientes",
+    "descripcion": "Ver lista de clientes"
+  },
+  {
+    "id_permiso": 92,
+    "nombre": "gestionar_clientes",
+    "descripcion": "Crear, editar y eliminar clientes"
+  },
+  {
+    "id_permiso": 93,
+    "nombre": "ver_empleados",
+    "descripcion": "Ver lista de empleados"
+  },
+  {
+    "id_permiso": 94,
+    "nombre": "gestionar_empleados",
+    "descripcion": "Crear, editar y eliminar empleados"
+  },
+  {
+    "id_permiso": 95,
+    "nombre": "ver_usuarios",
+    "descripcion": "Ver lista de usuarios"
+  },
+  {
+    "id_permiso": 96,
+    "nombre": "gestionar_usuarios",
+    "descripcion": "Crear, editar y eliminar usuarios"
+  },
+  {
+    "id_permiso": 97,
+    "nombre": "ver_roles",
+    "descripcion": "Ver lista de roles"
+  },
+  {
+    "id_permiso": 98,
+    "nombre": "gestionar_roles",
+    "descripcion": "Crear, editar roles y asignar permisos"
+  },
+  {
+    "id_permiso": 99,
+    "nombre": "ver_pedidos_domiciliario",
+    "descripcion": "Ver pedidos asignados al domiciliario"
+  },
+  {
+    "id_permiso": 100,
+    "nombre": "facturar_pedido",
+    "descripcion": "Facturar y entregar un pedido"
+  },
+  {
+    "id_permiso": 101,
+    "nombre": "gestionar_cocina",
+    "descripcion": "Ver pedidos en cocina y marcarlos como listos"
+  }
+]

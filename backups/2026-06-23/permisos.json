@@ -1,0 +1,147 @@
+[
+  {
+    "id_permiso": 81,
+    "nombre": "ver_dashboard",
+    "descripcion": "ver_dashboard"
+  },
+  {
+    "id_permiso": 82,
+    "nombre": "ver_ventas",
+    "descripcion": "ver_ventas"
+  },
+  {
+    "id_permiso": 83,
+    "nombre": "gestionar_ventas",
+    "descripcion": "gestionar_ventas"
+  },
+  {
+    "id_permiso": 84,
+    "nombre": "cambiar_estado_venta",
+    "descripcion": "cambiar_estado_venta"
+  },
+  {
+    "id_permiso": 85,
+    "nombre": "anular_venta",
+    "descripcion": "anular_venta"
+  },
+  {
+    "id_permiso": 86,
+    "nombre": "confirmar_domicilios",
+    "descripcion": "confirmar_domicilios"
+  },
+  {
+    "id_permiso": 87,
+    "nombre": "gestionar_productos",
+    "descripcion": "gestionar_productos"
+  },
+  {
+    "id_permiso": 88,
+    "nombre": "gestionar_categorias",
+    "descripcion": "gestionar_categorias"
+  },
+  {
+    "id_permiso": 89,
+    "nombre": "gestionar_toppings",
+    "descripcion": "gestionar_toppings"
+  },
+  {
+    "id_permiso": 90,
+    "nombre": "gestionar_adiciones",
+    "descripcion": "gestionar_adiciones"
+  },
+  {
+    "id_permiso": 91,
+    "nombre": "ver_clientes",
+    "descripcion": "ver_clientes"
+  },
+  {
+    "id_permiso": 92,
+    "nombre": "gestionar_clientes",
+    "descripcion": "gestionar_clientes"
+  },
+  {
+    "id_permiso": 93,
+    "nombre": "ver_empleados",
+    "descripcion": "ver_empleados"
+  },
+  {
+    "id_permiso": 94,
+    "nombre": "gestionar_empleados",
+    "descripcion": "gestionar_empleados"
+  },
+  {
+    "id_permiso": 95,
+    "nombre": "ver_usuarios",
+    "descripcion": "ver_usuarios"
+  },
+  {
+    "id_permiso": 96,
+    "nombre": "gestionar_usuarios",
+    "descripcion": "gestionar_usuarios"
+  },
+  {
+    "id_permiso": 97,
+    "nombre": "ver_roles",
+    "descripcion": "ver_roles"
+  },
+  {
+    "id_permiso": 98,
+    "nombre": "gestionar_roles",
+    "descripcion": "gestionar_roles"
+  },
+  {
+    "id_permiso": 99,
+    "nombre": "ver_pedidos_domiciliario",
+    "descripcion": "ver_pedidos_domiciliario"
+  },
+  {
+    "id_permiso": 100,
+    "nombre": "facturar_pedido",
+    "descripcion": "facturar_pedido"
+  },
+  {
+    "id_permiso": 101,
+    "nombre": "gestionar_cocina",
+    "descripcion": "gestionar_cocina"
+  },
+  {
+    "id_permiso": 166,
+    "nombre": "pagos.crear",
+    "descripcion": "pagos.crear"
+  },
+  {
+    "id_permiso": 167,
+    "nombre": "pagos.ver",
+    "descripcion": "pagos.ver"
+  },
+  {
+    "id_permiso": 168,
+    "nombre": "metodos_pago.listar",
+    "descripcion": "metodos_pago.listar"
+  },
+  {
+    "id_permiso": 169,
+    "nombre": "metodos_pago.crear",
+    "descripcion": "metodos_pago.crear"
+  },
+  {
+    "id_permiso": 170,
+    "nombre": "metodos_pago.editar",
+    "descripcion": "metodos_pago.editar"
+  },
+  {
+    "id_permiso": 171,
+    "nombre": "metodos_pago.estado",
+    "descripcion": "metodos_pago.estado"
+  },
+  {
+    "id_permiso": 177,
+    "nombre": "ver_cierre_caja",
+    "descripcion": "ver_cierre_caja"
+  },
+  {
+    "id_permiso": 194,
+    "nombre": "ver_reportes",
+    "descripcion": "ver_reportes"
+  }
+]

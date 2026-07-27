@@ -162,7 +162,13 @@ const perfil = async (id) => {
   return c;
 };
 
-const listarDirecciones = async (id) => { await obtener(id); return prisma.direccion.findMany({ where: { id_cliente: id } }); };
+const listarDirecciones = async (id) => {
+  await obtener(id);
+  return prisma.direccion.findMany({
+    where: { id_cliente: id },
+    include: { barrioRel: { select: { precio_domicilio: true, nombre: true } } },
+  });
+};
 const crearDireccion    = async (id, datos) => { await obtener(id); return prisma.direccion.create({ data: { ...datos, id_cliente: id, estado: 1 } }); };
 
 module.exports = { listar, crear, buscar, obtener, actualizar, eliminar, cambiarEstado,

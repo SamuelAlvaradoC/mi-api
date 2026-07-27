@@ -74,6 +74,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
         referencia:      nueva_direccion.referencia   || null,
         lat:             nueva_direccion.lat          || null,
         lng:             nueva_direccion.lng          || null,
+        id_barrio:       nueva_direccion.id_barrio    ? Number(nueva_direccion.id_barrio) : null,
       },
     });
     direccionId = dir.id_direccion;

@@ -1,0 +1,35 @@
+[22/6/2026, 4:31:59 p. m.] 
+[22/6/2026, 4:31:59 p. m.]   ==========================================
+[22/6/2026, 4:31:59 p. m.]    CHOCOFRESEO - SISTEMA DE IMPRESION
+[22/6/2026, 4:31:59 p. m.]   ==========================================
+[22/6/2026, 4:31:59 p. m.] 
+[22/6/2026, 4:31:59 p. m.]   Impresora : POS Printer 203DPI  Series
+[22/6/2026, 4:31:59 p. m.]   Servidor  : https://mi-api-qpjo.onrender.com
+[22/6/2026, 4:31:59 p. m.] 
+[22/6/2026, 4:32:02 p. m.]   [OK] Conectado al servidor ChocoFreseo
+[22/6/2026, 4:32:02 p. m.]   [...] Esperando pedidos listos...
+[22/6/2026, 4:36:06 p. m.] 
+[22/6/2026, 4:36:06 p. m.]   CIERRE DE CAJA: 22/06/2026
+[22/6/2026, 4:36:14 p. m.]      [OK] Cierre impreso correctamente
+[22/6/2026, 4:36:39 p. m.] 
+[22/6/2026, 4:36:39 p. m.]   REIMPRESION: #25
+[22/6/2026, 4:36:40 p. m.]      Logo cargado
+[22/6/2026, 4:36:41 p. m.]      [OK] Reimpreso correctamente
+[22/6/2026, 5:01:12 p. m.]   [X] Desconectado - reconectando...
+[22/6/2026, 5:01:14 p. m.]   [!] Error de conexion: xhr poll error
+[22/6/2026, 5:38:54 p. m.]   [!] Error de conexion: xhr poll error
+[22/6/2026, 5:39:00 p. m.]   [!] Error de conexion: xhr poll error
+[22/6/2026, 5:39:05 p. m.]   [!] Error de conexion: xhr poll error
+[22/6/2026, 5:39:30 p. m.]   [!] Error de conexion: timeout
+[22/6/2026, 5:39:36 p. m.]   [OK] Conectado al servidor ChocoFreseo
+[22/6/2026, 5:39:36 p. m.]   [...] Esperando pedidos listos...
+[23/6/2026, 12:30:54 p. m.] 
+[23/6/2026, 12:30:54 p. m.]   ==========================================
+[23/6/2026, 12:30:54 p. m.]    CHOCOFRESEO - SISTEMA DE IMPRESION
+[23/6/2026, 12:30:54 p. m.]   ==========================================
+[23/6/2026, 12:30:54 p. m.] 
+[23/6/2026, 12:30:54 p. m.]   Impresora : POS Printer 203DPI  Series
+[23/6/2026, 12:30:54 p. m.]   Servidor  : https://mi-api-qpjo.onrender.com
+[23/6/2026, 12:30:54 p. m.] 
+[23/6/2026, 12:30:55 p. m.]   [OK] Conectado al servidor ChocoFreseo
+[23/6/2026, 12:30:55 p. m.]   [...] Esperando pedidos listos...

@@ -1,0 +1,77 @@
+[
+  {
+    "id_usuario": 1,
+    "id_rol": 1,
+    "nombre": "Administrador",
+    "email": "samuel@gmail.com",
+    "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+    "estado": 1,
+    "fecha_registro": "2026-05-15T20:06:10.526Z",
+    "rol": {
+      "id_rol": 1,
+      "nombre": "admin",
+      "descripcion": "Administrador del sistema",
+      "estado": 1
+    }
+  },
+  {
+    "id_usuario": 2,
+    "id_rol": 2,
+    "nombre": "Carlos Domiciliario",
+    "email": "domi@gmail.com",
+    "contrasena": "$2a$10$jUH1zITIrm2Vu0oMV50Jd.FqCfsUu5afjoQjqfUzCHFaygq8oMDlq",
+    "estado": 1,
+    "fecha_registro": "2026-05-15T20:06:10.919Z",
+    "rol": {
+      "id_rol": 2,
+      "nombre": "domiciliario",
+      "descripcion": "Entrega de pedidos a domicilio",
+      "estado": 1
+    }
+  },
+  {
+    "id_usuario": 4,
+    "id_rol": 3,
+    "nombre": "Confirmador Domicilio",
+    "email": "confirmador@gmail.com",
+    "contrasena": "$2a$10$uXyElNzXwxbz4HP9UhDsgOQC0XNTCS7BqpDlsCPHk0cA6UXH0DWu2",
+    "estado": 1,
+    "fecha_registro": "2026-05-15T20:06:11.123Z",
+    "rol": {
+      "id_rol": 3,
+      "nombre": "confirmador_domicilio",
+      "descripcion": "Confirma y gestiona el estado de los domicilios",
+      "estado": 1
+    }
+  },
+  {
+    "id_usuario": 7,
+    "id_rol": 2,
+    "nombre": "mathew",
+    "email": "mathew@gmail.com",
+    "contrasena": "$2a$10$m4HHNuqEgtkSo2eg1egjeuU4sTU4eEcB8HqYs9f2wOmwJ9RUgORc6",
+    "estado": 1,
+    "fecha_registro": "2026-05-27T03:20:10.716Z",
+    "rol": {
+      "id_rol": 2,
+      "nombre": "domiciliario",
+      "descripcion": "Entrega de pedidos a domicilio",
+      "estado": 1
+    }
+  },
+  {
+    "id_usuario": 16,
+    "id_rol": 5,
+    "nombre": "Cocinero Principal",
+    "email": "cocina@gmail.com",
+    "contrasena": "$2a$10$FEZ6A1AIrfyWef5hzTpTNOaEM9jwTpeHPzgIKbR.44XcPqqSOPY/G",
+    "estado": 1,
+    "fecha_registro": "2026-05-15T20:06:11.327Z",
+    "rol": {
+      "id_rol": 5,
+      "nombre": "cocinero",
+      "descripcion": "Encargado de preparar los pedidos en cocina",
+      "estado": 1
+    }
+  }
+]

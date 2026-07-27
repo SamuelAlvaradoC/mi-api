@@ -1,0 +1,110 @@
+[
+  {
+    "id_adicion": 1,
+    "nombre": "Chocolate",
+    "descripcion": "frutas",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086628/hsg4n0fhkl797dq1agka.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 3,
+    "nombre": "crema chantilly",
+    "descripcion": "chantilly",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086818/yrje7grr4ktyphe5vjyv.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 4,
+    "nombre": "queso",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086721/dmimbuyy2d4i1gzclszi.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 5,
+    "nombre": "arequipe",
+    "descripcion": "arequipe",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086754/qeflrtdjwt7jjrjyqxp6.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 6,
+    "nombre": "Crema antigravedad",
+    "descripcion": "Crema antigravedad",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086805/vaqi2lumxlnzupqbi9hg.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 7,
+    "nombre": "Choco krispi",
+    "descripcion": "Choco krispi",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086894/imsedngn8cvzkovryvo7.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 8,
+    "nombre": "Cereza",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415341/y9n1wonsewwkn8drpkbz.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 9,
+    "nombre": "Chocolate blanco",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415383/opglbfukiq1datn2szcs.jpg",
+    "gramaje": null,
+    "precio": "4985",
+    "estado": 1
+  },
+  {
+    "id_adicion": 10,
+    "nombre": "Fresa",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415405/udrjsxpmm47431zko4rf.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 11,
+    "nombre": "Durazno",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415533/s8q4oovvwlwkscwf1zbc.png",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 12,
+    "nombre": "Leche condensada",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415561/llx4sh3x7mqhy2xpfq3f.jpg",
+    "gramaje": null,
+    "precio": "5000",
+    "estado": 1
+  },
+  {
+    "id_adicion": 13,
+    "nombre": "Botella de agua",
+    "descripcion": "",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1781415807/cgezipgtejdbqvwrg5h4.png",
+    "gramaje": null,
+    "precio": "2000",
+    "estado": 1
+  }
+]

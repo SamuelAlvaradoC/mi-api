@@ -1,0 +1,17 @@
+[
+  {
+    "id_estado_domicilio": 1,
+    "nombre_estado": "asignado",
+    "descripcion": "asignado"
+  },
+  {
+    "id_estado_domicilio": 2,
+    "nombre_estado": "en_camino",
+    "descripcion": "en_camino"
+  },
+  {
+    "id_estado_domicilio": 3,
+    "nombre_estado": "entregado",
+    "descripcion": "entregado"
+  }
+]

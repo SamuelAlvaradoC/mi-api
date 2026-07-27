@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-06-23",
+  "roles": 5,
+  "permisos": 29,
+  "rol_permisos": 43,
+  "usuarios_staff": 6,
+  "empleados": 6,
+  "categorias": 9,
+  "productos": 36,
+  "toppings": 6,
+  "adiciones": 14,
+  "estados": 6,
+  "estados_domicilio": 3,
+  "configuracion": 4,
+  "cierre_caja": 2,
+  "gastos_dia": 0
+}

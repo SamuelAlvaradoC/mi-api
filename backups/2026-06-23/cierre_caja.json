@@ -1,0 +1,16 @@
+[
+  {
+    "id_cierre": 1,
+    "fecha": "2026-06-20T17:41:36.641Z",
+    "base_inicial": 20000,
+    "creado_por": 1,
+    "gastos": []
+  },
+  {
+    "id_cierre": 2,
+    "fecha": "2026-06-22T18:02:20.076Z",
+    "base_inicial": 200000,
+    "creado_por": 1,
+    "gastos": []
+  }
+]

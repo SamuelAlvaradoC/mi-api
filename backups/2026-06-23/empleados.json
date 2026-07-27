@@ -1,0 +1,44 @@
+[
+  {
+    "id_empleado": 1,
+    "id_usuario": 2,
+    "cargo": "Domiciliario",
+    "fecha_ingreso": "2026-04-20T00:00:00.000Z",
+    "estado": 1
+  },
+  {
+    "id_empleado": 2,
+    "id_usuario": 1,
+    "cargo": "Administrador",
+    "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+    "estado": 1
+  },
+  {
+    "id_empleado": 3,
+    "id_usuario": 4,
+    "cargo": "Confirmador",
+    "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+    "estado": 1
+  },
+  {
+    "id_empleado": 4,
+    "id_usuario": 16,
+    "cargo": "Cocinero",
+    "fecha_ingreso": "2026-04-30T00:00:00.000Z",
+    "estado": 1
+  },
+  {
+    "id_empleado": 5,
+    "id_usuario": 7,
+    "cargo": "Domiciliario",
+    "fecha_ingreso": "2026-05-26T00:00:00.000Z",
+    "estado": 1
+  },
+  {
+    "id_empleado": 6,
+    "id_usuario": 18,
+    "cargo": "admin",
+    "fecha_ingreso": "2026-06-20T00:00:00.000Z",
+    "estado": 1
+  }
+]

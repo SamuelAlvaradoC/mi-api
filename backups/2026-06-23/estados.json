@@ -1,0 +1,32 @@
+[
+  {
+    "id_estado": 1,
+    "nombre_estado": "pendiente",
+    "descripcion": null
+  },
+  {
+    "id_estado": 2,
+    "nombre_estado": "en_proceso",
+    "descripcion": null
+  },
+  {
+    "id_estado": 3,
+    "nombre_estado": "listo",
+    "descripcion": null
+  },
+  {
+    "id_estado": 4,
+    "nombre_estado": "entregado",
+    "descripcion": null
+  },
+  {
+    "id_estado": 5,
+    "nombre_estado": "anulado",
+    "descripcion": null
+  },
+  {
+    "id_estado": 6,
+    "nombre_estado": "despachado",
+    "descripcion": null
+  }
+]
