@@ -189,9 +189,31 @@ model EstadoDomicilio {
 // DIRECCIONES
 // ─────────────────────────────────────────────
 
+model Ciudad {
+  id_ciudad Int      @id @default(autoincrement())
+  nombre    String   @unique @db.VarChar(100)
+  estado    Int      @default(1)
+  barrios   Barrio[]
+
+  @@map("ciudades")
+}
+
+model Barrio {
+  id_barrio        Int         @id @default(autoincrement())
+  id_ciudad        Int
+  nombre           String      @db.VarChar(100)
+  precio_domicilio Float
+  estado           Int         @default(1)
+  ciudad           Ciudad      @relation(fields: [id_ciudad], references: [id_ciudad])
+  direcciones      Direccion[]
+
+  @@map("barrios")
+}
+
 model Direccion {
   id_direccion    Int      @id @default(autoincrement())
   id_cliente      Int
+  id_barrio       Int?
   direccion_linea String   @db.VarChar(255)
   barrio          String?  @db.VarChar(100)
   ciudad          String?  @db.VarChar(100)
@@ -201,8 +223,9 @@ model Direccion {
   referencia      String?  @db.VarChar(255)
   estado          Int      @default(1) @db.SmallInt
 
-  cliente Cliente @relation(fields: [id_cliente], references: [id_cliente])
-  ventas  Venta[]
+  cliente   Cliente  @relation(fields: [id_cliente], references: [id_cliente])
+  barrioRel Barrio?  @relation(fields: [id_barrio], references: [id_barrio])
+  ventas    Venta[]
 
   @@map("direcciones")
 }
