@@ -86,10 +86,13 @@ const crearMiDireccion = async (req, res, next) => {
       },
     });
     if (existente) {
-      if (!existente.id_barrio && id_barrio) {
+      const updateData = {};
+      if (existente.estado === 0) updateData.estado = 1;
+      if (!existente.id_barrio && id_barrio) updateData.id_barrio = Number(id_barrio);
+      if (Object.keys(updateData).length > 0) {
         const actualizada = await prisma.direccion.update({
           where: { id_direccion: existente.id_direccion },
-          data:  { id_barrio: Number(id_barrio) },
+          data: updateData,
           include: { barrioRel: { select: { id_barrio: true, nombre: true, precio_domicilio: true } } },
         });
         return success(res, actualizada);

@@ -608,10 +608,13 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
       },
     });
     if (existente) {
-      if (!existente.id_barrio && nueva_direccion.id_barrio) {
+      const updateData = {};
+      if (existente.estado === 0) updateData.estado = 1;
+      if (!existente.id_barrio && nueva_direccion.id_barrio) updateData.id_barrio = Number(nueva_direccion.id_barrio);
+      if (Object.keys(updateData).length > 0) {
         await prisma.direccion.update({
           where: { id_direccion: existente.id_direccion },
-          data:  { id_barrio: Number(nueva_direccion.id_barrio) },
+          data: updateData,
         });
       }
       direccionId = existente.id_direccion;
