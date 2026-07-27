@@ -85,7 +85,17 @@ const crearMiDireccion = async (req, res, next) => {
         ciudad: ciudad || null,
       },
     });
-    if (existente) { return success(res, existente); }
+    if (existente) {
+      if (!existente.id_barrio && id_barrio) {
+        const actualizada = await prisma.direccion.update({
+          where: { id_direccion: existente.id_direccion },
+          data:  { id_barrio: Number(id_barrio) },
+          include: { barrioRel: { select: { id_barrio: true, nombre: true, precio_domicilio: true } } },
+        });
+        return success(res, actualizada);
+      }
+      return success(res, existente);
+    }
     const dir = await prisma.direccion.create({
       data: {
         id_cliente: cliente.id_cliente,

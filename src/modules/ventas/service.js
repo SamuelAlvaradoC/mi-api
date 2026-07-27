@@ -599,19 +599,38 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
 
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {
-    const dir = await prisma.direccion.create({
-      data: {
+    const existente = await prisma.direccion.findFirst({
+      where: {
         id_cliente:      cliente.id_cliente,
         direccion_linea: nueva_direccion.direccion_linea,
-        barrio:          nueva_direccion.barrio       || null,
-        ciudad:          nueva_direccion.ciudad       || null,
-        departamento:    nueva_direccion.departamento || null,
-        referencia:      nueva_direccion.referencia   || null,
-        lat:             nueva_direccion.lat          || null,
-        lng:             nueva_direccion.lng          || null,
+        barrio:          nueva_direccion.barrio || null,
+        ciudad:          nueva_direccion.ciudad || null,
       },
     });
-    direccionId = dir.id_direccion;
+    if (existente) {
+      if (!existente.id_barrio && nueva_direccion.id_barrio) {
+        await prisma.direccion.update({
+          where: { id_direccion: existente.id_direccion },
+          data:  { id_barrio: Number(nueva_direccion.id_barrio) },
+        });
+      }
+      direccionId = existente.id_direccion;
+    } else {
+      const dir = await prisma.direccion.create({
+        data: {
+          id_cliente:      cliente.id_cliente,
+          direccion_linea: nueva_direccion.direccion_linea,
+          barrio:          nueva_direccion.barrio       || null,
+          ciudad:          nueva_direccion.ciudad       || null,
+          departamento:    nueva_direccion.departamento || null,
+          referencia:      nueva_direccion.referencia   || null,
+          lat:             nueva_direccion.lat          || null,
+          lng:             nueva_direccion.lng          || null,
+          id_barrio:       nueva_direccion.id_barrio    ? Number(nueva_direccion.id_barrio) : null,
+        },
+      });
+      direccionId = dir.id_direccion;
+    }
   }
 
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });

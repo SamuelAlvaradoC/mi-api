@@ -34,6 +34,7 @@ const nuevaDireccionSchema = z.object({
   referencia:      z.string().optional().nullable(),
   lat:             z.number().optional().nullable(),
   lng:             z.number().optional().nullable(),
+  id_barrio:       z.number().int().positive().optional().nullable(),
 });
 
 const crearVentaSchema = z.object({
