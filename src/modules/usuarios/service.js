@@ -66,7 +66,12 @@ const actualizar = async (id, datos) => {
   if (datos.id_rol !== undefined) {
     const nuevoCargo = CARGO_MAP[usuario.rol?.nombre];
     if (nuevoCargo) {
-      await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+      const yaExiste = await prisma.empleado.findFirst({ where: { id_usuario: id } });
+      if (yaExiste) {
+        await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+      } else {
+        await prisma.empleado.create({ data: { id_usuario: id, cargo: nuevoCargo, fecha_ingreso: new Date(), estado: 1 } });
+      }
     }
   }
   return usuario;
@@ -110,7 +115,12 @@ const asignarRol = async (id, id_rol) => {
   const usuario = await prisma.usuario.update({ where: { id_usuario: id }, data: { id_rol }, select });
   const nuevoCargo = CARGO_MAP[rol.nombre];
   if (nuevoCargo) {
-    await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+    const yaExiste = await prisma.empleado.findFirst({ where: { id_usuario: id } });
+    if (yaExiste) {
+      await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+    } else {
+      await prisma.empleado.create({ data: { id_usuario: id, cargo: nuevoCargo, fecha_ingreso: new Date(), estado: 1 } });
+    }
   }
   return usuario;
 };
