@@ -107,7 +107,12 @@ const asignarRol = async (id, id_rol) => {
   await obtener(id);
   const rol = await prisma.rol.findUnique({ where: { id_rol } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
-  return prisma.usuario.update({ where: { id_usuario: id }, data: { id_rol }, select });
+  const usuario = await prisma.usuario.update({ where: { id_usuario: id }, data: { id_rol }, select });
+  const nuevoCargo = CARGO_MAP[rol.nombre];
+  if (nuevoCargo) {
+    await prisma.empleado.updateMany({ where: { id_usuario: id }, data: { cargo: nuevoCargo } });
+  }
+  return usuario;
 };
 
 module.exports = { listar, buscar, obtener, crear, actualizar, eliminar, activarDesactivar, asignarRol };

@@ -21,13 +21,18 @@ const obtener = async (id) => {
   return e;
 };
 
-const ROL_POR_CARGO = { 'Domiciliario': 2, 'Cocinero': 5, 'Confirmador': 3 };
+const CARGO_A_ROL = { 'Domiciliario': 'domiciliario', 'Cocinero': 'cocinero', 'Confirmador': 'confirmador_domicilio', 'Administrador': 'admin' };
 
 const crear = async ({ nombre, email, contrasena, id_rol, cargo, fecha_ingreso }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
   if (existe) throw { status: 409, message: 'El email ya está registrado' };
   const hash   = await bcrypt.hash(contrasena, 10);
-  const rolFinal = id_rol || ROL_POR_CARGO[cargo] || 2;
+  let rolFinal = id_rol;
+  if (!rolFinal && cargo && CARGO_A_ROL[cargo]) {
+    const rolObj = await prisma.rol.findFirst({ where: { nombre: CARGO_A_ROL[cargo] } });
+    rolFinal = rolObj?.id_rol;
+  }
+  if (!rolFinal) rolFinal = 2;
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.create({
       data: { nombre, email, contrasena: hash, id_rol: rolFinal, estado: 1 },
@@ -50,8 +55,9 @@ const actualizar = async (id, datos) => {
   if (estado !== undefined) empDatos.estado = estado;
   if (empDatos.fecha_ingreso) empDatos.fecha_ingreso = new Date(empDatos.fecha_ingreso);
   // Sincronizar id_rol en Usuario cuando cambia el cargo
-  if (empDatos.cargo && ROL_POR_CARGO[empDatos.cargo]) {
-    usuarioDatos.id_rol = ROL_POR_CARGO[empDatos.cargo];
+  if (empDatos.cargo && CARGO_A_ROL[empDatos.cargo]) {
+    const rolObj = await prisma.rol.findFirst({ where: { nombre: CARGO_A_ROL[empDatos.cargo] } });
+    if (rolObj) usuarioDatos.id_rol = rolObj.id_rol;
   }
   await prisma.$transaction(async (tx) => {
     if (Object.keys(usuarioDatos).length > 0) {

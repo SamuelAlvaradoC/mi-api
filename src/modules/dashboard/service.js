@@ -196,11 +196,12 @@ const domiciliariosDia = async (fecha) => {
   const resumen = {};
   ventas.forEach((v) => {
     const nombre = v.id_domiciliario ? (nombrePorId[v.id_domiciliario] || 'Desconocido') : 'Sin asignar';
-    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0 };
+    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0, total_domicilios: 0 };
     resumen[nombre].entregas++;
-    resumen[nombre].total      += Number(v.total);
-    resumen[nombre].efectivo   += Number(v.monto_efectivo      || 0);
-    resumen[nombre].transferencia += Number(v.monto_transferencia || 0);
+    resumen[nombre].total             += Number(v.total);
+    resumen[nombre].efectivo          += Number(v.monto_efectivo      || 0);
+    resumen[nombre].transferencia     += Number(v.monto_transferencia || 0);
+    resumen[nombre].total_domicilios  += Number(v.costo_domicilio     || 0);
   });
 
   return Object.values(resumen).filter(r => r.entregas > 0);
