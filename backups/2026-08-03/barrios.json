@@ -1,0 +1,2138 @@
+[
+  {
+    "id_barrio": 2,
+    "id_ciudad": 2,
+    "nombre": "San Blas",
+    "precio_domicilio": 10000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 3,
+    "id_ciudad": 2,
+    "nombre": "Andalucia",
+    "precio_domicilio": 9000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 4,
+    "id_ciudad": 2,
+    "nombre": "Toscana",
+    "precio_domicilio": 12000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 5,
+    "id_ciudad": 2,
+    "nombre": "Bello Horizonte",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 6,
+    "id_ciudad": 2,
+    "nombre": "Belencito Corazón",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 7,
+    "id_ciudad": 2,
+    "nombre": "La Aguacatala",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 8,
+    "id_ciudad": 2,
+    "nombre": "El Rincon",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 2,
+      "nombre": "Medellín",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 9,
+    "id_ciudad": 1,
+    "nombre": "París",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 10,
+    "id_ciudad": 1,
+    "nombre": "Girasoles",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 11,
+    "id_ciudad": 1,
+    "nombre": "Nueva Jerusalén",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 12,
+    "id_ciudad": 1,
+    "nombre": "Los Sauces",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 13,
+    "id_ciudad": 1,
+    "nombre": "El Cafetal",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 14,
+    "id_ciudad": 1,
+    "nombre": "La Pradera",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 15,
+    "id_ciudad": 1,
+    "nombre": "La Esmeralda",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 16,
+    "id_ciudad": 1,
+    "nombre": "La Maruchenga",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 17,
+    "id_ciudad": 1,
+    "nombre": "José Antonio Galán",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 18,
+    "id_ciudad": 1,
+    "nombre": "Salvador Allende",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 19,
+    "id_ciudad": 1,
+    "nombre": "Madera",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 20,
+    "id_ciudad": 1,
+    "nombre": "Barrio Nuevo",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 21,
+    "id_ciudad": 1,
+    "nombre": "Cabañita",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 22,
+    "id_ciudad": 1,
+    "nombre": "Cabaña",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 23,
+    "id_ciudad": 1,
+    "nombre": "La Florida",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 24,
+    "id_ciudad": 1,
+    "nombre": "Gran Avenida",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 25,
+    "id_ciudad": 1,
+    "nombre": "San José Obrero",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 26,
+    "id_ciudad": 1,
+    "nombre": "Santa Ana",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 27,
+    "id_ciudad": 1,
+    "nombre": "Villas de Occidente",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 28,
+    "id_ciudad": 1,
+    "nombre": "Molinares",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 29,
+    "id_ciudad": 1,
+    "nombre": "San Simón",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 30,
+    "id_ciudad": 1,
+    "nombre": "Amazonía",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 31,
+    "id_ciudad": 1,
+    "nombre": "Los Búcaros",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 32,
+    "id_ciudad": 1,
+    "nombre": "Serramonte",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 33,
+    "id_ciudad": 1,
+    "nombre": "Salento",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 34,
+    "id_ciudad": 1,
+    "nombre": "Suárez",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 35,
+    "id_ciudad": 1,
+    "nombre": "Puerto Bello",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 36,
+    "id_ciudad": 1,
+    "nombre": "Rincón Santos",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 37,
+    "id_ciudad": 1,
+    "nombre": "Central",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 38,
+    "id_ciudad": 1,
+    "nombre": "Espíritu Santo",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 39,
+    "id_ciudad": 1,
+    "nombre": "Centro",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 40,
+    "id_ciudad": 1,
+    "nombre": "Pérez",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 41,
+    "id_ciudad": 1,
+    "nombre": "Nazareth",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 42,
+    "id_ciudad": 1,
+    "nombre": "La Meseta",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 43,
+    "id_ciudad": 1,
+    "nombre": "El Rosario",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 44,
+    "id_ciudad": 1,
+    "nombre": "Andalucía",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 45,
+    "id_ciudad": 1,
+    "nombre": "López de Mesa",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 46,
+    "id_ciudad": 1,
+    "nombre": "El Cairo",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 47,
+    "id_ciudad": 1,
+    "nombre": "La Milagrosa",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 48,
+    "id_ciudad": 1,
+    "nombre": "El Congolo",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 49,
+    "id_ciudad": 1,
+    "nombre": "Las Granjas",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 50,
+    "id_ciudad": 1,
+    "nombre": "Prado",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 51,
+    "id_ciudad": 1,
+    "nombre": "Mánchester",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 52,
+    "id_ciudad": 1,
+    "nombre": "La Estación",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 53,
+    "id_ciudad": 1,
+    "nombre": "La Cumbre",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 54,
+    "id_ciudad": 1,
+    "nombre": "Altavista",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 55,
+    "id_ciudad": 1,
+    "nombre": "El Carmelo",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 56,
+    "id_ciudad": 1,
+    "nombre": "Hato Viejo",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 57,
+    "id_ciudad": 1,
+    "nombre": "El Porvenir",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 58,
+    "id_ciudad": 1,
+    "nombre": "Briceño",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 59,
+    "id_ciudad": 1,
+    "nombre": "Buenos Aires",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 60,
+    "id_ciudad": 1,
+    "nombre": "El Paraíso",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 61,
+    "id_ciudad": 1,
+    "nombre": "Riachuelos",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 62,
+    "id_ciudad": 1,
+    "nombre": "Valadares",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 63,
+    "id_ciudad": 1,
+    "nombre": "El Trapiche",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 64,
+    "id_ciudad": 1,
+    "nombre": "Aralias",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 65,
+    "id_ciudad": 1,
+    "nombre": "Urapanes",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 66,
+    "id_ciudad": 1,
+    "nombre": "La Primavera",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 67,
+    "id_ciudad": 1,
+    "nombre": "Villa María",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 68,
+    "id_ciudad": 1,
+    "nombre": "Villas de Comfenalco",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 69,
+    "id_ciudad": 1,
+    "nombre": "Bellavista",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 70,
+    "id_ciudad": 1,
+    "nombre": "El Ducado",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 71,
+    "id_ciudad": 1,
+    "nombre": "La Aldea",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 72,
+    "id_ciudad": 1,
+    "nombre": "La Selva",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 73,
+    "id_ciudad": 1,
+    "nombre": "Las Araucarias",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 74,
+    "id_ciudad": 1,
+    "nombre": "Los Alpes",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 75,
+    "id_ciudad": 1,
+    "nombre": "Pachelly",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 76,
+    "id_ciudad": 1,
+    "nombre": "Playa Rica",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 77,
+    "id_ciudad": 1,
+    "nombre": "San Gabriel",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 78,
+    "id_ciudad": 1,
+    "nombre": "San Martín",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 79,
+    "id_ciudad": 1,
+    "nombre": "Tierradentro",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 80,
+    "id_ciudad": 1,
+    "nombre": "Villas del Sol",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 81,
+    "id_ciudad": 1,
+    "nombre": "Villa Linda",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 82,
+    "id_ciudad": 1,
+    "nombre": "Altos de Niquía",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 83,
+    "id_ciudad": 1,
+    "nombre": "Altos de Quitasol",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 84,
+    "id_ciudad": 1,
+    "nombre": "El Tanque",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 85,
+    "id_ciudad": 1,
+    "nombre": "Bifamiliares",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 86,
+    "id_ciudad": 1,
+    "nombre": "El Mirador",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 87,
+    "id_ciudad": 1,
+    "nombre": "Los Ángeles",
+    "precio_domicilio": 16000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 88,
+    "id_ciudad": 1,
+    "nombre": "Niquía",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 89,
+    "id_ciudad": 1,
+    "nombre": "Ciudadela del Norte",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 90,
+    "id_ciudad": 1,
+    "nombre": "Hermosa Provincia",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 91,
+    "id_ciudad": 1,
+    "nombre": "Panamericano",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 92,
+    "id_ciudad": 1,
+    "nombre": "Terranova",
+    "precio_domicilio": 17000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 93,
+    "id_ciudad": 1,
+    "nombre": "Navarra",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 94,
+    "id_ciudad": 1,
+    "nombre": "El Trébol",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 95,
+    "id_ciudad": 1,
+    "nombre": "Buenavista",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 96,
+    "id_ciudad": 1,
+    "nombre": "Guasimalito",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 97,
+    "id_ciudad": 1,
+    "nombre": "Norteamérica",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 98,
+    "id_ciudad": 1,
+    "nombre": "Roterdam",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 99,
+    "id_ciudad": 1,
+    "nombre": "Valle Verde",
+    "precio_domicilio": 18000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 100,
+    "id_ciudad": 1,
+    "nombre": "Fontidueño",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 101,
+    "id_ciudad": 1,
+    "nombre": "La Mina",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 102,
+    "id_ciudad": 1,
+    "nombre": "Alcalá",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 103,
+    "id_ciudad": 1,
+    "nombre": "Los Ciruelos",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 104,
+    "id_ciudad": 1,
+    "nombre": "Estación Primera",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 105,
+    "id_ciudad": 1,
+    "nombre": "Las Vegas",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 106,
+    "id_ciudad": 1,
+    "nombre": "La Camila",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 107,
+    "id_ciudad": 1,
+    "nombre": "Cinco Estrellas",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 108,
+    "id_ciudad": 1,
+    "nombre": "Marco Fidel Suárez",
+    "precio_domicilio": 15000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 109,
+    "id_ciudad": 1,
+    "nombre": "Zamora",
+    "precio_domicilio": 12000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 110,
+    "id_ciudad": 1,
+    "nombre": "La Gabriela",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 111,
+    "id_ciudad": 1,
+    "nombre": "Belvedere",
+    "precio_domicilio": 14000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 112,
+    "id_ciudad": 1,
+    "nombre": "Acevedo",
+    "precio_domicilio": 12000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 113,
+    "id_ciudad": 1,
+    "nombre": "Santa Rita",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 114,
+    "id_ciudad": 1,
+    "nombre": "Alpes del Norte",
+    "precio_domicilio": 13000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 1,
+      "nombre": "Bello",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 115,
+    "id_ciudad": 3,
+    "nombre": "Zona Industrial Nº1",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 116,
+    "id_ciudad": 3,
+    "nombre": "Zona Industrial Nº2",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 117,
+    "id_ciudad": 3,
+    "nombre": "La Independencia",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 118,
+    "id_ciudad": 3,
+    "nombre": "San Juan Bautista",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 119,
+    "id_ciudad": 3,
+    "nombre": "San José",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 120,
+    "id_ciudad": 3,
+    "nombre": "Araucaria",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 121,
+    "id_ciudad": 3,
+    "nombre": "La Gloria",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 122,
+    "id_ciudad": 3,
+    "nombre": "Las Mercedes",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 123,
+    "id_ciudad": 3,
+    "nombre": "Centro",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 124,
+    "id_ciudad": 3,
+    "nombre": "Asturias",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 125,
+    "id_ciudad": 3,
+    "nombre": "Los Naranjos",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 126,
+    "id_ciudad": 3,
+    "nombre": "Villa Paula",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 127,
+    "id_ciudad": 3,
+    "nombre": "Artex",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 128,
+    "id_ciudad": 3,
+    "nombre": "Playa Rica",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 129,
+    "id_ciudad": 3,
+    "nombre": "Satexco",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 130,
+    "id_ciudad": 3,
+    "nombre": "San Isidro",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 131,
+    "id_ciudad": 3,
+    "nombre": "La Santa Cruz",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 132,
+    "id_ciudad": 3,
+    "nombre": "Santa Catalina",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 133,
+    "id_ciudad": 3,
+    "nombre": "Samaria",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 134,
+    "id_ciudad": 3,
+    "nombre": "La Finca",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 135,
+    "id_ciudad": 3,
+    "nombre": "Yarumito",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 136,
+    "id_ciudad": 3,
+    "nombre": "El Palmar",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 137,
+    "id_ciudad": 3,
+    "nombre": "Santa Ana",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 138,
+    "id_ciudad": 3,
+    "nombre": "Samaria Nº1",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 139,
+    "id_ciudad": 3,
+    "nombre": "Las Margaritas",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 140,
+    "id_ciudad": 3,
+    "nombre": "Malta",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 141,
+    "id_ciudad": 3,
+    "nombre": "Glorieta Pilsen",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 142,
+    "id_ciudad": 3,
+    "nombre": "Monte Verde",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 143,
+    "id_ciudad": 3,
+    "nombre": "Camparola",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 144,
+    "id_ciudad": 3,
+    "nombre": "San Pio X",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 145,
+    "id_ciudad": 3,
+    "nombre": "La Palama",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 146,
+    "id_ciudad": 3,
+    "nombre": "Jardines Montesacro",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 147,
+    "id_ciudad": 3,
+    "nombre": "Zona Industrial Nº3",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 148,
+    "id_ciudad": 3,
+    "nombre": "Las Brisas",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 149,
+    "id_ciudad": 3,
+    "nombre": "Pilsen",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 150,
+    "id_ciudad": 3,
+    "nombre": "San Javier",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 151,
+    "id_ciudad": 3,
+    "nombre": "Villa Lia",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 152,
+    "id_ciudad": 3,
+    "nombre": "19 de Abril",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 153,
+    "id_ciudad": 3,
+    "nombre": "San Gabriel",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 154,
+    "id_ciudad": 3,
+    "nombre": "San Antonio",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 155,
+    "id_ciudad": 3,
+    "nombre": "Triana",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 156,
+    "id_ciudad": 3,
+    "nombre": "Ditaires",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 157,
+    "id_ciudad": 3,
+    "nombre": "San Francisco",
+    "precio_domicilio": 25000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 158,
+    "id_ciudad": 3,
+    "nombre": "Santa Maria Nº1",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 159,
+    "id_ciudad": 3,
+    "nombre": "Santa Maria Nº2",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 160,
+    "id_ciudad": 3,
+    "nombre": "Santa Maria Nº3",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 161,
+    "id_ciudad": 3,
+    "nombre": "San Pablo",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 162,
+    "id_ciudad": 3,
+    "nombre": "Colinas del Sur",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 163,
+    "id_ciudad": 3,
+    "nombre": "Central Mayorista",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 164,
+    "id_ciudad": 3,
+    "nombre": "San Fernando",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 165,
+    "id_ciudad": 3,
+    "nombre": "La Raya",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 166,
+    "id_ciudad": 3,
+    "nombre": "Simón Bolívar",
+    "precio_domicilio": 21000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 167,
+    "id_ciudad": 3,
+    "nombre": "Las Acacias",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 168,
+    "id_ciudad": 3,
+    "nombre": "Las Américas",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 169,
+    "id_ciudad": 3,
+    "nombre": "El Tablazo",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 170,
+    "id_ciudad": 3,
+    "nombre": "Calatrava",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 171,
+    "id_ciudad": 3,
+    "nombre": "Loma Linda",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 172,
+    "id_ciudad": 3,
+    "nombre": "La Aldea",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 173,
+    "id_ciudad": 3,
+    "nombre": "Ferrara",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 174,
+    "id_ciudad": 3,
+    "nombre": "Balcones de Sevilla",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 175,
+    "id_ciudad": 3,
+    "nombre": "Fátima",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 176,
+    "id_ciudad": 3,
+    "nombre": "El Rosario",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 177,
+    "id_ciudad": 3,
+    "nombre": "La Unión",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 178,
+    "id_ciudad": 3,
+    "nombre": "Santa Maria la Nueva",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 3,
+      "nombre": "Itagüí",
+      "estado": 1
+    }
+  },
+  {
+    "id_barrio": 179,
+    "id_ciudad": 4,
+    "nombre": "El Chingui",
+    "precio_domicilio": 23000,
+    "estado": 1,
+    "ciudad": {
+      "id_ciudad": 4,
+      "nombre": "Envigado",
+      "estado": 1
+    }
+  }
+]

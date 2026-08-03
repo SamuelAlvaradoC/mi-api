@@ -1,0 +1,267 @@
+[
+  {
+    "id_rol_permiso": 320,
+    "id_rol": 1,
+    "id_permiso": 94
+  },
+  {
+    "id_rol_permiso": 330,
+    "id_rol": 1,
+    "id_permiso": 97
+  },
+  {
+    "id_rol_permiso": 331,
+    "id_rol": 1,
+    "id_permiso": 95
+  },
+  {
+    "id_rol_permiso": 332,
+    "id_rol": 1,
+    "id_permiso": 82
+  },
+  {
+    "id_rol_permiso": 312,
+    "id_rol": 1,
+    "id_permiso": 85
+  },
+  {
+    "id_rol_permiso": 313,
+    "id_rol": 1,
+    "id_permiso": 84
+  },
+  {
+    "id_rol_permiso": 314,
+    "id_rol": 1,
+    "id_permiso": 86
+  },
+  {
+    "id_rol_permiso": 315,
+    "id_rol": 1,
+    "id_permiso": 100
+  },
+  {
+    "id_rol_permiso": 316,
+    "id_rol": 1,
+    "id_permiso": 90
+  },
+  {
+    "id_rol_permiso": 317,
+    "id_rol": 1,
+    "id_permiso": 88
+  },
+  {
+    "id_rol_permiso": 329,
+    "id_rol": 1,
+    "id_permiso": 99
+  },
+  {
+    "id_rol_permiso": 319,
+    "id_rol": 1,
+    "id_permiso": 101
+  },
+  {
+    "id_rol_permiso": 318,
+    "id_rol": 1,
+    "id_permiso": 92
+  },
+  {
+    "id_rol_permiso": 321,
+    "id_rol": 1,
+    "id_permiso": 87
+  },
+  {
+    "id_rol_permiso": 322,
+    "id_rol": 1,
+    "id_permiso": 98
+  },
+  {
+    "id_rol_permiso": 323,
+    "id_rol": 1,
+    "id_permiso": 89
+  },
+  {
+    "id_rol_permiso": 324,
+    "id_rol": 1,
+    "id_permiso": 96
+  },
+  {
+    "id_rol_permiso": 325,
+    "id_rol": 1,
+    "id_permiso": 83
+  },
+  {
+    "id_rol_permiso": 326,
+    "id_rol": 1,
+    "id_permiso": 91
+  },
+  {
+    "id_rol_permiso": 327,
+    "id_rol": 1,
+    "id_permiso": 81
+  },
+  {
+    "id_rol_permiso": 328,
+    "id_rol": 1,
+    "id_permiso": 93
+  },
+  {
+    "id_rol_permiso": 406,
+    "id_rol": 1,
+    "id_permiso": 166
+  },
+  {
+    "id_rol_permiso": 407,
+    "id_rol": 1,
+    "id_permiso": 167
+  },
+  {
+    "id_rol_permiso": 408,
+    "id_rol": 1,
+    "id_permiso": 168
+  },
+  {
+    "id_rol_permiso": 409,
+    "id_rol": 1,
+    "id_permiso": 169
+  },
+  {
+    "id_rol_permiso": 410,
+    "id_rol": 1,
+    "id_permiso": 170
+  },
+  {
+    "id_rol_permiso": 411,
+    "id_rol": 1,
+    "id_permiso": 171
+  },
+  {
+    "id_rol_permiso": 417,
+    "id_rol": 1,
+    "id_permiso": 177
+  },
+  {
+    "id_rol_permiso": 419,
+    "id_rol": 1,
+    "id_permiso": 194
+  },
+  {
+    "id_rol_permiso": 420,
+    "id_rol": 1,
+    "id_permiso": 195
+  },
+  {
+    "id_rol_permiso": 421,
+    "id_rol": 1,
+    "id_permiso": 196
+  },
+  {
+    "id_rol_permiso": 307,
+    "id_rol": 2,
+    "id_permiso": 100
+  },
+  {
+    "id_rol_permiso": 308,
+    "id_rol": 2,
+    "id_permiso": 82
+  },
+  {
+    "id_rol_permiso": 306,
+    "id_rol": 2,
+    "id_permiso": 99
+  },
+  {
+    "id_rol_permiso": 453,
+    "id_rol": 3,
+    "id_permiso": 89
+  },
+  {
+    "id_rol_permiso": 437,
+    "id_rol": 3,
+    "id_permiso": 93
+  },
+  {
+    "id_rol_permiso": 438,
+    "id_rol": 3,
+    "id_permiso": 177
+  },
+  {
+    "id_rol_permiso": 439,
+    "id_rol": 3,
+    "id_permiso": 84
+  },
+  {
+    "id_rol_permiso": 440,
+    "id_rol": 3,
+    "id_permiso": 86
+  },
+  {
+    "id_rol_permiso": 441,
+    "id_rol": 3,
+    "id_permiso": 91
+  },
+  {
+    "id_rol_permiso": 442,
+    "id_rol": 3,
+    "id_permiso": 85
+  },
+  {
+    "id_rol_permiso": 443,
+    "id_rol": 3,
+    "id_permiso": 95
+  },
+  {
+    "id_rol_permiso": 444,
+    "id_rol": 3,
+    "id_permiso": 81
+  },
+  {
+    "id_rol_permiso": 445,
+    "id_rol": 3,
+    "id_permiso": 82
+  },
+  {
+    "id_rol_permiso": 446,
+    "id_rol": 3,
+    "id_permiso": 83
+  },
+  {
+    "id_rol_permiso": 447,
+    "id_rol": 3,
+    "id_permiso": 196
+  },
+  {
+    "id_rol_permiso": 448,
+    "id_rol": 3,
+    "id_permiso": 195
+  },
+  {
+    "id_rol_permiso": 449,
+    "id_rol": 3,
+    "id_permiso": 88
+  },
+  {
+    "id_rol_permiso": 450,
+    "id_rol": 3,
+    "id_permiso": 92
+  },
+  {
+    "id_rol_permiso": 451,
+    "id_rol": 3,
+    "id_permiso": 101
+  },
+  {
+    "id_rol_permiso": 452,
+    "id_rol": 3,
+    "id_permiso": 90
+  },
+  {
+    "id_rol_permiso": 454,
+    "id_rol": 3,
+    "id_permiso": 96
+  },
+  {
+    "id_rol_permiso": 310,
+    "id_rol": 5,
+    "id_permiso": 101
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "id_empleado": 3,
+    "id_usuario": 3,
+    "cargo": "Confirmador",
+    "fecha_ingreso": "2026-07-28T00:00:00.000Z",
+    "estado": 1
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-08-03",
+  "roles": 5,
+  "permisos": 31,
+  "rol_permisos": 53,
+  "usuarios_staff": 3,
+  "empleados": 1,
+  "categorias": 9,
+  "productos": 36,
+  "toppings": 6,
+  "adiciones": 14,
+  "ciudades": 9,
+  "barrios": 178,
+  "estados": 6,
+  "estados_domicilio": 0,
+  "configuracion": 4
+}

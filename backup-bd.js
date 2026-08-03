@@ -43,14 +43,21 @@ async function backup() {
     orderBy: { id_rol: 'asc' },
   }));
 
-  // Usuarios staff (excluye rol = 'cliente')
+  // Usuarios staff: solo admin y confirmador_domicilio — deja fuera
+  // domiciliarios/cocineros y cualquier cuenta de prueba con dominio
+  // @test.com (ej. cuentas de debug que no son staff real).
+  const filtroStaff = {
+    rol: { nombre: { in: ['admin', 'confirmador_domicilio'] } },
+    NOT: { email: { endsWith: '@test.com' } },
+  };
   await exportar('usuarios_staff', () => prisma.usuario.findMany({
-    where: { rol: { nombre: { not: 'cliente' } } },
+    where: filtroStaff,
     include: { rol: true },
     orderBy: { id_usuario: 'asc' },
   }));
 
   await exportar('empleados', () => prisma.empleado.findMany({
+    where: { usuario: filtroStaff },
     orderBy: { id_empleado: 'asc' },
   }));
 
@@ -72,6 +79,16 @@ async function backup() {
     orderBy: { id_adicion: 'asc' },
   }));
 
+  // Zonas de cobertura — módulo nuevo, no existía en backups anteriores a agosto 2026
+  await exportar('ciudades', () => prisma.ciudad.findMany({
+    orderBy: { id_ciudad: 'asc' },
+  }));
+
+  await exportar('barrios', () => prisma.barrio.findMany({
+    include: { ciudad: true },
+    orderBy: { id_barrio: 'asc' },
+  }));
+
   // Lookup tables necesarias para restaurar
   await exportar('estados', () => prisma.estado.findMany({
     orderBy: { id_estado: 'asc' },
@@ -86,15 +103,10 @@ async function backup() {
     orderBy: { id: 'asc' },
   }));
 
-  // Cierre de caja
-  await exportar('cierre_caja', () => prisma.cierreCaja.findMany({
-    include: { gastos: true },
-    orderBy: { id_cierre: 'asc' },
-  }));
-
-  await exportar('gastos_dia', () => prisma.gastoDia.findMany({
-    orderBy: { id_gasto: 'asc' },
-  }));
+  // NOTA: cierre_caja y gastos_dia se dejan fuera de este backup a propósito
+  // (decisión 2026-08-03) — es un backup de arranque limpio para reiniciar
+  // el aplicativo desde cero en ventas, y el cierre de caja es historial
+  // operativo del día a día, no catálogo/config base.
 
   // Resumen
   fs.writeFileSync(

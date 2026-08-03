@@ -1,0 +1,47 @@
+[
+  {
+    "id_ciudad": 1,
+    "nombre": "Bello",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 2,
+    "nombre": "Medellín",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 3,
+    "nombre": "Itagüí",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 4,
+    "nombre": "Envigado",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 5,
+    "nombre": "Sabaneta",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 6,
+    "nombre": "La Estrella",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 7,
+    "nombre": "Copacabana",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 8,
+    "nombre": "Caldas",
+    "estado": 1
+  },
+  {
+    "id_ciudad": 9,
+    "nombre": "San Antonio de Prado",
+    "estado": 1
+  }
+]

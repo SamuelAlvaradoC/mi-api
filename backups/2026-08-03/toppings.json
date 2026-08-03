@@ -1,0 +1,50 @@
+[
+  {
+    "id_topping": 1,
+    "nombre": "Mani",
+    "descripcion": "Mani",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086968/mnnyz8hb4zjaiziq2i46.jpg",
+    "gramaje": null,
+    "estado": 1
+  },
+  {
+    "id_topping": 2,
+    "nombre": "Almendra",
+    "descripcion": "Almendra",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779086993/vpticxy3bp3m98sy4on1.jpg",
+    "gramaje": null,
+    "estado": 1
+  },
+  {
+    "id_topping": 3,
+    "nombre": "oreo",
+    "descripcion": "oreo",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779087017/fwbytsimv3g0xrjhlork.jpg",
+    "gramaje": null,
+    "estado": 1
+  },
+  {
+    "id_topping": 4,
+    "nombre": "Leche en polvo",
+    "descripcion": "Leche en polvo",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779087043/oqcbkcbzqppwcfxhk8ev.jpg",
+    "gramaje": null,
+    "estado": 1
+  },
+  {
+    "id_topping": 6,
+    "nombre": "Milo",
+    "descripcion": "Milo",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779087058/pazemtiiiq1390crz3go.jpg",
+    "gramaje": null,
+    "estado": 1
+  },
+  {
+    "id_topping": 7,
+    "nombre": "Pistacho",
+    "descripcion": "Pistacho",
+    "img": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1779087080/g85hpmnpwgljrrbikjih.jpg",
+    "gramaje": null,
+    "estado": 1
+  }
+]

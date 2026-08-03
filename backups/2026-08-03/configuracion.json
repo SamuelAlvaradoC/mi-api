@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "clave": "tiempo_espera",
+    "valor": "50",
+    "descripcion": "Tiempo estimado de espera en minutos"
+  },
+  {
+    "id": 2,
+    "clave": "hora_apertura",
+    "valor": "13",
+    "descripcion": "Hora de apertura (0-23)"
+  },
+  {
+    "id": 3,
+    "clave": "hora_cierre",
+    "valor": "20",
+    "descripcion": "Hora de cierre (0-23)"
+  },
+  {
+    "id": 4,
+    "clave": "estado_tienda",
+    "valor": "open",
+    "descripcion": "schedule|open|closed"
+  }
+]
