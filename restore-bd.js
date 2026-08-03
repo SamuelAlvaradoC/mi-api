@@ -70,6 +70,33 @@ async function restore() {
     prisma.categoria.createMany({ data: leer('categorias'), skipDuplicates: true })
   );
 
+  // 5b. Ciudades (debe ir antes que barrios, que tiene FK a ciudad)
+  if (fs.existsSync(path.join(DIR, 'ciudades.json'))) {
+    await restaurar('ciudades', () =>
+      prisma.ciudad.createMany({ data: limpiar(leer('ciudades'), ['barrios']), skipDuplicates: true })
+    );
+  } else {
+    console.log('⏭️  ciudades → no existe en este backup, omitido');
+  }
+
+  // 5c. Barrios (FK a ciudad)
+  if (fs.existsSync(path.join(DIR, 'barrios.json'))) {
+    await restaurar('barrios', () =>
+      prisma.barrio.createMany({ data: limpiar(leer('barrios'), ['ciudad', 'direcciones']), skipDuplicates: true })
+    );
+  } else {
+    console.log('⏭️  barrios → no existe en este backup, omitido');
+  }
+
+  // 5d. Estados de domicilio (lookup, catálogo sin dependencias)
+  if (fs.existsSync(path.join(DIR, 'estados_domicilio.json'))) {
+    await restaurar('estados_domicilio', () =>
+      prisma.estadoDomicilio.createMany({ data: leer('estados_domicilio'), skipDuplicates: true })
+    );
+  } else {
+    console.log('⏭️  estados_domicilio → no existe en este backup, omitido');
+  }
+
   // 6. Usuarios staff (quitar relación anidada "rol")
   await restaurar('usuarios_staff', () =>
     prisma.usuario.createMany({
@@ -152,6 +179,9 @@ async function restore() {
     ['roles_id_rol_seq',                  'roles',        'id_rol'],
     ['rol_permisos_id_rol_permiso_seq',   'rol_permisos', 'id_rol_permiso'],
     ['categorias_id_categoria_seq',       'categorias',   'id_categoria'],
+    ['ciudades_id_ciudad_seq',             'ciudades',     'id_ciudad'],
+    ['barrios_id_barrio_seq',              'barrios',      'id_barrio'],
+    ['estados_domicilio_id_estado_domicilio_seq', 'estados_domicilio', 'id_estado_domicilio'],
     ['usuarios_id_usuario_seq',           'usuarios',     'id_usuario'],
     ['empleados_id_empleado_seq',         'empleados',    'id_empleado'],
     ['productos_id_producto_seq',         'productos',    'id_producto'],
