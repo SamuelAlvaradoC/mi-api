@@ -6,7 +6,7 @@ const { success } = require('../../utils/response');
 const crearEmpleadoSchema = z.object({
   nombre:        z.string().min(2),
   email:         z.string().email(),
-  contrasena:    z.string().min(6),
+  contrasena:    z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   id_rol:        z.number().int().positive().default(2),
   cargo:         z.string().max(50),
   fecha_ingreso: z.string(),

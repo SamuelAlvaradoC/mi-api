@@ -23,11 +23,14 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // cada hora
 
+// Máximo de IPs recordadas por usuario (evita que el arreglo crezca sin límite)
+const MAX_IPS_CONOCIDAS = 10;
+
 // ── Login ───────────────────────────────────────────────
-const login = async ({ email, contrasena }) => {
+const login = async ({ email, contrasena, ip }) => {
   const usuario = await prisma.usuario.findUnique({ where: { email }, include: { rol: true, cliente: true, empleado: true } });
   if (!usuario) throw { status: 401, message: 'Credenciales inválidas' };
-  if (!usuario.estado) throw { status: 403, message: 'Usuario inactivo' };
+  if (!usuario.estado) throw { status: 403, message: 'Usuario inactivo. Por favor, contáctate con el administrador.' };
 
   const valida = await bcrypt.compare(contrasena, usuario.contrasena);
   if (!valida) throw { status: 401, message: 'Credenciales inválidas' };
@@ -40,11 +43,20 @@ const login = async ({ email, contrasena }) => {
 
   const { contrasena: _, ...datos } = usuario;
 
-  // Alerta de login solo a clientes y domiciliarios
-  const rolNombre = usuario.rol?.nombre || '';
-  if (['cliente', 'domiciliario'].includes(rolNombre)) {
-    enviarAlertaLogin(usuario.email, usuario.nombre)
+  // Alerta de login para TODOS los roles, pero solo si la IP no es una de
+  // las ya conocidas para este usuario (evita mandar correo en cada login
+  // normal desde el mismo lugar de siempre).
+  const ipsConocidas = usuario.ips_conocidas || [];
+  const esIpNueva = !!ip && !ipsConocidas.includes(ip);
+  if (esIpNueva) {
+    enviarAlertaLogin(usuario.email, usuario.nombre, ip)
       .catch(e => console.error('Error email login:', e.message));
+    // Esta sí se espera (a diferencia del correo): si no queda guardada antes
+    // de responder, el siguiente login rápido desde la misma IP volvería a
+    // leer el arreglo viejo y mandaría una alerta duplicada.
+    const nuevasIps = [...ipsConocidas, ip].slice(-MAX_IPS_CONOCIDAS);
+    await prisma.usuario.update({ where: { id_usuario: usuario.id_usuario }, data: { ips_conocidas: nuevasIps } })
+      .catch(e => console.error('Error guardando ip_conocida:', e.message));
   }
 
   return { token, usuario: datos };
@@ -166,6 +178,9 @@ const verificarReset = async ({ email, codigo, nueva_password }) => {
   }
 
   intentosFallidos.delete(email);
+  const usuarioActual = await prisma.usuario.findUnique({ where: { email } });
+  const igual = await bcrypt.compare(nueva_password, usuarioActual.contrasena);
+  if (igual) throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
   const hash = await bcrypt.hash(nueva_password, 10);
   await prisma.usuario.update({ where: { email }, data: { contrasena: hash } });
   resetTokens.delete(email);
@@ -183,6 +198,9 @@ const cambiarContrasena = async ({ token, nueva_contrasena }) => {
   }
   if (!emailEncontrado) throw { status: 400, message: 'Token inválido o expirado' };
 
+  const usuarioActual = await prisma.usuario.findUnique({ where: { email: emailEncontrado } });
+  const igual = await bcrypt.compare(nueva_contrasena, usuarioActual.contrasena);
+  if (igual) throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
   const hash = await bcrypt.hash(nueva_contrasena, 10);
   await prisma.usuario.update({ where: { email: emailEncontrado }, data: { contrasena: hash } });
   resetTokens.delete(emailEncontrado);
@@ -236,12 +254,13 @@ const editarPerfil = async (id_usuario, { nombre, email, telefono }) => {
 
   let telefonoActual = null;
   if (telefono !== undefined) {
+    const telefonoNormalizado = telefono.trim() === '' ? null : telefono.trim();
     const cliente = await prisma.cliente.upsert({
       where:  { id_usuario },
-      update: { telefono },
-      create: { id_usuario, telefono },
+      update: { telefono: telefonoNormalizado },
+      create: { id_usuario, telefono: telefonoNormalizado },
     }).catch(() => null);
-    telefonoActual = cliente?.telefono ?? telefono;
+    telefonoActual = cliente?.telefono ?? telefonoNormalizado;
   } else {
     const cliente = await prisma.cliente.findUnique({ where: { id_usuario }, select: { telefono: true } }).catch(() => null);
     telefonoActual = cliente?.telefono ?? null;

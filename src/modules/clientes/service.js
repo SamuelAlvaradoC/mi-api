@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { eliminarPorUsuario } = require('../../utils/eliminarCuentaCascada');
 
 const incUsuario  = { usuario: { select: { nombre: true, email: true, estado: true } } };
 const incListado  = {
@@ -11,7 +12,11 @@ const listar = () => prisma.cliente.findMany({ include: incListado });
 
 const crear = async ({ nombre, email, contrasena, telefono }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
-  if (existe) throw { status: 409, message: 'El email ya está registrado' };
+  if (existe) throw { status: 409, message: 'Ese correo electrónico ya está registrado en otra cuenta' };
+  if (telefono && telefono.trim() !== '') {
+    const telefonoExistente = await prisma.cliente.findFirst({ where: { telefono: telefono.trim() } });
+    if (telefonoExistente) throw { status: 409, message: 'Ese número de teléfono ya está registrado en otra cuenta' };
+  }
   const bcrypt = require('bcryptjs');
   const hash   = await bcrypt.hash(contrasena, 10);
   return prisma.$transaction(async (tx) => {
@@ -47,6 +52,16 @@ const obtener = async (id) => {
 const actualizar = async (id, datos) => {
   const cliente = await obtener(id);
   const { nombre, email, ...clienteDatos } = datos;
+
+  if (email !== undefined) {
+    const emailExistente = await prisma.usuario.findFirst({ where: { email, NOT: { id_usuario: cliente.id_usuario } } });
+    if (emailExistente) throw { status: 409, message: 'Ese correo electrónico ya está en uso por otra cuenta' };
+  }
+  if (clienteDatos.telefono && clienteDatos.telefono.trim() !== '') {
+    const telefonoExistente = await prisma.cliente.findFirst({ where: { telefono: clienteDatos.telefono.trim(), NOT: { id_cliente: id } } });
+    if (telefonoExistente) throw { status: 409, message: 'Ese número de teléfono ya está registrado en otra cuenta' };
+  }
+
   const usuarioDatos = {};
   if (nombre !== undefined) usuarioDatos.nombre = nombre;
   if (email  !== undefined) usuarioDatos.email  = email;
@@ -63,13 +78,7 @@ const actualizar = async (id, datos) => {
 
 const eliminar = async (id) => {
   const cliente = await obtener(id);
-  const ventasCount = await prisma.venta.count({ where: { id_cliente: id } });
-  if (ventasCount > 0) throw { status: 409, message: `No se puede eliminar: el cliente tiene ${ventasCount} venta(s) registrada(s)` };
-  // Soft-delete en cascada: usuario + cliente
-  return prisma.$transaction(async (tx) => {
-    await tx.usuario.update({ where: { id_usuario: cliente.id_usuario }, data: { estado: 0 } });
-    return tx.cliente.update({ where: { id_cliente: id }, data: { estado: 0 } });
-  });
+  await eliminarPorUsuario(cliente.id_usuario);
 };
 
 const cambiarEstado = async (id, estado) => {

@@ -6,6 +6,10 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Render corre detrás de un proxy — sin esto, req.ip siempre devuelve la IP
+// del proxy y no la del cliente real, rompiendo la detección de IP nueva.
+app.set('trust proxy', 1);
+
 // ── Seguridad HTTP ──────────────────────────────────────
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));

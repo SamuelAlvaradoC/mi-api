@@ -6,7 +6,7 @@ const { success } = require('../../utils/response');
 const login = async (req, res, next) => {
   try {
     const datos = loginSchema.parse(req.body);
-    success(res, await authService.login(datos), 'Login exitoso');
+    success(res, await authService.login({ ...datos, ip: req.ip }), 'Login exitoso');
   } catch (err) { next(err); }
 };
 
@@ -124,9 +124,12 @@ const cambiarContrasenaAuth = async (req, res, next) => {
     const prisma = require('../../config/prisma');
     const { contrasena_actual, nueva_contrasena } = req.body;
     if (!contrasena_actual || !nueva_contrasena) throw { status: 400, message: 'Faltan campos requeridos' };
+    if (nueva_contrasena.length < 8) throw { status: 400, message: 'La contraseña debe tener al menos 8 caracteres' };
     const usuario = await prisma.usuario.findUnique({ where: { id_usuario: req.user.id_usuario } });
     const valida = await bcrypt.compare(contrasena_actual, usuario.contrasena);
     if (!valida) throw { status: 401, message: 'Contraseña actual incorrecta' };
+    const igual = await bcrypt.compare(nueva_contrasena, usuario.contrasena);
+    if (igual) throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
     const hash = await bcrypt.hash(nueva_contrasena, 10);
     await prisma.usuario.update({ where: { id_usuario: req.user.id_usuario }, data: { contrasena: hash } });
     success(res, null, 'Contraseña actualizada');

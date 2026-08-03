@@ -57,6 +57,7 @@ model Usuario {
   contrasena     String   @db.VarChar(255)
   estado         Int      @default(1) @db.SmallInt
   fecha_registro DateTime @default(now())
+  ips_conocidas  String[] @default([])
 
   rol      Rol       @relation(fields: [id_rol], references: [id_rol])
   cliente  Cliente?

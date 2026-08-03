@@ -63,8 +63,9 @@ const enviarBienvenida = async (email, nombre) => {
   });
 };
 
-// 2. ALERTA LOGIN
-const enviarAlertaLogin = async (email, nombre) => {
+// 2. ALERTA LOGIN — se manda solo cuando el login viene de una IP nueva
+// para el usuario (ver auth/service.js), sin importar el rol.
+const enviarAlertaLogin = async (email, nombre, ip) => {
   const fecha = new Date().toLocaleString('es-CO', {
     timeZone: 'America/Bogota',
     dateStyle: 'full',
@@ -80,7 +81,7 @@ const enviarAlertaLogin = async (email, nombre) => {
       </h2>
       <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
         Hola <strong>${nombre}</strong>, detectamos un inicio de sesión
-        en tu cuenta de ChocoFreseo.
+        desde un lugar que no reconocemos en tu cuenta de ChocoFreseo.
       </p>
       <div style="background:#f9f9f9;border-radius:10px;padding:16px;
         margin-bottom:20px;">
@@ -89,11 +90,17 @@ const enviarAlertaLogin = async (email, nombre) => {
           <span style="color:#888;">Fecha y hora</span>
           <span style="font-weight:700;color:#1a1a1a;">${fecha}</span>
         </div>
-        <div style="padding:6px 0;font-size:13px;display:flex;
-          justify-content:space-between;">
+        <div style="padding:6px 0;border-bottom:1px solid #f0f0f0;
+          font-size:13px;display:flex;justify-content:space-between;">
           <span style="color:#888;">Cuenta</span>
           <span style="font-weight:700;color:#1a1a1a;">${email}</span>
         </div>
+        ${ip ? `
+        <div style="padding:6px 0;font-size:13px;display:flex;
+          justify-content:space-between;">
+          <span style="color:#888;">Dirección IP</span>
+          <span style="font-weight:700;color:#1a1a1a;">${ip}</span>
+        </div>` : ''}
       </div>
       <div style="background:#fef3c7;border-radius:8px;padding:12px 16px;
         border-left:4px solid #f59e0b;">

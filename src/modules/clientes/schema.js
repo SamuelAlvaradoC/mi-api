@@ -3,7 +3,7 @@ const { z } = require('zod');
 const crearClienteSchema = z.object({
   nombre:    z.string().min(2),
   email:     z.string().email(),
-  contrasena: z.string().min(6),
+  contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   direccion: z.string().max(255).optional(),
   barrio:    z.string().max(100).optional(),
   ciudad:    z.string().max(100).optional(),

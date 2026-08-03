@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/prisma');
+const { eliminarPorUsuario } = require('../../utils/eliminarCuentaCascada');
 
 const select = {
   id_usuario: true, id_rol: true, nombre: true,
@@ -81,19 +82,8 @@ const SUPER_ADMIN_ID = 1;
 
 const eliminar = async (id) => {
   if (id === SUPER_ADMIN_ID) throw { status: 403, message: 'No se puede eliminar al Super Admin' };
-  const u = await obtener(id);
-  // Verificar ventas via cliente
-  const cliente = await prisma.cliente.findUnique({ where: { id_usuario: id } });
-  if (cliente) {
-    const ventasCount = await prisma.venta.count({ where: { id_cliente: cliente.id_cliente } });
-    if (ventasCount > 0) throw { status: 409, message: `No se puede eliminar: el usuario tiene ${ventasCount} venta(s) registrada(s)` };
-  }
-  // Soft-delete en cascada: usuario + empleado vinculado + cliente vinculado
-  return prisma.$transaction(async (tx) => {
-    try { await tx.empleado.updateMany({ where: { id_usuario: id }, data: { estado: 0 } }); } catch (_) {}
-    try { await tx.cliente.updateMany({ where: { id_usuario: id }, data: { estado: 0 } }); } catch (_) {}
-    return tx.usuario.update({ where: { id_usuario: id }, data: { estado: 0 }, select });
-  });
+  await obtener(id);
+  await eliminarPorUsuario(id);
 };
 
 const activarDesactivar = async (id, estado) => {
