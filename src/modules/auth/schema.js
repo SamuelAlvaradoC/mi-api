@@ -42,5 +42,16 @@ const verificarResetSchema = z.object({
   nueva_password:  z.string().min(8, 'Mínimo 8 caracteres'),
 });
 
+const crearDireccionSchema = z.object({
+  direccion_linea: z.string().min(1, 'La dirección es requerida'),
+  barrio:          z.string().optional().nullable(),
+  ciudad:          z.string().optional().nullable(),
+  departamento:    z.string().optional().nullable(),
+  referencia:      z.string().optional().nullable(),
+  lat:             z.number().optional().nullable(),
+  lng:             z.number().optional().nullable(),
+  id_barrio:       z.number().int().positive().optional().nullable(),
+});
+
 module.exports = { loginSchema, registerSchema, recuperarSchema, cambiarContrasenaSchema, editarPerfilSchema,
-                   solicitarResetSchema, verificarResetSchema };
+                   solicitarResetSchema, verificarResetSchema, crearDireccionSchema };

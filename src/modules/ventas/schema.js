@@ -67,4 +67,16 @@ const anularVentaSchema = z.object({
   motivo_anulacion: z.string().min(5, 'Debe indicar el motivo de anulación'),
 });
 
-module.exports = { crearVentaSchema, estadoVentaSchema, anularVentaSchema };
+// items/costo_domicilio son opcionales porque una venta "entregada" solo
+// permite cambiar el método de pago (ver ventas/service.js editar()).
+const editarVentaSchema = z.object({
+  items:               z.array(itemVentaSchema).optional(),
+  costo_domicilio:     z.number().min(0).optional(),
+  metodo_pago:         z.string().optional().nullable(),
+  monto_efectivo:      z.number().min(0).optional().nullable(),
+  monto_transferencia: z.number().min(0).optional().nullable(),
+  nombre_cliente:      z.string().optional().nullable(),
+  telefono_cliente:    z.string().optional().nullable(),
+});
+
+module.exports = { crearVentaSchema, estadoVentaSchema, anularVentaSchema, editarVentaSchema };

@@ -76,6 +76,14 @@ const eliminarGasto = async (id_gasto) => {
   const id = Number(id_gasto);
   const gasto = await prisma.gastoDia.findUnique({ where: { id_gasto: id } });
   if (!gasto) throw { status: 404, message: 'Gasto no encontrado' };
+
+  // Igual que agregarGasto: solo se puede tocar el cierre de hoy, para no
+  // alterar retroactivamente el saldo de un día ya cerrado.
+  const cierreHoy = await obtenerCierreHoy();
+  if (!cierreHoy || gasto.id_cierre !== cierreHoy.id_cierre) {
+    throw { status: 403, message: 'Solo se pueden eliminar gastos del cierre de hoy' };
+  }
+
   await prisma.gastoDia.delete({ where: { id_gasto: id } });
   return { id_gasto: id };
 };

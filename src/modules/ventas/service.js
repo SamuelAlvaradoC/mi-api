@@ -80,6 +80,20 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     direccionId = dir.id_direccion;
   }
 
+  // El costo de domicilio nunca se confía del cliente: si la dirección tiene
+  // un barrio del catálogo, el precio real de Barrio.precio_domicilio manda
+  // sobre lo que haya mandado el front (evita manipular el costo enviado).
+  if (direccionId) {
+    const dirResuelta = await prisma.direccion.findUnique({
+      where: { id_direccion: direccionId },
+      select: { id_barrio: true },
+    });
+    if (dirResuelta?.id_barrio) {
+      const barrio = await prisma.barrio.findUnique({ where: { id_barrio: dirResuelta.id_barrio } });
+      if (barrio) costo_domicilio = Number(barrio.precio_domicilio);
+    }
+  }
+
   const productoIds = items.map((i) => i.id_producto);
   const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds }, estado: 1 } });
   // Guardar permite_toppings para calcular correctamente cuántos son gratis
@@ -669,6 +683,10 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
     return obtener(id);
   }
 
+  if (!Array.isArray(items) || items.length === 0) {
+    throw { status: 400, message: 'Debe incluir al menos un producto' };
+  }
+
   // Borrar detalles existentes en orden de FK
   const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
   if (detalleIds.length > 0) {
@@ -711,7 +729,13 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
     return { ...item, precio_unitario: precioUnitFinal2, subtotal: precioUnitFinal2 * item.cantidad, adicionesCalc };
   });
 
-  const total = subtotal + Number(costo_domicilio || 0);
+  // Igual que crear(): si la venta ya tenía un descuento por puntos aplicado,
+  // se vuelve a aplicar sobre el nuevo subtotal (recapado para que nunca supere
+  // el subtotal, por si los items cambiaron a un valor menor). Antes esto se
+  // perdía al editar, dejando el total sin descontar aunque descuento_puntos
+  // siguiera guardado en la venta — sobrecobro real.
+  const descuentoAplicado = Math.min(Number(venta.descuento_puntos || 0), subtotal);
+  const total = Math.max(0, subtotal - descuentoAplicado) + Number(costo_domicilio || 0);
 
   // Calcular montos: para efectivo/transferencia siempre derivar del total real (evitar inconsistencias)
   let montoEf = venta.monto_efectivo;
@@ -728,6 +752,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
     where: { id_venta: id },
     data: {
       subtotal, total, costo_domicilio: Number(costo_domicilio || 0),
+      descuento_puntos: descuentoAplicado,
       metodo_pago: metodoFinal,
       monto_efectivo: montoEf,
       monto_transferencia: montoTr,

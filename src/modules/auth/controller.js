@@ -1,6 +1,6 @@
 const authService = require('./service');
 const { loginSchema, registerSchema, recuperarSchema, cambiarContrasenaSchema, editarPerfilSchema,
-        solicitarResetSchema, verificarResetSchema } = require('./schema');
+        solicitarResetSchema, verificarResetSchema, crearDireccionSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const login = async (req, res, next) => {
@@ -75,8 +75,7 @@ const crearMiDireccion = async (req, res, next) => {
     const prisma = require('../../config/prisma');
     let cliente = await prisma.cliente.findUnique({ where: { id_usuario: req.user.id_usuario } });
     if (!cliente) cliente = await prisma.cliente.create({ data: { id_usuario: req.user.id_usuario } });
-    const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng, id_barrio } = req.body;
-    if (!direccion_linea?.trim()) throw { status: 400, message: 'La dirección es requerida' };
+    const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng, id_barrio } = crearDireccionSchema.parse(req.body);
     const existente = await prisma.direccion.findFirst({
       where: {
         id_cliente: cliente.id_cliente,
