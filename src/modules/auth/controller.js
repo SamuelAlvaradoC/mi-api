@@ -75,7 +75,7 @@ const crearMiDireccion = async (req, res, next) => {
     const prisma = require('../../config/prisma');
     let cliente = await prisma.cliente.findUnique({ where: { id_usuario: req.user.id_usuario } });
     if (!cliente) cliente = await prisma.cliente.create({ data: { id_usuario: req.user.id_usuario } });
-    const { direccion_linea, barrio, ciudad, departamento, referencia, lat, lng, id_barrio } = crearDireccionSchema.parse(req.body);
+    const { direccion_linea, barrio, ciudad, departamento, referencia, id_barrio } = crearDireccionSchema.parse(req.body);
     const existente = await prisma.direccion.findFirst({
       where: {
         id_cliente: cliente.id_cliente,
@@ -106,8 +106,6 @@ const crearMiDireccion = async (req, res, next) => {
         ciudad:      ciudad      || null,
         departamento: departamento || null,
         referencia:  referencia  || null,
-        lat:         lat         || null,
-        lng:         lng         || null,
         id_barrio:   id_barrio   ? Number(id_barrio) : null,
         estado: 1,
       },

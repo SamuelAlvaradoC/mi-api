@@ -72,8 +72,6 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
         ciudad:          nueva_direccion.ciudad       || null,
         departamento:    nueva_direccion.departamento || null,
         referencia:      nueva_direccion.referencia   || null,
-        lat:             nueva_direccion.lat          || null,
-        lng:             nueva_direccion.lng          || null,
         id_barrio:       nueva_direccion.id_barrio    ? Number(nueva_direccion.id_barrio) : null,
       },
     });
@@ -98,7 +96,8 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds }, estado: 1 } });
   // Guardar permite_toppings para calcular correctamente cuántos son gratis
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
-    precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0
+    precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
+    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -109,6 +108,16 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   const itemsCalc = items.map((item) => {
     const pd = prodData[item.id_producto];
     if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no disponible` };
+    // permite_chocolate/permite_salsas SIEMPRE vienen de la BD (pd), nunca del
+    // cliente — antes estas banderas no se validaban y cualquier producto
+    // podía recibir chocolate/salsas sin importar su configuración real.
+    if (item.chocolate && !pd.permite_chocolate) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
+    }
+    const salsasArrCheck = Array.isArray(item.salsas) ? item.salsas : [];
+    if (salsasArrCheck.length > 0 && !pd.permite_salsas) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite agregar salsas` };
+    }
     // Si permite_toppings=0: ningún topping es gratis (todos se cobran a $2000)
     // max_toppings SIEMPRE viene de la BD (pd), nunca del cliente — evita manipulación de precio
     const maxTop = pd.permite_toppings ? pd.max_toppings : 0;
@@ -122,7 +131,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     }));
     const adicionPerUnit = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
     // Salsas extra: las primeras 2 son gratis, el resto $5.000 c/u
-    const salsasArr      = Array.isArray(item.salsas) ? item.salsas : [];
+    const salsasArr      = salsasArrCheck;
     const salsasExtra    = Math.max(0, salsasArr.length - 2);
     const salsaExtraUnit = salsasExtra * 5000;
     // precio_unitario incluye: base + toppings extra + salsas extra (adiciones se guardan separado)
@@ -342,14 +351,21 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     }
   }
 
-  // Al marcar como entregado con método de pago → crear detalle en pagos/detalle_pagos
-  if (estadoNombre === 'entregado' && metodo_pago) {
+  // Al marcar como entregado → crear detalle en pagos/detalle_pagos. El método
+  // de pago se lee de la venta ya guardada (no del body de este PATCH): el
+  // frontend normalmente no reenvía metodo_pago aquí porque ya quedó fijado
+  // al crear la venta, así que exigirlo del body hacía que esta rama nunca
+  // disparara en la práctica.
+  if (estadoNombre === 'entregado') {
     try {
       const empleado = id_usuario
         ? await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } })
         : null;
-      if (empleado) {
-        const venta = await prisma.venta.findUnique({ where: { id_venta: id } });
+      const venta = await prisma.venta.findUnique({ where: { id_venta: id } });
+      const metodoPagoFinal = metodo_pago || venta.metodo_pago;
+      if (empleado && metodoPagoFinal) {
+        const montoEfectivoFinal      = monto_efectivo      != null ? Number(monto_efectivo)      : Number(venta.monto_efectivo || 0);
+        const montoTransferenciaFinal = monto_transferencia != null ? Number(monto_transferencia) : Number(venta.monto_transferencia || 0);
 
         // Crear o actualizar registro de pago
         let pago = await prisma.pago.findFirst({ where: { id_venta: id } });
@@ -371,23 +387,23 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         const mEfectivo   = metodos.find((m) => m.nombre.toLowerCase().includes('efectivo'));
         const mTransf     = metodos.find((m) => m.nombre.toLowerCase().includes('transferencia'));
 
-        if (metodo_pago === 'efectivo' && mEfectivo) {
+        if (metodoPagoFinal === 'efectivo' && mEfectivo) {
           await prisma.detallePago.create({
             data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: venta.total },
           });
-        } else if (metodo_pago === 'transferencia' && mTransf) {
+        } else if (metodoPagoFinal === 'transferencia' && mTransf) {
           await prisma.detallePago.create({
             data: { id_pago: pago.id_pago, id_metodo_pago: mTransf.id_metodo_pago, monto: venta.total, comprobante: comprobante_url || null },
           });
-        } else if (metodo_pago === 'mixto') {
-          if (mEfectivo && Number(monto_efectivo) > 0) {
+        } else if (metodoPagoFinal === 'mixto') {
+          if (mEfectivo && montoEfectivoFinal > 0) {
             await prisma.detallePago.create({
-              data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: Number(monto_efectivo) },
+              data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: montoEfectivoFinal },
             });
           }
-          if (mTransf && Number(monto_transferencia) > 0) {
+          if (mTransf && montoTransferenciaFinal > 0) {
             await prisma.detallePago.create({
-              data: { id_pago: pago.id_pago, id_metodo_pago: mTransf.id_metodo_pago, monto: Number(monto_transferencia), comprobante: comprobante_url || null },
+              data: { id_pago: pago.id_pago, id_metodo_pago: mTransf.id_metodo_pago, monto: montoTransferenciaFinal, comprobante: comprobante_url || null },
             });
           }
         }
@@ -449,8 +465,8 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         } catch (_) {}
         io.emit('pedido_listo', {
           id_venta:       ventaParaImprimir.id_venta,
-          cliente:        ventaParaImprimir.cliente?.usuario?.nombre || '—',
-          telefono:       ventaParaImprimir.cliente?.telefono || '—',
+          cliente:        ventaParaImprimir.nombre_cliente   || ventaParaImprimir.cliente?.usuario?.nombre || '—',
+          telefono:       ventaParaImprimir.telefono_cliente || ventaParaImprimir.cliente?.telefono        || '—',
           direccion:      ventaParaImprimir.direccion?.direccion_linea || '—',
           barrio:         ventaParaImprimir.direccion?.barrio || '',
           ciudad:         ventaParaImprimir.direccion?.ciudad || '',
@@ -550,7 +566,7 @@ const comprobante = async (id) => {
     comprobante: {
       numero:        `VTA-${String(venta.id_venta).padStart(6, '0')}`,
       fecha:         venta.fecha,
-      cliente:       venta.cliente?.usuario?.nombre,
+      cliente:       venta.nombre_cliente || venta.cliente?.usuario?.nombre,
       estado:        venta.estado?.nombre_estado,
       items:         venta.detalleVentas.map((d) => ({
         producto:   d.producto.nombre,
@@ -572,7 +588,7 @@ const whatsapp = async (id) => {
   const num   = `VTA-${String(venta.id_venta).padStart(6, '0')}`;
   const msg   = encodeURIComponent(
     `*Comprobante ${num}*\n` +
-    `Cliente: ${venta.cliente?.usuario?.nombre}\n` +
+    `Cliente: ${venta.nombre_cliente || venta.cliente?.usuario?.nombre}\n` +
     `Total: $${Number(venta.total).toLocaleString('es-CO')}\n` +
     `Estado: ${venta.estado?.nombre_estado}\n` +
     `Fecha: ${new Date(venta.fecha).toLocaleString('es-CO')}`
@@ -699,7 +715,8 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   const productoIds = items.map((i) => i.id_producto);
   const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds } } });
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
-    precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0
+    precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
+    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -710,6 +727,13 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   const itemsCalc = items.map((item) => {
     const pd = prodData[item.id_producto];
     if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
+    if (item.chocolate && !pd.permite_chocolate) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
+    }
+    const salsasArr2Check = Array.isArray(item.salsas) ? item.salsas : [];
+    if (salsasArr2Check.length > 0 && !pd.permite_salsas) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite agregar salsas` };
+    }
     const maxTop = pd.permite_toppings ? pd.max_toppings : 0;
     const totalTop = (item.toppings || []).reduce((s, t) => s + (typeof t === 'number' ? 1 : (t.cantidad || 1)), 0);
     const toppingExtra = Math.max(0, totalTop - maxTop) * 2000;
@@ -720,7 +744,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       subtotal: (precioA[a.id_adicion] || 0) * a.cantidad,
     }));
     const adicionPerUnit  = adicionesCalc.reduce((s, a) => s + a.subtotal, 0);
-    const salsasArr2      = Array.isArray(item.salsas) ? item.salsas : [];
+    const salsasArr2      = salsasArr2Check;
     const salsasCob2      = Math.max(0, salsasArr2.length - 2);
     const salsaExtra2     = salsasCob2 * 5000;
     const precioUnitFinal2 = precioUnitItem + salsaExtra2;

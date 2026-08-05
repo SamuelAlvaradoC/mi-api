@@ -48,8 +48,6 @@ const crearDireccionSchema = z.object({
   ciudad:          z.string().optional().nullable(),
   departamento:    z.string().optional().nullable(),
   referencia:      z.string().optional().nullable(),
-  lat:             z.number().optional().nullable(),
-  lng:             z.number().optional().nullable(),
   id_barrio:       z.number().int().positive().optional().nullable(),
 });
 
