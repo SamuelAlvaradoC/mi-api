@@ -464,46 +464,55 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     try {
       const io = getIo();
       if (io) {
-        const ventaParaImprimir = await obtener(id);
-        const puntos_usados_val = ventaParaImprimir.puntos_usados || 0;
-        const puntos_ganados_val = puntos_usados_val > 0
-          ? 0
-          : Math.floor(Number(ventaParaImprimir.subtotal || 0) / 500);
-        let puntos_actuales_val = 0;
-        try {
-          if (ventaParaImprimir.id_cliente) {
-            const reg = await obtenerPuntos(ventaParaImprimir.id_cliente);
-            puntos_actuales_val = reg.puntos || 0;
-          }
-        } catch (_) {}
-        io.emit('pedido_listo', {
-          id_venta:       ventaParaImprimir.id_venta,
-          cliente:        ventaParaImprimir.nombre_cliente   || ventaParaImprimir.cliente?.usuario?.nombre || '—',
-          telefono:       ventaParaImprimir.telefono_cliente || ventaParaImprimir.cliente?.telefono        || '—',
-          direccion:      ventaParaImprimir.direccion?.direccion_linea || '—',
-          barrio:         ventaParaImprimir.direccion?.barrio || '',
-          ciudad:         ventaParaImprimir.direccion?.ciudad || '',
-          referencia:     ventaParaImprimir.direccion?.referencia || '',
-          total:          ventaParaImprimir.total,
-          subtotal:       ventaParaImprimir.subtotal,
-          costo_domicilio: ventaParaImprimir.costo_domicilio,
-          metodo_pago:    ventaParaImprimir.metodo_pago,
-          monto_efectivo: ventaParaImprimir.monto_efectivo,
-          monto_transferencia: ventaParaImprimir.monto_transferencia,
-          observaciones:  ventaParaImprimir.observaciones,
-          puntos_usados:    puntos_usados_val,
-          descuento_puntos: ventaParaImprimir.descuento_puntos || 0,
-          puntos_ganados:   puntos_ganados_val,
-          puntos_actuales:  puntos_actuales_val,
-          puntosTotal:      puntos_actuales_val + puntos_ganados_val,
-          detalleVentas:  ventaParaImprimir.detalleVentas,
-          fecha:          ventaParaImprimir.fecha,
-        });
+        io.emit('pedido_listo', await armarPayloadImpresion(id));
       }
     } catch(e) { console.error('Error emitiendo pedido_listo:', e.message); }
   }
 
   return ventaActualizada;
+};
+
+// Construye el payload de impresión (comanda/reimpresión) SIEMPRE desde datos
+// reales de la BD — nunca desde lo que un cliente de socket.io mande, porque
+// ese canal no tiene autenticación y cualquiera podría forjar un ticket falso.
+const armarPayloadImpresion = async (id) => {
+  const venta = await obtener(id);
+  const puntos_usados_val = venta.puntos_usados || 0;
+  const puntos_ganados_val = puntos_usados_val > 0
+    ? 0
+    : Math.floor(Number(venta.subtotal || 0) / 500);
+  let puntos_actuales_val = 0;
+  try {
+    if (venta.id_cliente) {
+      const reg = await obtenerPuntos(venta.id_cliente);
+      puntos_actuales_val = reg.puntos || 0;
+    }
+  } catch (_) {}
+  return {
+    id_venta:       venta.id_venta,
+    cliente:        venta.nombre_cliente   || venta.cliente?.usuario?.nombre || '—',
+    telefono:       venta.telefono_cliente || venta.cliente?.telefono        || '—',
+    direccion:      venta.direccion?.direccion_linea || '—',
+    barrio:         venta.direccion?.barrio || '',
+    ciudad:         venta.direccion?.ciudad || '',
+    referencia:     venta.direccion?.referencia || '',
+    total:          venta.total,
+    subtotal:       venta.subtotal,
+    costo_domicilio: venta.costo_domicilio,
+    metodo_pago:    venta.metodo_pago,
+    monto_efectivo: venta.monto_efectivo,
+    monto_transferencia: venta.monto_transferencia,
+    observaciones:  venta.observaciones,
+    puntos_usados:    puntos_usados_val,
+    descuento_puntos: venta.descuento_puntos || 0,
+    puntos_ganados:   puntos_ganados_val,
+    puntos_actuales:  puntos_actuales_val,
+    puntosGanados:    puntos_ganados_val,
+    puntosActuales:   puntos_actuales_val,
+    puntosTotal:      puntos_actuales_val + puntos_ganados_val,
+    detalleVentas:  venta.detalleVentas,
+    fecha:          venta.fecha,
+  };
 };
 
 const anular = async (id, motivo_anulacion) => {
@@ -822,4 +831,4 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   return obtener(id);
 };
 
-module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar };
+module.exports = { listar, filtrar, obtener, crear, cambiarEstado, anular, comprobante, whatsapp, totalVenta, misVentas, crearMiPedido, editar, armarPayloadImpresion };
