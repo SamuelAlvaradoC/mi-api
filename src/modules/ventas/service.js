@@ -61,6 +61,16 @@ const obtener = async (id) => {
 };
 
 const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
+  // El saldo de puntos se valida siempre server-side, aunque venga del panel
+  // admin (confiado) — evita dejar el saldo del cliente en negativo por un
+  // error humano o una llamada directa a la API.
+  if (Number(puntos_usados) > 0) {
+    const regPtsCheck = await prisma.puntosCliente.findUnique({ where: { id_cliente } });
+    if (!regPtsCheck || regPtsCheck.puntos < Number(puntos_usados)) {
+      throw { status: 400, message: 'El cliente no tiene suficientes puntos para aplicar este descuento' };
+    }
+  }
+
   // Si se envía nueva_direccion, crearla antes
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {
@@ -97,7 +107,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   // Guardar permite_toppings para calcular correctamente cuántos son gratis
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
     precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
-    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas,
+    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas, es_bowl: !!p.es_bowl,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -115,7 +125,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
       throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
     }
     const salsasArrCheck = Array.isArray(item.salsas) ? item.salsas : [];
-    if (salsasArrCheck.length > 0 && !pd.permite_salsas) {
+    // Los bowls reutilizan el campo "salsas" para guardar la cobertura elegida
+    // (un solo elemento) — no exigen permite_salsas=true, que de hecho siempre
+    // es false en un bowl.
+    if (salsasArrCheck.length > 0 && !pd.permite_salsas && !pd.es_bowl) {
       throw { status: 400, message: `El producto ${item.id_producto} no permite agregar salsas` };
     }
     // Si permite_toppings=0: ningún topping es gratis (todos se cobran a $2000)
@@ -728,7 +741,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
   const productos   = await prisma.producto.findMany({ where: { id_producto: { in: productoIds } } });
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
     precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
-    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas,
+    permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas, es_bowl: !!p.es_bowl,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -743,7 +756,7 @@ const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo,
       throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
     }
     const salsasArr2Check = Array.isArray(item.salsas) ? item.salsas : [];
-    if (salsasArr2Check.length > 0 && !pd.permite_salsas) {
+    if (salsasArr2Check.length > 0 && !pd.permite_salsas && !pd.es_bowl) {
       throw { status: 400, message: `El producto ${item.id_producto} no permite agregar salsas` };
     }
     const maxTop = pd.permite_toppings ? pd.max_toppings : 0;

@@ -12,6 +12,7 @@ async function main() {
     { nombre: 'domiciliario',          descripcion: 'Entrega de pedidos a domicilio' },
     { nombre: 'confirmador_domicilio', descripcion: 'Confirma y gestiona el estado de los domicilios' },
     { nombre: 'cliente',               descripcion: 'Cliente de la tienda' },
+    { nombre: 'cocinero',              descripcion: 'Encargado de preparar los pedidos en cocina' },
   ];
   for (const r of rolesData) {
     await prisma.rol.upsert({ where: { id_rol: rolesData.indexOf(r) + 1 }, update: r, create: r }).catch(() =>
@@ -79,6 +80,21 @@ async function main() {
       });
     }
     console.log('✓ RolPermisos: confirmador_domicilio tiene ver_cierre_caja');
+  }
+
+  // ── Rol cocinero → permiso gestionar_cocina ────────────
+  const rolCocinero = await prisma.rol.findFirst({ where: { nombre: 'cocinero' } });
+  const permisoCocina = await prisma.permiso.findFirst({ where: { nombre: 'gestionar_cocina' } });
+  if (rolCocinero && permisoCocina) {
+    const yaTieneCocina = await prisma.rolPermiso.findFirst({
+      where: { id_rol: rolCocinero.id_rol, id_permiso: permisoCocina.id_permiso },
+    });
+    if (!yaTieneCocina) {
+      await prisma.rolPermiso.create({
+        data: { id_rol: rolCocinero.id_rol, id_permiso: permisoCocina.id_permiso },
+      });
+    }
+    console.log('✓ RolPermisos: cocinero tiene gestionar_cocina');
   }
 
   // ── Estados de venta ───────────────────────────────────
