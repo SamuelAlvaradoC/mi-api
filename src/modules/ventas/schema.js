@@ -41,6 +41,11 @@ const crearVentaSchema = z.object({
   id_direccion:        z.number().int().positive().optional(),
   nueva_direccion:     nuevaDireccionSchema.optional(),
   costo_domicilio:     z.number().min(0).default(0),
+  // Solo el panel admin puede pedir explícitamente que se respete el
+  // costo_domicilio mandado en vez del precio del barrio (ej: promoción
+  // puntual). Este campo NO existe en crearMiPedidoSchema — un cliente nunca
+  // puede activarlo.
+  override_costo_domicilio: z.boolean().optional().default(false),
   observaciones:       z.string().optional().nullable(),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
@@ -86,6 +91,7 @@ const anularVentaSchema = z.object({
 const editarVentaSchema = z.object({
   items:               z.array(itemVentaSchema).optional(),
   costo_domicilio:     z.number().min(0).optional(),
+  override_costo_domicilio: z.boolean().optional().default(false),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),

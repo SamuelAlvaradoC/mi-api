@@ -60,7 +60,7 @@ const obtener = async (id) => {
   return { ...v, nombreDomiciliario: empleado?.usuario?.nombre || null };
 };
 
-const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
+const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
   // El saldo de puntos se valida siempre server-side, aunque venga del panel
   // admin (confiado) — evita dejar el saldo del cliente en negativo por un
   // error humano o una llamada directa a la API.
@@ -91,7 +91,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   // El costo de domicilio nunca se confía del cliente: si la dirección tiene
   // un barrio del catálogo, el precio real de Barrio.precio_domicilio manda
   // sobre lo que haya mandado el front (evita manipular el costo enviado).
-  if (direccionId) {
+  // Único escape: el admin pide explícitamente override_costo_domicilio=true
+  // (ej: promoción puntual) — crearMiPedido() nunca manda ese flag, así que
+  // el cliente jamás puede activarlo.
+  if (direccionId && !override_costo_domicilio) {
     const dirResuelta = await prisma.direccion.findUnique({
       where: { id_direccion: direccionId },
       select: { id_barrio: true },
@@ -704,13 +707,24 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });
 };
 
-const editar = async (id, { items, costo_domicilio, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {
+const editar = async (id, { items, costo_domicilio, override_costo_domicilio = false, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {
   const venta = await obtener(id);
   const estadoActual = venta.estado?.nombre_estado;
 
   // Anuladas: nunca se pueden tocar
   if (estadoActual === 'anulado') {
     throw { status: 400, message: 'No se puede editar una venta anulada' };
+  }
+
+  // Mismo criterio que crear(): si la dirección de la venta tiene un barrio
+  // del catálogo, su precio real manda sobre lo que se mande a editar, salvo
+  // que el admin pida explícitamente override_costo_domicilio=true.
+  if (!override_costo_domicilio && venta.id_direccion) {
+    const dirVenta = await prisma.direccion.findUnique({ where: { id_direccion: venta.id_direccion }, select: { id_barrio: true } });
+    if (dirVenta?.id_barrio) {
+      const barrioVenta = await prisma.barrio.findUnique({ where: { id_barrio: dirVenta.id_barrio } });
+      if (barrioVenta) costo_domicilio = Number(barrioVenta.precio_domicilio);
+    }
   }
 
   const snapData = {};
