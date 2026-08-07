@@ -667,6 +667,18 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
     }
   }
 
+  // El costo de domicilio del cliente NUNCA se confía ciegamente: exigimos que
+  // la dirección resuelta tenga un barrio real del catálogo, así garantizamos
+  // que crear() (más abajo) siempre sobreescribe costo_domicilio con el precio
+  // real del barrio en vez de aceptar lo que el cliente haya mandado.
+  if (!direccionId) {
+    throw { status: 400, message: 'Debes seleccionar o registrar una dirección de entrega' };
+  }
+  const dirFinal = await prisma.direccion.findUnique({ where: { id_direccion: direccionId }, select: { id_barrio: true } });
+  if (!dirFinal?.id_barrio) {
+    throw { status: 400, message: 'La dirección seleccionada no tiene un barrio válido. Selecciona o registra una dirección con barrio del catálogo.' };
+  }
+
   return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });
 };
 

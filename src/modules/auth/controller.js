@@ -1,5 +1,5 @@
 const authService = require('./service');
-const { loginSchema, registerSchema, recuperarSchema, cambiarContrasenaSchema, editarPerfilSchema,
+const { loginSchema, registerSchema, editarPerfilSchema,
         solicitarResetSchema, verificarResetSchema, crearDireccionSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
@@ -21,20 +21,6 @@ const logout = (req, res, next) => {
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     success(res, authService.logout(token), 'Sesión cerrada');
-  } catch (err) { next(err); }
-};
-
-const recuperarContrasena = async (req, res, next) => {
-  try {
-    const { email } = recuperarSchema.parse(req.body);
-    success(res, await authService.recuperarContrasena({ email }), 'Token de recuperación generado');
-  } catch (err) { next(err); }
-};
-
-const cambiarContrasena = async (req, res, next) => {
-  try {
-    const datos = cambiarContrasenaSchema.parse(req.body);
-    success(res, await authService.cambiarContrasena(datos), 'Contraseña actualizada');
   } catch (err) { next(err); }
 };
 
@@ -172,6 +158,6 @@ const misPermisos = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { login, register, logout, recuperarContrasena, cambiarContrasena,
+module.exports = { login, register, logout,
   solicitarReset, verificarReset,
   getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth, misPermisos };

@@ -5,4 +5,8 @@ const crearCategoriaSchema = z.object({
   descripcion: z.string().max(150).optional(),
 });
 
-module.exports = { crearCategoriaSchema };
+const estadoCategoriaSchema = z.object({
+  estado: z.number().int().min(0).max(1),
+});
+
+module.exports = { crearCategoriaSchema, estadoCategoriaSchema };

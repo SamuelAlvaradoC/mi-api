@@ -18,25 +18,8 @@ const actualizarProductoSchema = crearProductoSchema.partial().extend({
   estado: z.number().int().min(0).max(1).optional(),
 });
 
-const crearCategoriaSchema = z.object({
-  nombre:      z.string().min(2).max(100),
-  descripcion: z.string().max(150).optional(),
+const estadoProductoSchema = z.object({
+  estado: z.number().int().min(0).max(1),
 });
 
-const crearToppingSchema = z.object({
-  nombre:      z.string().min(2).max(100),
-  descripcion: z.string().max(150).optional(),
-  img:         z.string().max(255).optional(),
-});
-
-const crearAdicionSchema = z.object({
-  nombre:      z.string().min(2).max(100),
-  descripcion: z.string().max(150).optional(),
-  img:         z.string().max(255).optional(),
-  precio:      z.number().positive(),
-});
-
-module.exports = {
-  crearProductoSchema, actualizarProductoSchema,
-  crearCategoriaSchema, crearToppingSchema, crearAdicionSchema,
-};
+module.exports = { crearProductoSchema, actualizarProductoSchema, estadoProductoSchema };

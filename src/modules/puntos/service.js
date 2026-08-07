@@ -46,32 +46,7 @@ const acumularPuntos = async (id_cliente, id_venta, subtotal_productos, uso_punt
   return { puntos_ganados, total_puntos: registro.puntos };
 };
 
-const redimirPuntos = async (id_cliente, id_venta, puntos_a_usar) => {
-  const registro = await prisma.puntosCliente.findUnique({ where: { id_cliente } });
-  if (!registro || registro.puntos < puntos_a_usar)
-    throw { status: 400, message: 'Puntos insuficientes' };
-
-  const descuento = calcularDescuentoPuntos(puntos_a_usar);
-
-  await prisma.puntosCliente.update({
-    where: { id_cliente },
-    data:  { puntos: { decrement: puntos_a_usar } },
-  });
-
-  await prisma.movimientoPuntos.create({
-    data: {
-      id_puntos:   registro.id_puntos,
-      id_venta,
-      tipo:        'redencion',
-      puntos:      -puntos_a_usar,
-      descripcion: `Redención en compra #${id_venta} — descuento $${descuento.toLocaleString('es-CO')}`,
-    },
-  });
-
-  return { puntos_usados: puntos_a_usar, descuento_aplicado: descuento };
-};
-
 module.exports = {
   obtenerPuntos, calcularPuntosGanados, calcularDescuentoPuntos,
-  acumularPuntos, redimirPuntos, VALOR_PUNTO, PESOS_POR_PUNTO,
+  acumularPuntos, VALOR_PUNTO, PESOS_POR_PUNTO,
 };

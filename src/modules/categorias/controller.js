@@ -1,5 +1,5 @@
 const service = require('./service');
-const { crearCategoriaSchema } = require('./schema');
+const { crearCategoriaSchema, estadoCategoriaSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const listar       = async (req, res, next) => { try { success(res, await service.listar()); } catch (e) { next(e); } };
@@ -19,7 +19,7 @@ const eliminar     = async (req, res, next) => {
 };
 const cambiarEstado = async (req, res, next) => {
   try {
-    const { estado } = req.body;
+    const { estado } = estadoCategoriaSchema.parse(req.body);
     success(res, await service.cambiarEstado(Number(req.params.id), estado), 'Estado actualizado');
   } catch (e) { next(e); }
 };

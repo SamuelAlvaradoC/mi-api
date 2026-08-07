@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 const prisma = require('../../config/prisma');
 const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailer');
 
@@ -112,18 +111,6 @@ const logout = (token) => {
   return { mensaje: 'Sesión cerrada correctamente' };
 };
 
-// ── Recuperar contraseña ────────────────────────────────
-const recuperarContrasena = async ({ email }) => {
-  const usuario = await prisma.usuario.findUnique({ where: { email } });
-  if (!usuario) throw { status: 404, message: 'Email no registrado' };
-
-  const token = crypto.randomBytes(32).toString('hex');
-  resetTokens.set(email, { token, expiry: Date.now() + 3600_000 }); // 1 hora
-
-  // En producción: enviar por email. Aquí lo devolvemos para pruebas.
-  return { token, mensaje: 'Token generado. En producción se enviaría por email.' };
-};
-
 // ── Solicitar reset con código de 6 dígitos ─────────────
 const solicitarReset = async ({ email }) => {
   const usuario = await prisma.usuario.findUnique({ where: { email } });
@@ -184,26 +171,6 @@ const verificarReset = async ({ email, codigo, nueva_password }) => {
   const hash = await bcrypt.hash(nueva_password, 10);
   await prisma.usuario.update({ where: { email }, data: { contrasena: hash } });
   resetTokens.delete(email);
-  return { mensaje: 'Contraseña actualizada correctamente' };
-};
-
-// ── Cambiar contraseña (con token de recuperación) ──────
-const cambiarContrasena = async ({ token, nueva_contrasena }) => {
-  let emailEncontrado = null;
-  for (const [email, data] of resetTokens.entries()) {
-    if (data.token === token && data.expiry > Date.now()) {
-      emailEncontrado = email;
-      break;
-    }
-  }
-  if (!emailEncontrado) throw { status: 400, message: 'Token inválido o expirado' };
-
-  const usuarioActual = await prisma.usuario.findUnique({ where: { email: emailEncontrado } });
-  const igual = await bcrypt.compare(nueva_contrasena, usuarioActual.contrasena);
-  if (igual) throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
-  const hash = await bcrypt.hash(nueva_contrasena, 10);
-  await prisma.usuario.update({ where: { email: emailEncontrado }, data: { contrasena: hash } });
-  resetTokens.delete(emailEncontrado);
   return { mensaje: 'Contraseña actualizada correctamente' };
 };
 
@@ -278,6 +245,6 @@ const desactivarCuenta = async (id_usuario) => {
   });
 };
 
-module.exports = { login, register, logout, recuperarContrasena, cambiarContrasena,
+module.exports = { login, register, logout,
   solicitarReset, verificarReset,
   getPerfil, editarPerfil, desactivarCuenta, isBlacklisted };

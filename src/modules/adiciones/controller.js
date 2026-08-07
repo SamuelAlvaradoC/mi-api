@@ -1,5 +1,5 @@
 const service = require('./service');
-const { crearAdicionSchema } = require('./schema');
+const { crearAdicionSchema, estadoAdicionSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const listar        = async (req, res, next) => { try { success(res, await service.listar()); } catch (e) { next(e); } };
@@ -8,6 +8,6 @@ const obtener      = async (req, res, next) => { try { success(res, await servic
 const crear        = async (req, res, next) => { try { success(res, await service.crear(crearAdicionSchema.parse(req.body)), 'Adición creada', 201); } catch (e) { next(e); } };
 const actualizar   = async (req, res, next) => { try { success(res, await service.actualizar(Number(req.params.id), crearAdicionSchema.partial().parse(req.body)), 'Adición actualizada'); } catch (e) { next(e); } };
 const eliminar     = async (req, res, next) => { try { await service.eliminar(Number(req.params.id)); success(res, null, 'Adición eliminada'); } catch (e) { next(e); } };
-const cambiarEstado = async (req, res, next) => { try { success(res, await service.cambiarEstado(Number(req.params.id), req.body.estado), 'Estado actualizado'); } catch (e) { next(e); } };
+const cambiarEstado = async (req, res, next) => { try { success(res, await service.cambiarEstado(Number(req.params.id), estadoAdicionSchema.parse(req.body).estado), 'Estado actualizado'); } catch (e) { next(e); } };
 
 module.exports = { listar, listarActivas, obtener, crear, actualizar, eliminar, cambiarEstado };

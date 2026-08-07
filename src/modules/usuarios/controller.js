@@ -1,5 +1,5 @@
 const service = require('./service');
-const { crearUsuarioSchema, actualizarUsuarioSchema } = require('./schema');
+const { crearUsuarioSchema, actualizarUsuarioSchema, estadoUsuarioSchema, asignarRolSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const listar   = async (req, res, next) => { try { success(res, await service.listar()); } catch (e) { next(e); } };
@@ -20,14 +20,14 @@ const eliminar = async (req, res, next) => {
 };
 const activarDesactivar = async (req, res, next) => {
   try {
-    const { estado } = req.body;
+    const { estado } = estadoUsuarioSchema.parse(req.body);
     success(res, await service.activarDesactivar(Number(req.params.id), estado), 'Estado cambiado');
   }
   catch (e) { next(e); }
 };
 const asignarRol = async (req, res, next) => {
   try {
-    const { id_rol } = req.body;
+    const { id_rol } = asignarRolSchema.parse(req.body);
     success(res, await service.asignarRol(Number(req.params.id), id_rol), 'Rol asignado');
   } catch (e) { next(e); }
 };

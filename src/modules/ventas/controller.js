@@ -1,5 +1,5 @@
 const service = require('./service');
-const { crearVentaSchema, estadoVentaSchema, anularVentaSchema, editarVentaSchema } = require('./schema');
+const { crearVentaSchema, crearMiPedidoSchema, estadoVentaSchema, anularVentaSchema, editarVentaSchema } = require('./schema');
 const { success } = require('../../utils/response');
 
 const listar       = async (req, res, next) => { try { success(res, await service.listar({ estado: req.query.estado, fecha: req.query.fecha })); } catch (e) { next(e); } };
@@ -49,7 +49,7 @@ const misDespachos = async (req, res, next) => {
     }));
   } catch (e) { next(e); }
 };
-const crearMiPedido= async (req, res, next) => { try { success(res, await service.crearMiPedido(req.user.id_usuario, req.body), 'Pedido creado', 201); } catch (e) { next(e); } };
+const crearMiPedido= async (req, res, next) => { try { success(res, await service.crearMiPedido(req.user.id_usuario, crearMiPedidoSchema.parse(req.body)), 'Pedido creado', 201); } catch (e) { next(e); } };
 
 const editar = async (req, res, next) => { try { success(res, await service.editar(Number(req.params.id), editarVentaSchema.parse(req.body)), 'Venta actualizada'); } catch (e) { next(e); } };
 

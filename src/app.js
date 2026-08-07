@@ -34,12 +34,9 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-// Rutas de auth SIN rate limit (desactivado temporalmente)
-// app.use('/api/auth/login',                authLimiter);
-// app.use('/api/auth/solicitar-reset',      authLimiter);
-// app.use('/api/auth/verificar-reset',      authLimiter);
-// app.use('/api/auth/recuperar',            authLimiter);
-// app.use('/api/auth/recuperar-contrasena', authLimiter);
+app.use('/api/auth/login',           authLimiter);
+app.use('/api/auth/solicitar-reset', authLimiter);
+app.use('/api/auth/verificar-reset', authLimiter);
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -26,4 +26,8 @@ const crearDireccionSchema = z.object({
   referencia:      z.string().max(255).optional(),
 });
 
-module.exports = { crearClienteSchema, actualizarClienteSchema, crearDireccionSchema };
+const estadoClienteSchema = z.object({
+  estado: z.number().int().min(0).max(1),
+});
+
+module.exports = { crearClienteSchema, actualizarClienteSchema, crearDireccionSchema, estadoClienteSchema };

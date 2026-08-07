@@ -12,15 +12,6 @@ const registerSchema = z.object({
   id_rol:    z.number().int().positive(),
 });
 
-const recuperarSchema = z.object({
-  email: z.string().email(),
-});
-
-const cambiarContrasenaSchema = z.object({
-  token:            z.string().min(10),
-  nueva_contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-});
-
 const telefonoCol = z.string()
   .regex(/^3[0-9]{9}$/, 'El teléfono debe ser un número colombiano válido de 10 dígitos (ej: 3001234567)')
   .optional()
@@ -51,5 +42,5 @@ const crearDireccionSchema = z.object({
   id_barrio:       z.number().int().positive().optional().nullable(),
 });
 
-module.exports = { loginSchema, registerSchema, recuperarSchema, cambiarContrasenaSchema, editarPerfilSchema,
+module.exports = { loginSchema, registerSchema, editarPerfilSchema,
                    solicitarResetSchema, verificarResetSchema, crearDireccionSchema };

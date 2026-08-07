@@ -35,6 +35,7 @@ async function main() {
     'gestionar_adiciones', 'gestionar_roles', 'ver_reportes',
     'ver_pedidos_domiciliario', 'facturar_pedido',
     'confirmar_domicilios', 'gestionar_cocina', 'ver_cierre_caja',
+    'gestionar_ciudades', 'gestionar_barrios',
     // En uso real por checkPermiso() aunque no están en la lista de negocio de 22:
     'ver_roles',
     'pagos.crear', 'pagos.ver',

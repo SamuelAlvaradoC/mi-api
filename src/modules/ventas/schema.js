@@ -6,6 +6,7 @@ const itemVentaSchema = z.object({
   max_toppings:    z.number().int().min(0).optional(),
   precio_unitario: z.number().optional(),
   chocolate:       z.string().optional().nullable(),
+  salsas: z.array(z.union([z.string(), z.number()])).optional().default([]),
   toppings: z.array(
     z.union([
       z.number().int().positive(),
@@ -49,6 +50,21 @@ const crearVentaSchema = z.object({
   puntos_usados:       z.number().int().min(0).optional().default(0),
 });
 
+const crearMiPedidoSchema = z.object({
+  id_direccion:        z.number().int().positive().optional(),
+  nueva_direccion:     nuevaDireccionSchema.optional(),
+  costo_domicilio:     z.number().min(0).default(0),
+  observaciones:       z.string().optional().nullable(),
+  metodo_pago:         z.string().optional().nullable(),
+  monto_efectivo:      z.number().min(0).optional().nullable(),
+  monto_transferencia: z.number().min(0).optional().nullable(),
+  comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
+  puntos_a_usar:       z.number().int().min(0).optional().default(0),
+}).refine((d) => d.id_direccion !== undefined || d.nueva_direccion !== undefined, {
+  message: 'Debe seleccionar o registrar una dirección de entrega',
+});
+
 const estadoVentaSchema = z.object({
   id_estado:           z.number().int().positive().optional(),
   nombre_estado:       z.string().optional(),
@@ -77,4 +93,4 @@ const editarVentaSchema = z.object({
   telefono_cliente:    z.string().optional().nullable(),
 });
 
-module.exports = { crearVentaSchema, estadoVentaSchema, anularVentaSchema, editarVentaSchema };
+module.exports = { crearVentaSchema, crearMiPedidoSchema, estadoVentaSchema, anularVentaSchema, editarVentaSchema };

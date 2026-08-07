@@ -19,4 +19,12 @@ const actualizarUsuarioSchema = z.object({
   estado: z.number().int().min(0).max(1).optional(),
 });
 
-module.exports = { crearUsuarioSchema, actualizarUsuarioSchema };
+const estadoUsuarioSchema = z.object({
+  estado: z.number().int().min(0).max(1),
+});
+
+const asignarRolSchema = z.object({
+  id_rol: z.number().int().positive(),
+});
+
+module.exports = { crearUsuarioSchema, actualizarUsuarioSchema, estadoUsuarioSchema, asignarRolSchema };

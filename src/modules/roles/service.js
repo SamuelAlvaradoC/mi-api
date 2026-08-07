@@ -45,18 +45,6 @@ const asignarPermisos = async (id, permisos) => {
 
 const listarPermisos = () => prisma.permiso.findMany({ orderBy: { nombre: 'asc' } });
 
-const asignarRolUsuario = async (id_usuario, id_rol) => {
-  const usuario = await prisma.usuario.findUnique({ where: { id_usuario } });
-  if (!usuario) throw { status: 404, message: 'Usuario no encontrado' };
-  const rol = await prisma.rol.findUnique({ where: { id_rol } });
-  if (!rol) throw { status: 404, message: 'Rol no encontrado' };
-  return prisma.usuario.update({
-    where: { id_usuario },
-    data: { id_rol },
-    select: { id_usuario: true, nombre: true, email: true, id_rol: true, rol: true },
-  });
-};
-
 const activarDesactivar = async (id) => {
   const rol = await prisma.rol.findUnique({ where: { id_rol: id } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
@@ -67,4 +55,4 @@ const activarDesactivar = async (id) => {
   });
 };
 
-module.exports = { listar, obtener, crear, actualizar, eliminar, asignarPermisos, listarPermisos, asignarRolUsuario, activarDesactivar };
+module.exports = { listar, obtener, crear, actualizar, eliminar, asignarPermisos, listarPermisos, activarDesactivar };
