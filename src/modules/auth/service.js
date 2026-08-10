@@ -48,7 +48,7 @@ const login = async ({ email, contrasena, ip }) => {
   const ipsConocidas = usuario.ips_conocidas || [];
   const esIpNueva = !!ip && !ipsConocidas.includes(ip);
   if (esIpNueva) {
-    enviarAlertaLogin(usuario.email, usuario.nombre, ip)
+    enviarAlertaLogin(usuario.email, usuario.nombre)
       .catch(e => console.error('Error email login:', e.message));
     // Esta sí se espera (a diferencia del correo): si no queda guardada antes
     // de responder, el siguiente login rápido desde la misma IP volvería a
