@@ -31,9 +31,16 @@ const crear = async ({ nombre, email, contrasena, id_rol, cargo, fecha_ingreso }
   let rolFinal = id_rol;
   if (!rolFinal && cargo && CARGO_A_ROL[cargo]) {
     const rolObj = await prisma.rol.findFirst({ where: { nombre: CARGO_A_ROL[cargo] } });
-    rolFinal = rolObj?.id_rol;
+    if (!rolObj) {
+      // Antes esto caía en un default silencioso a id_rol=2 (domiciliario),
+      // asignando el rol equivocado sin avisar — p.ej. un empleado con cargo
+      // "Cocinero" terminaba creado como domiciliario si el rol "cocinero"
+      // no existía todavía en Roles.
+      throw { status: 422, message: `El rol "${CARGO_A_ROL[cargo]}" no existe. Créalo desde Configuración → Roles antes de asignar el cargo "${cargo}".` };
+    }
+    rolFinal = rolObj.id_rol;
   }
-  if (!rolFinal) rolFinal = 2;
+  if (!rolFinal) throw { status: 422, message: 'No se pudo determinar el rol del empleado. Indica un cargo válido.' };
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.create({
       data: { nombre, email, contrasena: hash, id_rol: rolFinal, estado: 1 },
@@ -58,7 +65,10 @@ const actualizar = async (id, datos) => {
   // Sincronizar id_rol en Usuario cuando cambia el cargo
   if (empDatos.cargo && CARGO_A_ROL[empDatos.cargo]) {
     const rolObj = await prisma.rol.findFirst({ where: { nombre: CARGO_A_ROL[empDatos.cargo] } });
-    if (rolObj) usuarioDatos.id_rol = rolObj.id_rol;
+    if (!rolObj) {
+      throw { status: 422, message: `El rol "${CARGO_A_ROL[empDatos.cargo]}" no existe. Créalo desde Configuración → Roles antes de asignar el cargo "${empDatos.cargo}".` };
+    }
+    usuarioDatos.id_rol = rolObj.id_rol;
   }
   await prisma.$transaction(async (tx) => {
     if (Object.keys(usuarioDatos).length > 0) {
