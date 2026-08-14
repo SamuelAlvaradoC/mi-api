@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../config/prisma');
 const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailer');
+const logger = require('../../utils/logger');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
 const resetTokens      = new Map(); // email → { token, expiry }
@@ -49,13 +50,13 @@ const login = async ({ email, contrasena, ip }) => {
   const esIpNueva = !!ip && !ipsConocidas.includes(ip);
   if (esIpNueva) {
     enviarAlertaLogin(usuario.email, usuario.nombre)
-      .catch(e => console.error('Error email login:', e.message));
+      .catch(e => logger.error('Error enviando alerta de login', { error: e.message, stack: e.stack, email: usuario.email }));
     // Esta sí se espera (a diferencia del correo): si no queda guardada antes
     // de responder, el siguiente login rápido desde la misma IP volvería a
     // leer el arreglo viejo y mandaría una alerta duplicada.
     const nuevasIps = [...ipsConocidas, ip].slice(-MAX_IPS_CONOCIDAS);
     await prisma.usuario.update({ where: { id_usuario: usuario.id_usuario }, data: { ips_conocidas: nuevasIps } })
-      .catch(e => console.error('Error guardando ip_conocida:', e.message));
+      .catch(e => logger.error('Error guardando IP conocida', { error: e.message, stack: e.stack, id_usuario: usuario.id_usuario }));
   }
 
   return { token, usuario: datos };
@@ -98,7 +99,7 @@ const register = async ({ nombre, email, contrasena, id_rol }) => {
     // Enviar email de bienvenida (no bloquear si falla)
     if (id_rol === 4 || rol?.nombre === 'cliente') {
       enviarBienvenida(email, nombre)
-        .catch(e => console.error('Error email bienvenida:', e.message));
+        .catch(e => logger.error('Error enviando email de bienvenida', { error: e.message, stack: e.stack, email }));
     }
 
     return datos;
@@ -121,19 +122,22 @@ const solicitarReset = async ({ email }) => {
 
   let emailEnviado = false;
   try {
-    console.log('=== INTENTANDO ENVIAR EMAIL ===');
-    console.log('Para:', email);
-    console.log('GMAIL_USER:', process.env.GMAIL_USER || 'NO DEFINIDO');
-    console.log('GMAIL_PASS:', process.env.GMAIL_PASS ? 'DEFINIDO' : 'NO DEFINIDO');
+    logger.debug('Intentando enviar email de recuperación', {
+      email,
+      gmailUserConfigurado: !!process.env.GMAIL_USER,
+      gmailPassConfigurado: !!process.env.GMAIL_PASS,
+    });
     await enviarCodigoRecuperacion(email, codigo);
     emailEnviado = true;
-    console.log('=== EMAIL ENVIADO OK ===');
+    logger.info('Email de recuperación enviado', { email });
   } catch (err) {
-    console.error('=== ERROR GMAIL ===');
-    console.error('Mensaje:', err?.message);
-    console.error('Código:', err?.code);
-    console.error('Respuesta:', err?.response);
-    console.error('===================');
+    logger.error('Error enviando email de recuperación (Gmail)', {
+      error: err?.message,
+      stack: err?.stack,
+      code:  err?.code,
+      response: err?.response,
+      email,
+    });
   }
 
   const resp = {

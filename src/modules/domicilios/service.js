@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const logger = require('../../utils/logger');
 
 const inc = {
   empleado:        { include: { usuario: { select: { nombre: true } } } },
@@ -82,7 +83,7 @@ const coger = async (id_venta, id_usuario) => {
       }
     }
   } catch (e) {
-    console.error('[coger] ventaDomiciliario no actualizado (no crítico):', e.message);
+    logger.warn('ventaDomiciliario no actualizado (no crítico)', { error: e.message, stack: e.stack, id_venta });
   }
 
   return { id_venta, id_empleado: empleado.id_empleado };

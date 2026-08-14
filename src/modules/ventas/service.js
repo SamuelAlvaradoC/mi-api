@@ -1,6 +1,7 @@
 const prisma = require('../../config/prisma');
 const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos } = require('../puntos/service');
 const { getIo } = require('../../socket');
+const logger = require('../../utils/logger');
 
 const includeDetalle = {
   cliente:  { select: { id_cliente: true, telefono: true, ciudad: true, barrio: true, usuario: { select: { nombre: true, email: true } } } },
@@ -229,7 +230,9 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
           },
         });
       }
-    } catch (e) { console.error('Error descontando puntos:', e.message); }
+    } catch (e) {
+      logger.error('Error descontando puntos', { error: e.message, stack: e.stack, id_cliente, id_venta: nuevaVenta.id_venta });
+    }
   }
 
   return nuevaVenta;
@@ -271,7 +274,9 @@ const cambiarEstado = async (id, datos, id_usuario) => {
           },
         });
       }
-    } catch (e) { console.error('Error devolviendo puntos al anular:', e.message); }
+    } catch (e) {
+      logger.error('Error devolviendo puntos al anular', { error: e.message, stack: e.stack, id_venta: id, id_cliente: ventaActual.id_cliente });
+    }
   }
 
   if (estadoNombre === 'anulado' && ventaActual.estado?.nombre_estado === 'entregado') {
@@ -301,7 +306,9 @@ const cambiarEstado = async (id, datos, id_usuario) => {
           });
         }
       }
-    } catch (e) { console.error('Error revirtiendo puntos acumulados al anular:', e.message); }
+    } catch (e) {
+      logger.error('Error revirtiendo puntos acumulados al anular', { error: e.message, stack: e.stack, id_venta: id, id_cliente: ventaActual.id_cliente });
+    }
   }
 
   const estadoAnterior = ventaActual.estado?.nombre_estado;
@@ -332,10 +339,12 @@ const cambiarEstado = async (id, datos, id_usuario) => {
               descripcion: `Reversión por retroceso de estado de entregado a ${estadoNombre}`,
             },
           });
-          console.log('Puntos revertidos por retroceso:', ultimoMov.puntos);
+          logger.info('Puntos revertidos por retroceso de estado', { id_venta: id, puntos: ultimoMov.puntos });
         }
       }
-    } catch (e) { console.error('Error revirtiendo puntos por retroceso de estado:', e.message); }
+    } catch (e) {
+      logger.error('Error revirtiendo puntos por retroceso de estado', { error: e.message, stack: e.stack, id_venta: id, id_cliente: ventaActual.id_cliente });
+    }
   }
 
   const updateData = { id_estado: estadoId };
@@ -363,7 +372,7 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         });
       }
     } catch (e) {
-      console.error('Error guardando id_domiciliario:', e.message);
+      logger.error('Error guardando id_domiciliario', { error: e.message, stack: e.stack, id_venta: id, id_usuario });
     }
   }
 
@@ -425,7 +434,7 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         }
       }
     } catch (pagoErr) {
-      console.error('Error creando pago detallado:', pagoErr.message);
+      logger.error('Error creando pago detallado', { error: pagoErr.message, stack: pagoErr.stack, id_venta: id });
     }
   }
 
@@ -440,7 +449,7 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         orderBy: { id_movimiento: 'desc' },
       });
       if (ultimoMov?.tipo === 'acumulacion') {
-        console.log('Puntos ya acumulados para venta #' + id + ' — omitiendo');
+        logger.info('Puntos ya acumulados para venta, omitiendo', { id_venta: id });
       } else {
         const ventaCompleta = await prisma.venta.findUnique({
           where: { id_venta: id },
@@ -456,7 +465,7 @@ const cambiarEstado = async (id, datos, id_usuario) => {
         }
       }
     } catch (e) {
-      console.error('Error acumulando puntos:', e.message);
+      logger.error('Error acumulando puntos', { error: e.message, stack: e.stack, id_venta: id });
     }
     // Re-fetch para incluir pagos y movimientos de puntos recién creados en la respuesta
     return obtener(id);
@@ -469,7 +478,9 @@ const cambiarEstado = async (id, datos, id_usuario) => {
       if (io) {
         io.emit('pedido_listo', await armarPayloadImpresion(id));
       }
-    } catch(e) { console.error('Error emitiendo pedido_listo:', e.message); }
+    } catch(e) {
+      logger.error('Error emitiendo pedido_listo', { error: e.message, stack: e.stack, id_venta: id });
+    }
   }
 
   return ventaActualizada;
@@ -542,9 +553,11 @@ const anular = async (id, motivo_anulacion) => {
             descripcion: `Devolución por anulación del pedido #${id}`,
           },
         });
-        console.log('Puntos devueltos:', venta.puntos_usados, 'cliente:', venta.id_cliente);
+        logger.info('Puntos devueltos por anulación', { id_venta: id, puntos: venta.puntos_usados, id_cliente: venta.id_cliente });
       }
-    } catch (e) { console.error('Error devolviendo puntos:', e.message); }
+    } catch (e) {
+      logger.error('Error devolviendo puntos', { error: e.message, stack: e.stack, id_venta: id, id_cliente: venta.id_cliente });
+    }
   }
 
   if (venta.estado?.nombre_estado === 'entregado') {
@@ -574,7 +587,9 @@ const anular = async (id, motivo_anulacion) => {
           });
         }
       }
-    } catch (e) { console.error('Error revirtiendo puntos acumulados al anular:', e.message); }
+    } catch (e) {
+      logger.error('Error revirtiendo puntos acumulados al anular', { error: e.message, stack: e.stack, id_venta: id, id_cliente: venta.id_cliente });
+    }
   }
 
   const estadoAnulado = await prisma.estado.findFirst({ where: { nombre_estado: 'anulado' } });

@@ -3,6 +3,7 @@ const express   = require('express');
 const cors      = require('cors');
 const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
+const logger    = require('./utils/logger');
 
 const app = express();
 
@@ -92,9 +93,21 @@ app.use((err, req, res, next) => {
   if (err.code === 'P2025') {
     return res.status(404).json({ success: false, data: null, message: 'El registro no existe' });
   }
-  console.error(err);
+  logger.error('Error no manejado', {
+    error:  err.message,
+    stack:  err.stack,
+    method: req.method,
+    url:    req.originalUrl,
+  });
   const status = err.status || 500;
-  res.status(status).json({ success: false, data: null, message: err.message || 'Error interno del servidor' });
+  // Solo se devuelve err.message al cliente cuando el error trae `status`
+  // explícito (significa que un service lo lanzó a propósito con un mensaje
+  // ya pensado para el usuario, ej: { status: 400, message: '...' }). Un
+  // error sin `status` es inesperado (bug, excepción de Prisma, etc.) y su
+  // .message puede contener detalle técnico interno — nunca se expone,
+  // aunque el logger sí guarda el detalle completo arriba.
+  const message = err.status ? (err.message || 'Error interno del servidor') : 'Error interno del servidor';
+  res.status(status).json({ success: false, data: null, message });
 });
 
 module.exports = app;

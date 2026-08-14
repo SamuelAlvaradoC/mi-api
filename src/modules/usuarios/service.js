@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/prisma');
 const { eliminarPorUsuario } = require('../../utils/eliminarCuentaCascada');
+const logger = require('../../utils/logger');
 
 const select = {
   id_usuario: true, id_rol: true, nombre: true,
@@ -55,7 +56,10 @@ const crear = async ({ telefono, ...datos }) => {
       }
     }
   } catch (perfErr) {
-    console.error('Error creando perfil vinculado:', perfErr.message);
+    logger.error('Error creando perfil vinculado', {
+      error: perfErr.message, stack: perfErr.stack,
+      id_usuario: usuario.id_usuario, rol: rolNombre,
+    });
   }
 
   return usuario;
