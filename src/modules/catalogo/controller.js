@@ -15,6 +15,7 @@ const obtenerProducto        = async (req, res, next) => { try { success(res, aw
 const listarCategorias       = async (req, res, next) => { try { success(res, await service.listarCategorias()); } catch (e) { next(e); } };
 const buscar                 = async (req, res, next) => { try { success(res, await service.buscar(req.query.q || '')); } catch (e) { next(e); } };
 const promociones            = async (req, res, next) => { try { success(res, await service.promociones()); } catch (e) { next(e); } };
+const masPedidos              = async (req, res, next) => { try { success(res, await service.masPedidos()); } catch (e) { next(e); } };
 const listarToppingsActivos  = async (req, res, next) => { try { success(res, await service.listarToppingsActivos()); } catch (e) { next(e); } };
 const listarAdicionesActivas = async (req, res, next) => { try { success(res, await service.listarAdicionesActivas()); } catch (e) { next(e); } };
 
@@ -25,6 +26,6 @@ const agregarItem   = async (req, res, next) => { try { success(res, await servi
 const actualizarItem= (req, res, next) => { try { success(res, service.actualizarItem(req.user.id_usuario, Number(req.params.id), req.body), 'Carrito actualizado'); } catch (e) { next(e); } };
 const eliminarItem  = (req, res, next) => { try { success(res, service.eliminarItem(req.user.id_usuario, Number(req.params.id)), 'Item eliminado'); } catch (e) { next(e); } };
 
-module.exports = { listarProductos, obtenerProducto, listarCategorias, buscar, promociones,
+module.exports = { listarProductos, obtenerProducto, listarCategorias, buscar, promociones, masPedidos,
   listarToppingsActivos, listarAdicionesActivas,
   getCarrito, totalCarrito, agregarItem, actualizarItem, eliminarItem };

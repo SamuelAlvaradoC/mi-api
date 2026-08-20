@@ -50,6 +50,29 @@ const promociones = async () => {
   return prisma.producto.findMany({ where: { id_producto: { in: ids }, estado: 1 }, include: { categoria: true } });
 };
 
+// Top 6 productos con más unidades vendidas en pedidos entregados (todo el
+// histórico, mismo criterio que el dashboard admin) — solo productos activos.
+// Se agrupa sin límite y se recorta a 6 después de filtrar inactivos, para
+// no perder puestos por productos desactivados que quedaron en medio del ranking.
+const masPedidos = async () => {
+  const agrupados = await prisma.detalleVenta.groupBy({
+    by: ['id_producto'],
+    where: { venta: { estado: { nombre_estado: 'entregado' } } },
+    _sum: { cantidad: true },
+    orderBy: { _sum: { cantidad: 'desc' } },
+  });
+  if (agrupados.length === 0) return [];
+
+  const ids = agrupados.map((r) => r.id_producto);
+  const productos = await prisma.producto.findMany({
+    where: { id_producto: { in: ids }, estado: 1 },
+    include: { categoria: true },
+  });
+  const porId = new Map(productos.map((p) => [p.id_producto, p]));
+
+  return agrupados.map((r) => porId.get(r.id_producto)).filter(Boolean).slice(0, 6);
+};
+
 const listarToppingsActivos  = () => prisma.topping.findMany({ where: { estado: 1 }, orderBy: { nombre: 'asc' } });
 const listarAdicionesActivas = () => prisma.adicion.findMany({ where: { estado: 1 }, orderBy: { nombre: 'asc' } });
 
@@ -116,7 +139,7 @@ const totalCarrito = (id_usuario) => {
 };
 
 module.exports = {
-  listarProductos, obtenerProducto, listarCategorias, buscar, promociones,
+  listarProductos, obtenerProducto, listarCategorias, buscar, promociones, masPedidos,
   listarToppingsActivos, listarAdicionesActivas,
   getCarrito, agregarItem, actualizarItem, eliminarItem, totalCarrito,
 };
