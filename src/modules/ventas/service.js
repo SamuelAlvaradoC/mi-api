@@ -471,11 +471,11 @@ const cambiarEstado = async (id, datos, id_usuario) => {
     return obtener(id);
   }
 
-  // Notificar al impresor cuando pasa a 'listo' -- pero no en el reingreso
-  // desde 'despachado' (el domiciliario/admin devolviendo un pedido que ya
-  // se imprimio la primera vez). El empleado puede reimprimir a mano con el
-  // boton "Generar comprobante" si de verdad lo necesita.
-  if (estadoNombre === 'listo' && estadoAnterior !== 'despachado') {
+  // Notificar al impresor cuando pasa a 'listo' -- pero no en ningun reingreso
+  // (el domiciliario/admin devolviendo desde 'despachado' o 'entregado' un
+  // pedido que ya se imprimio la primera vez). El empleado puede reimprimir
+  // a mano con el boton "Generar comprobante" si de verdad lo necesita.
+  if (estadoNombre === 'listo' && estadoAnterior !== 'despachado' && estadoAnterior !== 'entregado') {
     try {
       const io = getIo();
       if (io) {

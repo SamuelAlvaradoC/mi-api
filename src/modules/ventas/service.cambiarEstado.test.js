@@ -1,7 +1,13 @@
 jest.mock('../../config/prisma', () => ({
-  venta:    { findUnique: jest.fn(), update: jest.fn() },
-  estado:   { findFirst: jest.fn() },
-  empleado: { findUnique: jest.fn() },
+  venta:            { findUnique: jest.fn(), update: jest.fn() },
+  estado:           { findFirst: jest.fn() },
+  empleado:         { findUnique: jest.fn() },
+  // Solo se tocan cuando estadoAnterior === 'entregado' (reversion de puntos
+  // al retroceder desde entregado) -- findFirst sin mockResolvedValue ya
+  // resuelve a undefined, que es justo lo que este test necesita (sin
+  // movimiento previo que revertir).
+  movimientoPuntos: { findFirst: jest.fn(), create: jest.fn() },
+  puntosCliente:    { findUnique: jest.fn(), update: jest.fn() },
 }));
 jest.mock('../../socket', () => ({ getIo: jest.fn() }));
 jest.mock('../puntos/service', () => ({
@@ -40,7 +46,7 @@ const mockVenta = (estadoActual) => ({
   cliente: null,
   detalleVentas: [],
   fecha: new Date('2026-08-20T12:00:00.000Z'),
-  estado: { id_estado: estadoActual === 'despachado' ? 4 : 2, nombre_estado: estadoActual },
+  estado: { id_estado: { despachado: 4, entregado: 5 }[estadoActual] || 2, nombre_estado: estadoActual },
 });
 
 describe('cambiarEstado — impresion del comprobante al pasar a "listo"', () => {
@@ -65,6 +71,14 @@ describe('cambiarEstado — impresion del comprobante al pasar a "listo"', () =>
 
   test('NO imprime: reingreso a "listo" desde "despachado" (Devolver a Listo / devolver del domiciliario)', async () => {
     prisma.venta.findUnique.mockResolvedValue(mockVenta('despachado'));
+
+    await service.cambiarEstado(1, { nombre_estado: 'listo' }, 99);
+
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  test('NO imprime: reingreso a "listo" desde "entregado" (venta marcada entregada por error y devuelta)', async () => {
+    prisma.venta.findUnique.mockResolvedValue(mockVenta('entregado'));
 
     await service.cambiarEstado(1, { nombre_estado: 'listo' }, 99);
 
