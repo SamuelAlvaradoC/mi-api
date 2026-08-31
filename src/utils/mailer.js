@@ -1,7 +1,7 @@
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = 'ChocoFreseo <onboarding@resend.dev>';
+const FROM = 'ChocoFreseo <no-reply@chocofreseo.com>';
 
 const baseHTML = (contenido) => `
 <div style="font-family:Arial,sans-serif;max-width:520px;
