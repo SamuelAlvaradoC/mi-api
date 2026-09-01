@@ -160,10 +160,14 @@ function imprimirRaw(datos, nombreImpresora) {
 // ────────────────────────────────────────────────────────────
 
 // ── Socket ───────────────────────────────────────────────────
+// query.tipo='impresor' identifica este socket ante el backend (ver
+// server.js) para que el panel admin sepa en tiempo real si hay un
+// impresor conectado -- antes no había forma de saberlo del otro lado.
 const socket = io(URL_BACKEND, {
   reconnection: true,
   reconnectionAttempts: Infinity,
   reconnectionDelay: 3000,
+  query: { tipo: 'impresor' },
 });
 
 socket.on('connect',       () => { log('  [OK] Conectado al servidor ChocoFreseo'); log('  [...] Esperando pedidos listos...'); });
