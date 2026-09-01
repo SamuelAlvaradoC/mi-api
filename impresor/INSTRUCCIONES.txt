@@ -70,10 +70,12 @@ SOLUCIÓN DE PROBLEMAS
 ARCHIVOS EN ESTA CARPETA
 --------------------------
 INSTALAR.bat         → Instalador (ejecutar la primera vez)
-INICIAR_IMPRESOR.bat → Iniciar manualmente si es necesario
+INICIAR_IMPRESOR.bat → Iniciar manualmente si es necesario (ventana visible)
+iniciar_oculto.vbs   → Usado por el inicio automático (ventana oculta, no tocar)
 impresor.js          → Script principal (no borrar ni mover)
 package.json         → Configuración de dependencias (no borrar)
 INSTRUCCIONES.txt    → Este archivo
+README.md            → Cómo quedó configurado el inicio automático (para reinstalar en otro PC)
 logs.txt             → Registro de actividad (se crea automáticamente)
 node_modules/        → Dependencias (se crea automáticamente)
 

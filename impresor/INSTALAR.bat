@@ -64,21 +64,24 @@ echo  [OK] Dependencias instaladas.
 
 echo.
 echo  [*] Configurando inicio automatico...
-schtasks /create /tn "ChocoFreseo Impresor" ^
-  /tr "cmd /c cd /d \"%~dp0\" && node impresor.js >> \"%~dp0\logs.txt\" 2>&1" ^
-  /sc onlogon ^
-  /ru "%USERNAME%" ^
-  /f >nul 2>&1
+REM Acceso directo en la carpeta de Inicio de Windows (shell:startup) --
+REM apunta a iniciar_oculto.vbs, que corre impresor.js SIN ventana visible.
+REM No requiere permisos de Administrador (a diferencia de una Tarea
+REM Programada con /sc onlogon, que fallaba en silencio con "Acceso
+REM denegado" si este instalador no se ejecutaba como Administrador --
+REM esa era la causa real de que el arranque automatico nunca quedara
+REM configurado).
+powershell -Command "$ws = New-Object -ComObject WScript.Shell; $startup = [System.Environment]::GetFolderPath('Startup'); $s = $ws.CreateShortcut($startup + '\ChocoFreseo Impresor.lnk'); $s.TargetPath = '%~dp0iniciar_oculto.vbs'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = 'shell32.dll,137'; $s.Save()" 2>nul
 
 if %errorlevel% equ 0 (
-  echo  [OK] Inicio automatico configurado.
+  echo  [OK] Inicio automatico configurado -- arrancara solo, sin ventana visible, al iniciar sesion en Windows.
 ) else (
   echo  [!] No se pudo configurar inicio automatico.
-  echo      Usa el acceso directo del escritorio.
+  echo      Usa el acceso directo del escritorio mientras se soluciona.
 )
 
 echo.
-echo  [*] Creando acceso directo en el escritorio...
+echo  [*] Creando acceso directo en el escritorio (para iniciar manualmente si hace falta)...
 powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([System.Environment]::GetFolderPath('Desktop') + '\ChocoFreseo Impresor.lnk'); $s.TargetPath = '%~dp0INICIAR_IMPRESOR.bat'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = 'shell32.dll,137'; $s.Save()" 2>nul
 echo  [OK] Acceso directo creado.
 

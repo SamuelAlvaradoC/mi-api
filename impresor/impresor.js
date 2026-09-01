@@ -400,6 +400,19 @@ async function imprimirCierre(datos) {
 }
 // ────────────────────────────────────────────────────────────
 
+// El programa corre solo (via el acceso directo en la carpeta de Inicio
+// de Windows, sin ventana visible) -- un error no manejado no debe tumbar
+// el proceso, porque nadie se daría cuenta hasta la próxima vez que
+// alguien inicie sesión en el PC. Se registra en logs.txt y el proceso
+// sigue vivo (el socket ya tiene reconnection:true, así que sigue
+// recibiendo pedidos normalmente).
+process.on('uncaughtException', (err) => {
+  log('  [!] Error no manejado (el programa sigue corriendo): ' + (err?.message || err));
+});
+process.on('unhandledRejection', (err) => {
+  log('  [!] Promesa rechazada sin manejar (el programa sigue corriendo): ' + (err?.message || err));
+});
+
 process.on('SIGINT', () => {
   log('');
   log('  Cerrando sistema de impresion...');
