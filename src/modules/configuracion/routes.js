@@ -2,17 +2,8 @@ const { Router } = require('express');
 const verifyToken  = require('../../middlewares/verifyToken');
 const checkPermiso = require('../../middlewares/checkPermiso');
 const s = require('./service');
-const { hayImpresorConectado } = require('../../socket');
 
 const router = Router();
-
-/* ── Estado del impresor (Socket.IO) ──────────────────────────── */
-// Protegido: solo le interesa al panel admin -- si estuviera público
-// filtraría información operativa (si hay alguien en la tienda o no)
-// a cualquiera sin sesión.
-router.get('/estado-impresora', verifyToken, (req, res) => {
-  res.json({ success: true, data: { conectado: hayImpresorConectado() } });
-});
 
 /* ── Tiempo de espera ─────────────────────────────────────────── */
 router.get('/tiempo-espera', async (req, res) => {

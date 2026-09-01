@@ -2,7 +2,7 @@ require('dotenv').config();
 const { createServer } = require('http');
 const { Server }       = require('socket.io');
 const app              = require('./app');
-const { setIo, ROOM_IMPRESOR } = require('./socket');
+const { setIo } = require('./socket');
 
 const PORT       = process.env.PORT || 3000;
 const httpServer = createServer(app);
@@ -24,16 +24,6 @@ setIo(io);
 
 io.on('connection', (socket) => {
   console.log('Socket conectado:', socket.id);
-
-  // impresor.js se identifica con ?tipo=impresor al conectarse (ver
-  // impresor.js) -- se une a esta room para que el backend pueda saber
-  // si hay algún impresor realmente conectado (ver socket.js). El
-  // socket sale de la room automáticamente al desconectarse, Socket.IO
-  // lo maneja solo.
-  if (socket.handshake.query?.tipo === 'impresor') {
-    socket.join(ROOM_IMPRESOR);
-    console.log('  → Identificado como impresor:', socket.id);
-  }
 
   // El socket no tiene autenticación — nunca se reenvía tal cual lo que manda
   // el cliente (un ticket o un cierre de caja falsos se podrían imprimir si se
