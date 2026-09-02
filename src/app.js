@@ -5,7 +5,7 @@ const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
 const logger    = require('./utils/logger');
 const { registroLimiter } = require('./middlewares/rateLimiters');
-const { obtenerIpReal, obtenerIpKeyLimiter } = require('./utils/obtenerIpReal');
+const { obtenerIpKeyLimiter } = require('./utils/obtenerIpReal');
 
 const app = express();
 
@@ -62,20 +62,6 @@ const generalLimiter = rateLimit({
 
 // Health check
 app.get('/', (req, res) => res.json({ success: true, data: null, message: 'ChocoAdmin API running' }));
-
-// DIAGNÓSTICO TEMPORAL -- investigando por qué el rate limit por IP no
-// bloquea en producción. Solo lectura, sin efectos secundarios. Se quita
-// en cuanto se confirme la causa real. Ver conversación/commit.
-app.get('/api/_debug-ip', (req, res) => {
-  res.json({
-    headers: req.headers,
-    reqIp: req.ip,
-    reqIps: req.ips,
-    cfConnectingIp: req.headers['cf-connecting-ip'],
-    obtenerIpReal: obtenerIpReal(req),
-    obtenerIpKeyLimiter: obtenerIpKeyLimiter(req),
-  });
-});
 
 // ── Rutas ───────────────────────────────────────────────
 app.use('/api/auth',          require('./modules/auth/routes'));
