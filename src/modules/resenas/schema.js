@@ -1,16 +1,16 @@
 const { z } = require('zod');
-const { sanitizeTexto, sanitizeTextoOpcional, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
+const { noContengaHtml, MSG_HTML } = require('../../utils/validarSinHtml');
 
 const crearResenaSchema = z.object({
-  sede:                  z.string().min(1).max(50).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Campo requerido'),
-  frecuencia:            z.string().min(1).max(50).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Campo requerido'),
+  sede:                  z.string().trim().min(1).max(50).refine(noContengaHtml, MSG_HTML),
+  frecuencia:            z.string().trim().min(1).max(50).refine(noContengaHtml, MSG_HTML),
   calificacion_atencion: z.number().int().min(1).max(5),
   calificacion_producto: z.number().int().min(1).max(5),
-  recomendaria:          z.string().min(1).max(20).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Campo requerido'),
-  tiempo_adecuado:       z.string().min(1).max(30).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Campo requerido'),
-  lo_que_gusto:          z.string().max(2000).optional().transform(sanitizeTextoOpcional),
-  producto_deseado:      z.string().max(2000).optional().transform(sanitizeTextoOpcional),
-  mejora:                z.string().max(2000).optional().transform(sanitizeTextoOpcional),
+  recomendaria:          z.string().trim().min(1).max(20).refine(noContengaHtml, MSG_HTML),
+  tiempo_adecuado:       z.string().trim().min(1).max(30).refine(noContengaHtml, MSG_HTML),
+  lo_que_gusto:          z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
+  producto_deseado:      z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
+  mejora:                z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
 });
 
 module.exports = { crearResenaSchema };

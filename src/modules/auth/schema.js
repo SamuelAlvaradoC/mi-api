@@ -1,6 +1,5 @@
 const { z } = require('zod');
-const { sanitizeTexto, sanitizeTextoOpcional, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
-const MSG_NOMBRE_VACIO = 'El nombre no puede quedar vacío';
+const { noContengaHtml, MSG_HTML } = require('../../utils/validarSinHtml');
 
 const loginSchema = z.object({
   email:     z.string().trim().toLowerCase().email('Email inválido'),
@@ -8,7 +7,7 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  nombre:    z.string().min(2, 'El nombre debe tener al menos 2 caracteres').transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO),
+  nombre:    z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').refine(noContengaHtml, MSG_HTML),
   email:     z.string().trim().toLowerCase().email('Ingresa un correo electrónico válido'),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   id_rol:    z.number().int().positive(),
@@ -20,7 +19,7 @@ const telefonoCol = z.string()
   .or(z.literal(''));
 
 const editarPerfilSchema = z.object({
-  nombre:   z.string().min(2, 'El nombre debe tener al menos 2 caracteres').transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO).optional(),
+  nombre:   z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').refine(noContengaHtml, MSG_HTML).optional(),
   email:    z.string().trim().toLowerCase().email('Ingresa un correo electrónico válido').optional(),
   telefono: telefonoCol,
 });
@@ -36,11 +35,11 @@ const verificarResetSchema = z.object({
 });
 
 const crearDireccionSchema = z.object({
-  direccion_linea: z.string().min(1, 'La dirección es requerida').transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'La dirección no puede quedar vacía'),
-  barrio:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  ciudad:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  departamento:    z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  referencia:      z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  direccion_linea: z.string().trim().min(1, 'La dirección es requerida').refine(noContengaHtml, MSG_HTML),
+  barrio:          z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  ciudad:          z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  departamento:    z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  referencia:      z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
   id_barrio:       z.number().int().positive().optional().nullable(),
 });
 

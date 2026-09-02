@@ -1,5 +1,5 @@
 const { z } = require('zod');
-const { sanitizeTexto, sanitizeTextoOpcional, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
+const { noContengaHtml, MSG_HTML } = require('../../utils/validarSinHtml');
 
 const itemVentaSchema = z.object({
   id_producto:     z.number().int().positive(),
@@ -29,11 +29,11 @@ const itemVentaSchema = z.object({
 });
 
 const nuevaDireccionSchema = z.object({
-  direccion_linea: z.string().min(1).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'La dirección no puede quedar vacía'),
-  barrio:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  ciudad:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  departamento:    z.string().optional().nullable().transform(sanitizeTextoOpcional),
-  referencia:      z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  direccion_linea: z.string().trim().min(1).refine(noContengaHtml, MSG_HTML),
+  barrio:          z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  ciudad:          z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  departamento:    z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
+  referencia:      z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
   id_barrio:       z.number().int().positive().optional().nullable(),
 });
 
@@ -47,7 +47,7 @@ const crearVentaSchema = z.object({
   // puntual). Este campo NO existe en crearMiPedidoSchema — un cliente nunca
   // puede activarlo.
   override_costo_domicilio: z.boolean().optional().default(false),
-  observaciones:       z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  observaciones:       z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
@@ -60,7 +60,7 @@ const crearMiPedidoSchema = z.object({
   id_direccion:        z.number().int().positive().optional(),
   nueva_direccion:     nuevaDireccionSchema.optional(),
   costo_domicilio:     z.number().min(0).default(0),
-  observaciones:       z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  observaciones:       z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
@@ -78,13 +78,13 @@ const estadoVentaSchema = z.object({
   monto_efectivo:      z.number().min(0).optional(),
   monto_transferencia: z.number().min(0).optional(),
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
-  motivo_anulacion:    z.string().optional().transform(sanitizeTextoOpcional),
+  motivo_anulacion:    z.string().trim().optional().refine(noContengaHtml, MSG_HTML),
 }).refine((d) => d.id_estado !== undefined || d.nombre_estado !== undefined, {
   message: 'Debe proporcionar id_estado o nombre_estado',
 });
 
 const anularVentaSchema = z.object({
-  motivo_anulacion: z.string().min(5, 'Debe indicar el motivo de anulación').transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Debe indicar el motivo de anulación'),
+  motivo_anulacion: z.string().trim().min(5, 'Debe indicar el motivo de anulación').refine(noContengaHtml, MSG_HTML),
 });
 
 // items/costo_domicilio son opcionales porque una venta "entregada" solo
@@ -96,7 +96,7 @@ const editarVentaSchema = z.object({
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
-  nombre_cliente:      z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  nombre_cliente:      z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
   telefono_cliente:    z.string().optional().nullable(),
 });
 

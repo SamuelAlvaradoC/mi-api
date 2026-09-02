@@ -1,5 +1,5 @@
 const prisma = require('../../config/prisma');
-const { sanitizeTexto } = require('../../utils/sanitizeTexto');
+const { contieneHtml, MSG_HTML } = require('../../utils/validarSinHtml');
 
 const TIPOS_GASTO = ['domiciliario', 'empleado', 'insumos'];
 
@@ -62,12 +62,9 @@ const obtenerOcrearCierre = async (id_usuario) => {
 
 const agregarGasto = async (id_usuario, { tipo, descripcion, valor }) => {
   if (!TIPOS_GASTO.includes(tipo)) throw { status: 400, message: 'Tipo de gasto inválido' };
-  if (!descripcion || !String(descripcion).trim()) throw { status: 400, message: 'La descripción es obligatoria' };
-
-  // Si la descripción era puro HTML (ej. "<script></script>"), sanitizar
-  // la puede dejar vacía -- se revalida después de limpiar, no solo antes.
-  const descripcionLimpia = sanitizeTexto(String(descripcion));
+  const descripcionLimpia = String(descripcion || '').trim();
   if (!descripcionLimpia) throw { status: 400, message: 'La descripción es obligatoria' };
+  if (contieneHtml(descripcionLimpia)) throw { status: 400, message: MSG_HTML };
 
   const valorNum = Number(valor);
   if (isNaN(valorNum) || valorNum <= 0) throw { status: 400, message: 'El valor del gasto debe ser mayor a 0' };

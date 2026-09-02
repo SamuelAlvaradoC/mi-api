@@ -1,9 +1,8 @@
 const { z } = require('zod');
-const { sanitizeTexto, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
-const MSG_NOMBRE_VACIO = 'El nombre no puede quedar vacío';
+const { noContengaHtml, MSG_HTML } = require('../../utils/validarSinHtml');
 
 const crearUsuarioSchema = z.object({
-  nombre: z.string().min(2).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO),
+  nombre: z.string().trim().min(2).refine(noContengaHtml, MSG_HTML),
   email: z.string().email(),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   id_rol: z.number().int().positive(),
@@ -14,7 +13,7 @@ const crearUsuarioSchema = z.object({
 });
 
 const actualizarUsuarioSchema = z.object({
-  nombre: z.string().min(2).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO).optional(),
+  nombre: z.string().trim().min(2).refine(noContengaHtml, MSG_HTML).optional(),
   email: z.string().email().optional(),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres').optional(),
   id_rol: z.number().int().positive().optional(),
