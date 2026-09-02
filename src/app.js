@@ -5,11 +5,18 @@ const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
 const logger    = require('./utils/logger');
 const { registroLimiter } = require('./middlewares/rateLimiters');
+const { obtenerIpKeyLimiter } = require('./utils/obtenerIpReal');
 
 const app = express();
 
-// Render corre detrás de un proxy — sin esto, req.ip siempre devuelve la IP
-// del proxy y no la del cliente real, rompiendo la detección de IP nueva.
+// Render corre detrás de un proxy -- sin esto, Express ni siquiera intenta
+// leer X-Forwarded-For. Pero OJO: Render en realidad está detrás de
+// Cloudflare (Cloudflare -> balanceador de Render -> este contenedor, 2
+// saltos), y trust proxy=1 solo confía en 1 -- por eso req.ip TODAVÍA
+// resuelve una IP interna de la infraestructura de Render, no la del
+// cliente real (confirmado con evidencia real, ver utils/obtenerIpReal.js).
+// Se deja igual como base para Express, pero el código NO debe usar
+// req.ip directamente para identificar clientes -- usar obtenerIpReal(req).
 app.set('trust proxy', 1);
 
 // ── Seguridad HTTP ──────────────────────────────────────
@@ -32,6 +39,7 @@ app.use(express.json());
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  keyGenerator: obtenerIpKeyLimiter,
   message: { success: false, message: 'Demasiados intentos. Espera 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -44,6 +52,7 @@ app.use('/api/auth/register',        registroLimiter);
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
+  keyGenerator: obtenerIpKeyLimiter,
   message: { success: false, message: 'Demasiadas solicitudes. Intenta más tarde.' },
   standardHeaders: true,
   legacyHeaders: false,

@@ -2,11 +2,12 @@ const authService = require('./service');
 const { loginSchema, registerSchema, editarPerfilSchema,
         solicitarResetSchema, verificarResetSchema, crearDireccionSchema } = require('./schema');
 const { success } = require('../../utils/response');
+const { obtenerIpReal } = require('../../utils/obtenerIpReal');
 
 const login = async (req, res, next) => {
   try {
     const datos = loginSchema.parse(req.body);
-    success(res, await authService.login({ ...datos, ip: req.ip }), 'Login exitoso');
+    success(res, await authService.login({ ...datos, ip: obtenerIpReal(req) }), 'Login exitoso');
   } catch (err) { next(err); }
 };
 
