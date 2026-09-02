@@ -4,6 +4,7 @@ const cors      = require('cors');
 const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
 const logger    = require('./utils/logger');
+const { registroLimiter } = require('./middlewares/rateLimiters');
 
 const app = express();
 
@@ -38,6 +39,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login',           authLimiter);
 app.use('/api/auth/solicitar-reset', authLimiter);
 app.use('/api/auth/verificar-reset', authLimiter);
+app.use('/api/auth/register',        registroLimiter);
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
