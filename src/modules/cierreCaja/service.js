@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { sanitizeTexto } = require('../../utils/sanitizeTexto');
 
 const TIPOS_GASTO = ['domiciliario', 'empleado', 'insumos'];
 
@@ -63,12 +64,17 @@ const agregarGasto = async (id_usuario, { tipo, descripcion, valor }) => {
   if (!TIPOS_GASTO.includes(tipo)) throw { status: 400, message: 'Tipo de gasto inválido' };
   if (!descripcion || !String(descripcion).trim()) throw { status: 400, message: 'La descripción es obligatoria' };
 
+  // Si la descripción era puro HTML (ej. "<script></script>"), sanitizar
+  // la puede dejar vacía -- se revalida después de limpiar, no solo antes.
+  const descripcionLimpia = sanitizeTexto(String(descripcion));
+  if (!descripcionLimpia) throw { status: 400, message: 'La descripción es obligatoria' };
+
   const valorNum = Number(valor);
   if (isNaN(valorNum) || valorNum <= 0) throw { status: 400, message: 'El valor del gasto debe ser mayor a 0' };
 
   const cierre = await obtenerOcrearCierre(id_usuario);
   return prisma.gastoDia.create({
-    data: { id_cierre: cierre.id_cierre, tipo, descripcion: String(descripcion).trim(), valor: valorNum },
+    data: { id_cierre: cierre.id_cierre, tipo, descripcion: descripcionLimpia, valor: valorNum },
   });
 };
 

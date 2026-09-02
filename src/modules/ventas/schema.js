@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { sanitizeTexto, sanitizeTextoOpcional, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
 
 const itemVentaSchema = z.object({
   id_producto:     z.number().int().positive(),
@@ -28,11 +29,11 @@ const itemVentaSchema = z.object({
 });
 
 const nuevaDireccionSchema = z.object({
-  direccion_linea: z.string().min(1),
-  barrio:          z.string().optional().nullable(),
-  ciudad:          z.string().optional().nullable(),
-  departamento:    z.string().optional().nullable(),
-  referencia:      z.string().optional().nullable(),
+  direccion_linea: z.string().min(1).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'La dirección no puede quedar vacía'),
+  barrio:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  ciudad:          z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  departamento:    z.string().optional().nullable().transform(sanitizeTextoOpcional),
+  referencia:      z.string().optional().nullable().transform(sanitizeTextoOpcional),
   id_barrio:       z.number().int().positive().optional().nullable(),
 });
 
@@ -46,7 +47,7 @@ const crearVentaSchema = z.object({
   // puntual). Este campo NO existe en crearMiPedidoSchema — un cliente nunca
   // puede activarlo.
   override_costo_domicilio: z.boolean().optional().default(false),
-  observaciones:       z.string().optional().nullable(),
+  observaciones:       z.string().optional().nullable().transform(sanitizeTextoOpcional),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
@@ -59,7 +60,7 @@ const crearMiPedidoSchema = z.object({
   id_direccion:        z.number().int().positive().optional(),
   nueva_direccion:     nuevaDireccionSchema.optional(),
   costo_domicilio:     z.number().min(0).default(0),
-  observaciones:       z.string().optional().nullable(),
+  observaciones:       z.string().optional().nullable().transform(sanitizeTextoOpcional),
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
@@ -77,13 +78,13 @@ const estadoVentaSchema = z.object({
   monto_efectivo:      z.number().min(0).optional(),
   monto_transferencia: z.number().min(0).optional(),
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
-  motivo_anulacion:    z.string().optional(),
+  motivo_anulacion:    z.string().optional().transform(sanitizeTextoOpcional),
 }).refine((d) => d.id_estado !== undefined || d.nombre_estado !== undefined, {
   message: 'Debe proporcionar id_estado o nombre_estado',
 });
 
 const anularVentaSchema = z.object({
-  motivo_anulacion: z.string().min(5, 'Debe indicar el motivo de anulación'),
+  motivo_anulacion: z.string().min(5, 'Debe indicar el motivo de anulación').transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, 'Debe indicar el motivo de anulación'),
 });
 
 // items/costo_domicilio son opcionales porque una venta "entregada" solo
@@ -95,7 +96,7 @@ const editarVentaSchema = z.object({
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
-  nombre_cliente:      z.string().optional().nullable(),
+  nombre_cliente:      z.string().optional().nullable().transform(sanitizeTextoOpcional),
   telefono_cliente:    z.string().optional().nullable(),
 });
 

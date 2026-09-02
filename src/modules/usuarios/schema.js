@@ -1,7 +1,9 @@
 const { z } = require('zod');
+const { sanitizeTexto, noQuedeVacioTrasSanitizar } = require('../../utils/sanitizeTexto');
+const MSG_NOMBRE_VACIO = 'El nombre no puede quedar vacío';
 
 const crearUsuarioSchema = z.object({
-  nombre: z.string().min(2),
+  nombre: z.string().min(2).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO),
   email: z.string().email(),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   id_rol: z.number().int().positive(),
@@ -12,7 +14,7 @@ const crearUsuarioSchema = z.object({
 });
 
 const actualizarUsuarioSchema = z.object({
-  nombre: z.string().min(2).optional(),
+  nombre: z.string().min(2).transform(sanitizeTexto).refine(noQuedeVacioTrasSanitizar, MSG_NOMBRE_VACIO).optional(),
   email: z.string().email().optional(),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres').optional(),
   id_rol: z.number().int().positive().optional(),
