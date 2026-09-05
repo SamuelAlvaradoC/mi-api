@@ -16,6 +16,7 @@ const perfil            = async (req, res, next) => { try { success(res, await s
 const detalleAdmin      = async (req, res, next) => { try { success(res, await service.detalleAdmin(Number(req.params.id))); } catch (e) { next(e); } };
 const listarDirecciones = async (req, res, next) => { try { success(res, await service.listarDirecciones(Number(req.params.id))); } catch (e) { next(e); } };
 const crearDireccion    = async (req, res, next) => { try { success(res, await service.crearDireccion(Number(req.params.id), crearDireccionSchema.parse(req.body)), 'Dirección creada', 201); } catch (e) { next(e); } };
+const editarDireccion   = async (req, res, next) => { try { success(res, await service.editarDireccion(Number(req.params.id), Number(req.params.id_direccion), crearDireccionSchema.parse(req.body)), 'Dirección actualizada'); } catch (e) { next(e); } };
 
 module.exports = { listar, crear, buscar, obtener, actualizar, eliminar, cambiarEstado,
-  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, detalleAdmin, listarDirecciones, crearDireccion };
+  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, detalleAdmin, listarDirecciones, crearDireccion, editarDireccion };

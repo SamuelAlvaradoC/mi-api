@@ -180,5 +180,11 @@ const listarDirecciones = async (id) => {
 };
 const crearDireccion    = async (id, datos) => { await obtener(id); return prisma.direccion.create({ data: { ...datos, id_cliente: id, estado: 1 } }); };
 
+const editarDireccion = async (id, idDireccion, datos) => {
+  const dir = await prisma.direccion.findUnique({ where: { id_direccion: idDireccion } });
+  if (!dir || dir.id_cliente !== id) throw { status: 404, message: 'Dirección no encontrada' };
+  return prisma.direccion.update({ where: { id_direccion: idDireccion }, data: datos });
+};
+
 module.exports = { listar, crear, buscar, obtener, actualizar, eliminar, cambiarEstado,
-  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, detalleAdmin, listarDirecciones, crearDireccion };
+  historialPedidos, toppingsFavoritos, adicionesFavoritas, perfil, detalleAdmin, listarDirecciones, crearDireccion, editarDireccion };

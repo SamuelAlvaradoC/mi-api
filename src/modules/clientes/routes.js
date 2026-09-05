@@ -20,7 +20,8 @@ router.get('/:id/toppings-favoritos',  verifyToken, ver,       controller.toppin
 router.get('/:id/adiciones-favoritas', verifyToken, ver,       controller.adicionesFavoritas);
 router.get('/:id/perfil',              verifyToken, ver,       controller.perfil);
 router.get('/:id/detalle',             verifyToken, ver,       controller.detalleAdmin);
-router.get('/:id/direcciones',         verifyToken, ver,       controller.listarDirecciones);
-router.post('/:id/direcciones',        verifyToken, gestionar, controller.crearDireccion);
+router.get('/:id/direcciones',                verifyToken, ver,       controller.listarDirecciones);
+router.post('/:id/direcciones',               verifyToken, gestionar, controller.crearDireccion);
+router.put('/:id/direcciones/:id_direccion',  verifyToken, gestionar, controller.editarDireccion);
 
 module.exports = router;
