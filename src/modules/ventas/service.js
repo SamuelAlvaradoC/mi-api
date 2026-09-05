@@ -165,7 +165,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
 
   const estadoPendiente = await prisma.estado.findFirst({ where: { nombre_estado: 'pendiente' } });
   // Auto-calcular descuento_puntos desde puntos_usados si no se envió explícitamente
-  const descuentoCalc   = Number(descuento_puntos) || (Number(puntos_usados) > 0 ? calcularDescuentoPuntos(Number(puntos_usados)) : 0);
+  const descuentoCalc   = Number(descuento_puntos) || (Number(puntos_usados) > 0 ? await calcularDescuentoPuntos(Number(puntos_usados)) : 0);
   // Descuento de puntos solo aplica al subtotal de productos (nunca al domicilio)
   const descuento       = Math.min(descuentoCalc, subtotal);
   const total           = Math.max(0, subtotal - descuento) + Number(costo_domicilio);
@@ -669,7 +669,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
     if (!registro || registro.puntos < puntosUsar)
       throw { status: 400, message: 'No tienes suficientes puntos para aplicar este descuento' };
   }
-  const descuento_puntos = puntosUsar > 0 ? calcularDescuentoPuntos(puntosUsar) : 0;
+  const descuento_puntos = puntosUsar > 0 ? await calcularDescuentoPuntos(puntosUsar) : 0;
 
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {

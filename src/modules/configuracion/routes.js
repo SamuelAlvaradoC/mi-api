@@ -1,7 +1,15 @@
 const { Router } = require('express');
 const verifyToken  = require('../../middlewares/verifyToken');
 const checkPermiso = require('../../middlewares/checkPermiso');
+const { checkRolAdmin } = require('../../middlewares/checkPermiso');
 const s = require('./service');
+
+// Tope absoluto para bloquear errores de tecleo (ej. escribir 99999) --
+// el rango "normal" del negocio hoy es ~10-25 pesos por punto; 100 deja
+// margen amplio para ajustes futuros sin abrir la puerta a un valor
+// disparatado. La confirmación para valores fuera de 10-25 (pero dentro de
+// este tope) es responsabilidad del frontend (alerta antes de guardar).
+const VALOR_PUNTO_MAX = 100;
 
 const router = Router();
 
@@ -108,6 +116,43 @@ router.patch('/estado-tienda', verifyToken, checkPermiso('ver_dashboard'), async
     }
     await s.actualizar('estado_tienda', estado);
     res.json({ success: true, data: { estado } });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+/* ── Valor del punto de fidelidad ──────────────────────────────── */
+// Público — igual que /horario y /tiempo-espera: el catálogo (accesible sin
+// login) necesita este valor para mostrar "1 punto = $X" y calcular el
+// descuento antes de que el cliente inicie sesión o confirme el pedido.
+// Solo CAMBIARLO queda exclusivo del admin (ver checkRolAdmin, más abajo).
+router.get('/valor-punto', async (req, res) => {
+  try {
+    const valor = await s.valorPunto();
+    res.json({ success: true, data: { valor_punto_pesos: valor } });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.patch('/valor-punto', verifyToken, checkRolAdmin, async (req, res) => {
+  try {
+    const { valor_punto_pesos } = req.body;
+    const valor = Number(valor_punto_pesos);
+    if (valor_punto_pesos === undefined || isNaN(valor)) {
+      return res.status(400).json({ success: false, message: 'Valor inválido' });
+    }
+    if (valor <= 0) {
+      return res.status(400).json({ success: false, message: 'El valor debe ser mayor a 0' });
+    }
+    if (valor > VALOR_PUNTO_MAX) {
+      return res.status(400).json({ success: false, message: `El valor no puede superar $${VALOR_PUNTO_MAX} por punto` });
+    }
+    if (Number(valor.toFixed(2)) !== valor) {
+      return res.status(400).json({ success: false, message: 'El valor admite máximo 2 decimales' });
+    }
+    await s.actualizar('valor_punto_pesos', valor);
+    res.json({ success: true, data: { valor_punto_pesos: valor } });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }

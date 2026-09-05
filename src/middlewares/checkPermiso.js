@@ -44,5 +44,29 @@ const checkPermisoAny = (...nombres) => {
   };
 };
 
+/**
+ * Exige rol admin exacto -- a diferencia de checkPermiso, no basta con tener
+ * un permiso puntual: confirmador_domicilio hoy tiene casi todos los
+ * permisos individuales (incluido ver_dashboard) además de los suyos
+ * propios, así que ninguna combinación de checkPermiso(...) sirve para
+ * ajustes que deben quedar exclusivos del admin (ej. valor del punto de
+ * fidelidad, que afecta dinero real de todos los clientes).
+ * Uso: router.patch('/valor-punto', verifyToken, checkRolAdmin, controller)
+ */
+const checkRolAdmin = async (req, res, next) => {
+  try {
+    const { id_rol } = req.user;
+    const rol = await prisma.rol.findUnique({ where: { id_rol } });
+    if (!rol || rol.nombre !== 'admin') {
+      return res.status(403).json({
+        success: false, data: null,
+        message: 'Solo un administrador puede realizar esta acción',
+      });
+    }
+    next();
+  } catch (err) { next(err); }
+};
+
 module.exports = checkPermiso;
 module.exports.checkPermisoAny = checkPermisoAny;
+module.exports.checkRolAdmin = checkRolAdmin;

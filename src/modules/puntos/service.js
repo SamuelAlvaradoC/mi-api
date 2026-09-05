@@ -1,17 +1,23 @@
 const prisma = require('../../config/prisma');
+const { valorPunto } = require('../configuracion/service');
 
 const PESOS_POR_PUNTO = 500;
-const VALOR_PUNTO     = 12.5;
 
 const obtenerPuntos = async (id_cliente) => {
-  const registro = await prisma.puntosCliente.findUnique({
-    where: { id_cliente },
-    include: { movimientos: { orderBy: { fecha: 'desc' }, take: 10 } },
-  });
+  const [registro, valorPuntoActual] = await Promise.all([
+    prisma.puntosCliente.findUnique({
+      where: { id_cliente },
+      include: { movimientos: { orderBy: { fecha: 'desc' }, take: 10 } },
+    }),
+    valorPunto(),
+  ]);
   if (!registro) return { puntos: 0, saldo_pesos: 0, movimientos: [] };
   return {
     puntos:      registro.puntos,
-    saldo_pesos: registro.puntos * VALOR_PUNTO,
+    // Siempre en tiempo real con el valor ACTUAL configurado -- no hay
+    // "valor histórico" del punto, si el admin lo cambia el saldo en pesos
+    // de todos los clientes cambia de inmediato (ver configuracion/service.js).
+    saldo_pesos: registro.puntos * valorPuntoActual,
     movimientos: registro.movimientos,
   };
 };
@@ -19,8 +25,8 @@ const obtenerPuntos = async (id_cliente) => {
 const calcularPuntosGanados = (subtotal_productos) =>
   Math.floor(subtotal_productos / PESOS_POR_PUNTO);
 
-const calcularDescuentoPuntos = (puntos_a_usar) =>
-  puntos_a_usar * VALOR_PUNTO;
+const calcularDescuentoPuntos = async (puntos_a_usar) =>
+  puntos_a_usar * (await valorPunto());
 
 const acumularPuntos = async (id_cliente, id_venta, subtotal_productos, uso_puntos) => {
   if (uso_puntos > 0) return null;
@@ -48,5 +54,5 @@ const acumularPuntos = async (id_cliente, id_venta, subtotal_productos, uso_punt
 
 module.exports = {
   obtenerPuntos, calcularPuntosGanados, calcularDescuentoPuntos,
-  acumularPuntos, VALOR_PUNTO, PESOS_POR_PUNTO,
+  acumularPuntos, valorPunto, PESOS_POR_PUNTO,
 };
