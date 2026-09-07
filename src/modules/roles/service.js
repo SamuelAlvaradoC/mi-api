@@ -18,6 +18,9 @@ const obtener = async (id) => {
 const crear = (datos) => prisma.rol.create({ data: datos });
 
 const actualizar = async (id, datos) => {
+  if (id === ROL_ADMIN_ID && datos.estado !== undefined && Number(datos.estado) !== 1) {
+    throw { status: 403, message: 'No se puede cambiar el estado del rol Admin' };
+  }
   const rol = await prisma.rol.findUnique({ where: { id_rol: id } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
   return prisma.rol.update({ where: { id_rol: id }, data: datos });
