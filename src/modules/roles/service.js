@@ -1,5 +1,7 @@
 const prisma = require('../../config/prisma');
 
+const ROL_ADMIN_ID = 1;
+
 const listar = () => prisma.rol.findMany({
   include: { rolPermisos: { include: { permiso: true } } },
 });
@@ -22,6 +24,7 @@ const actualizar = async (id, datos) => {
 };
 
 const eliminar = async (id) => {
+  if (id === ROL_ADMIN_ID) throw { status: 403, message: 'No se puede eliminar el rol Admin' };
   const rol = await prisma.rol.findUnique({ where: { id_rol: id } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
   const enUso = await prisma.usuario.count({ where: { id_rol: id } });
@@ -46,6 +49,7 @@ const asignarPermisos = async (id, permisos) => {
 const listarPermisos = () => prisma.permiso.findMany({ orderBy: { nombre: 'asc' } });
 
 const activarDesactivar = async (id) => {
+  if (id === ROL_ADMIN_ID) throw { status: 403, message: 'No se puede cambiar el estado del rol Admin' };
   const rol = await prisma.rol.findUnique({ where: { id_rol: id } });
   if (!rol) throw { status: 404, message: 'Rol no encontrado' };
   return prisma.rol.update({

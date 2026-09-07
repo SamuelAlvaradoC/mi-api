@@ -31,6 +31,7 @@ const login = async ({ email, contrasena, ip }) => {
   const usuario = await prisma.usuario.findUnique({ where: { email }, include: { rol: true, cliente: true, empleado: true } });
   if (!usuario) throw { status: 401, message: 'Credenciales inválidas' };
   if (!usuario.estado) throw { status: 403, message: 'Usuario inactivo. Por favor, contáctate con el administrador.' };
+  if (!usuario.rol?.estado) throw { status: 403, message: 'Tu rol se encuentra inactivo. Por favor, contáctate con el administrador.' };
 
   const valida = await bcrypt.compare(contrasena, usuario.contrasena);
   if (!valida) throw { status: 401, message: 'Credenciales inválidas' };
