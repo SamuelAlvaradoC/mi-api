@@ -1,7 +1,13 @@
 const prisma = require('../../config/prisma');
-const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos } = require('../puntos/service');
+const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos, valorPunto } = require('../puntos/service');
 const { getIo } = require('../../socket');
 const logger = require('../../utils/logger');
+
+// El cliente solo puede usar puntos en incrementos de $1000 de descuento
+// (antes eran incrementos de 8 puntos = $100 con el valor por punto de
+// $12.5). El paso en PUNTOS se recalcula según el valor del punto vigente
+// -- si el admin lo cambia, el incremento sigue valiendo $1000 exactos.
+const INCREMENTO_PUNTOS_PESOS = 1000;
 
 const includeDetalle = {
   cliente:  { select: { id_cliente: true, telefono: true, ciudad: true, barrio: true, usuario: { select: { nombre: true, email: true } } } },
@@ -72,6 +78,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     const regPtsCheck = await prisma.puntosCliente.findUnique({ where: { id_cliente } });
     if (!regPtsCheck || regPtsCheck.puntos < Number(puntos_usados)) {
       throw { status: 400, message: 'El cliente no tiene suficientes puntos para aplicar este descuento' };
+    }
+    const pasoEnPuntos = Math.round(INCREMENTO_PUNTOS_PESOS / (await valorPunto()));
+    if (Number(puntos_usados) % pasoEnPuntos !== 0) {
+      throw { status: 400, message: `Los puntos solo se pueden usar en incrementos de ${pasoEnPuntos} puntos (equivalentes a $${INCREMENTO_PUNTOS_PESOS.toLocaleString('es-CO')})` };
     }
   }
 
