@@ -6,7 +6,7 @@ const crearResenaSchema = z.object({
   frecuencia:            z.string().trim().min(1).max(50).refine(noContengaHtml, MSG_HTML),
   calificacion_atencion: z.number().int().min(1).max(5),
   calificacion_producto: z.number().int().min(1).max(5),
-  calificacion_facilidad_pedido: z.number().int().min(1).max(5),
+  calificacion_facilidad_pedido: z.enum(['muy_facil', 'algo_confuso', 'dificil']),
   recomendaria:          z.string().trim().min(1).max(20).refine(noContengaHtml, MSG_HTML),
   tiempo_adecuado:       z.string().trim().min(1).max(30).refine(noContengaHtml, MSG_HTML),
   lo_que_gusto:          z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
