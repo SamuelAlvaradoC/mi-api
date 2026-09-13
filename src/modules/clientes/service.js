@@ -8,7 +8,9 @@ const incListado  = {
   _count:     { select: { ventas: true } },
 };
 
-const listar = () => prisma.cliente.findMany({ include: incListado });
+// Cliente no tiene columna propia de fecha -- se ordena por la fecha de
+// registro real, que vive en usuarios.fecha_registro (relación 1:1).
+const listar = () => prisma.cliente.findMany({ include: incListado, orderBy: { usuario: { fecha_registro: 'desc' } } });
 
 const crear = async ({ nombre, email, contrasena, telefono }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
