@@ -4,7 +4,12 @@ const { eliminarPorUsuario } = require('../../utils/eliminarCuentaCascada');
 
 const incUsuario = { usuario: { select: { nombre: true, email: true, estado: true, fecha_registro: true, rol: true } } };
 
-const listar = () => prisma.empleado.findMany({ include: incUsuario });
+// fecha_ingreso es una fecha de contratación editable por el admin (puede no
+// coincidir con cuándo se creó el registro -- confirmado con datos reales:
+// el empleado #3 tiene fecha_ingreso 15 días después de su fecha_registro
+// real) -- se ordena por usuarios.fecha_registro para el mismo criterio de
+// "más recién creado primero" que ya usan Clientes y Usuarios.
+const listar = () => prisma.empleado.findMany({ include: incUsuario, orderBy: { usuario: { fecha_registro: 'desc' } } });
 
 const buscar = (q) => prisma.empleado.findMany({
   where: {
