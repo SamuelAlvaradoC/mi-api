@@ -125,6 +125,7 @@ model Producto {
   max_toppings       Int?
   permite_chocolate  Boolean  @default(false)
   permite_salsas     Boolean  @default(false)
+  permite_frutas     Boolean  @default(false)
   es_bowl            Boolean  @default(false)
   img                String?  @db.VarChar(255)
   estado             Int      @default(1) @db.SmallInt
@@ -281,6 +282,7 @@ model DetalleVenta {
   subtotal         Decimal @db.Decimal(10, 2)
   chocolate        String? @db.VarChar(20)
   salsas           String? @db.Text
+  frutas           String? @db.VarChar(20)
 
   venta    Venta    @relation(fields: [id_venta], references: [id_venta])
   producto Producto @relation(fields: [id_producto], references: [id_producto])

@@ -20,7 +20,7 @@ const includeDetalle = {
   movimientosPuntos: true,
   detalleVentas: {
     include: {
-      producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true, es_bowl: true } },
+      producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true, es_bowl: true, permite_frutas: true } },
       detalleToppings:  { include: { topping: true } },
       detalleAdiciones: { include: { adicion: true } },
     },
@@ -132,6 +132,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
     precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
     permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas, es_bowl: !!p.es_bowl,
+    permite_frutas: !!p.permite_frutas,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -147,6 +148,9 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     // podía recibir chocolate/salsas sin importar su configuración real.
     if (item.chocolate && !pd.permite_chocolate) {
       throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
+    }
+    if (item.frutas && !pd.permite_frutas) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite elegir frutas` };
     }
     const salsasArrCheck = Array.isArray(item.salsas) ? item.salsas : [];
     // Los bowls reutilizan el campo "salsas" para guardar la cobertura elegida
@@ -224,6 +228,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
           id_producto: item.id_producto, cantidad: item.cantidad,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
+          frutas: item.frutas || null,
           salsas: item.salsas?.length ? JSON.stringify(item.salsas) : null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({
@@ -860,6 +865,7 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
   const prodData    = Object.fromEntries(productos.map((p) => [p.id_producto, {
     precio: Number(p.precio), max_toppings: p.max_toppings || 0, permite_toppings: p.permite_toppings || 0,
     permite_chocolate: !!p.permite_chocolate, permite_salsas: !!p.permite_salsas, es_bowl: !!p.es_bowl,
+    permite_frutas: !!p.permite_frutas,
   }]));
 
   const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
@@ -872,6 +878,9 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
     if (!pd) throw { status: 400, message: `Producto ${item.id_producto} no encontrado` };
     if (item.chocolate && !pd.permite_chocolate) {
       throw { status: 400, message: `El producto ${item.id_producto} no permite elegir chocolate` };
+    }
+    if (item.frutas && !pd.permite_frutas) {
+      throw { status: 400, message: `El producto ${item.id_producto} no permite elegir frutas` };
     }
     const salsasArr2Check = Array.isArray(item.salsas) ? item.salsas : [];
     if (salsasArr2Check.length > 0 && !pd.permite_salsas && !pd.es_bowl) {
@@ -929,6 +938,7 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
           id_producto: item.id_producto, cantidad: item.cantidad,
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
+          frutas: item.frutas || null,
           salsas: Array.isArray(item.salsas) && item.salsas.length > 0 ? JSON.stringify(item.salsas) : null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },

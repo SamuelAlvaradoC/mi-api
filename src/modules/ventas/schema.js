@@ -7,6 +7,7 @@ const itemVentaSchema = z.object({
   max_toppings:    z.number().int().min(0).optional(),
   precio_unitario: z.number().optional(),
   chocolate:       z.string().optional().nullable(),
+  frutas:          z.enum(['fresa_cereza', 'fresa_durazno', 'cereza_durazno']).optional().nullable(),
   salsas: z.array(z.union([z.string(), z.number()])).optional().default([]),
   toppings: z.array(
     z.union([
