@@ -13,6 +13,7 @@ const crearResenaSchema = z.object({
   producto_deseado:      z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
   mejora:                z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
   comentario_experiencia_web: z.string().trim().max(2000).optional().refine(noContengaHtml, MSG_HTML),
+  id_venta: z.number().int().positive().optional().nullable(),
 });
 
 module.exports = { crearResenaSchema };

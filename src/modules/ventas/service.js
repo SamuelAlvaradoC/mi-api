@@ -29,6 +29,9 @@ const includeDetalle = {
   // si el cliente edita o borra la dirección original después.
   pagos:    { include: { detallePagos: { include: { metodoPago: true } } } },
   movimientosPuntos: true,
+  // Solo el id -- alcanza para que el cliente sepa "ya reseñé este pedido"
+  // sin traer el contenido completo de la reseña en cada fetch de mis-pedidos.
+  resena:   { select: { id_resena: true } },
   detalleVentas: {
     include: {
       producto: { select: { id_producto: true, nombre: true, precio: true, max_toppings: true, permite_toppings: true, img: true, es_bowl: true, permite_frutas: true } },

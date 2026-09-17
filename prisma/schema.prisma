@@ -270,6 +270,7 @@ model Venta {
   pagos              Pago[]
   ventasDomiciliario VentaDomiciliario[]
   movimientosPuntos  MovimientoPuntos[]
+  resena             Resena?
 
   @@map("ventas")
 }
@@ -388,8 +389,10 @@ model Resena {
   comentario_experiencia_web    String?  @db.Text
   fecha                         DateTime @default(now())
   id_usuario                    Int?
+  id_venta                      Int?     @unique
 
   usuario Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+  venta   Venta?   @relation(fields: [id_venta], references: [id_venta])
 
   @@map("resenas")
 }
