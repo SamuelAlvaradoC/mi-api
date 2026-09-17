@@ -37,7 +37,7 @@ async function main() {
     'gestionar_clientes', 'ver_empleados', 'gestionar_empleados',
     'ver_usuarios', 'gestionar_usuarios', 'gestionar_productos',
     'gestionar_categorias', 'gestionar_toppings',
-    'gestionar_adiciones', 'gestionar_roles', 'ver_resenas',
+    'gestionar_adiciones', 'gestionar_roles', 'ver_resenas', 'ver_metricas',
     'ver_pedidos_domiciliario', 'facturar_pedido',
     'confirmar_domicilios', 'gestionar_cocina', 'ver_cierre_caja',
     'gestionar_ciudades', 'gestionar_barrios',

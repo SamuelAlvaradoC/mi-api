@@ -83,6 +83,7 @@ app.use('/api/ciudades',        require('./modules/ciudades/routes'));
 app.use('/api/barrios',         require('./modules/barrios/routes'));
 app.use('/api/domicilio',      require('./modules/domicilio/routes'));
 app.use('/api/resenas',        require('./modules/resenas/routes'));
+app.use('/api/metricas',       require('./modules/metricas/routes'));
 app.use('/api/configuracion',  require('./modules/configuracion/routes'));
 app.use('/api/puntos',         require('./modules/puntos/routes'));
 app.use('/api',               require('./modules/catalogo/routes')); // catálogo + carrito
