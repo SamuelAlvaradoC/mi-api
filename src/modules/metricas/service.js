@@ -97,6 +97,15 @@ const resumen = async (mesParam) => {
 
   const ventasNetasMes = mesesNetas.find((m2) => m2.mes === mes)?.total || 0;
 
+  // Promedio mensual: solo sobre los meses que ya tienen al menos una venta
+  // -- dividir entre los 12 meses del año (o entre los "transcurridos")
+  // hundía el número sin razón cuando el negocio recién empezó a usar la
+  // página. Es un indicador anual, no depende del mes filtrado arriba.
+  const mesesConVentas = mesesNetas.filter((m2) => m2.total > 0);
+  const promedioMensual = mesesConVentas.length > 0
+    ? mesesConVentas.reduce((s, m2) => s + m2.total, 0) / mesesConVentas.length
+    : 0;
+
   // Clientes nuevos vs recurrentes del mes: "nuevo" = su primera compra
   // entregada JAMÁS cae dentro de este mes; "recurrente" = ya tenía al menos
   // una compra entregada antes del inicio del mes. Un solo query con CTE:
@@ -129,6 +138,7 @@ const resumen = async (mesParam) => {
     clientes_registrados: clientesRegistrados,
     puntos_redimidos_mes: puntosRedimidosMes,
     ventas_netas_mes:     Math.round(ventasNetasMes),
+    promedio_mensual:     Math.round(promedioMensual),
     numero_ventas_mes:    numeroVentasMes,
     clientes_nuevos_mes:      nuevos,
     clientes_recurrentes_mes: recurrentes,
@@ -220,12 +230,19 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20 } = {}) => {
     ORDER BY ultima_compra ASC NULLS FIRST
   `;
 
-  const ahora = Date.now();
+  // Días calendario Colombia entre dos fechas (no horas transcurridas) -- se
+  // resta 5h antes de truncar al día para que "ayer a las 11pm" cuente como
+  // ayer y no como "hace 0 días" solo porque pasaron menos de 24h reales.
+  const diaColombiaUTC = (fecha) => {
+    const co = new Date(fecha.getTime() - 5 * 60 * 60 * 1000);
+    return Date.UTC(co.getUTCFullYear(), co.getUTCMonth(), co.getUTCDate());
+  };
+  const hoyCO = diaColombiaUTC(new Date());
   // Segmento por prioridad de negocio: un cliente en riesgo de fuga importa
   // más que si además era "nuevo" o "frecuente" -- por eso se evalúa primero.
   let clientes = rows.map((r) => {
     const diasDesdeUltimaCompra = r.ultima_compra
-      ? Math.floor((ahora - new Date(r.ultima_compra).getTime()) / 86400000)
+      ? Math.round((hoyCO - diaColombiaUTC(new Date(r.ultima_compra))) / 86400000)
       : null;
     let segmento = 'activo';
     if (diasDesdeUltimaCompra !== null && diasDesdeUltimaCompra > 30) segmento = 'en_riesgo';
