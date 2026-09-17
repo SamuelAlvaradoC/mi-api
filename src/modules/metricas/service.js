@@ -16,7 +16,10 @@ const resumen = async () => {
   const { inicio, fin, mesActual } = rangoMesActual();
 
   const [clientesRegistrados, estadoEntregado, mesesNetas] = await Promise.all([
-    prisma.usuario.count({ where: { estado: 1 } }),
+    // Fila en `clientes`, no en `usuarios` -- usuario.count({estado:1})
+    // incluía admins/empleados/domiciliarios/cocineros además de clientes,
+    // inflando el número (ej. 189 usuarios activos vs 183 clientes reales).
+    prisma.cliente.count(),
     prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } }),
     ventasPorMes(),
   ]);
