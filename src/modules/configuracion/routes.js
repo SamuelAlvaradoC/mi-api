@@ -158,4 +158,29 @@ router.patch('/valor-punto', verifyToken, checkRolAdmin, async (req, res) => {
   }
 });
 
+/* ── Datafono (método de pago) — toggle exclusivo admin ────────── */
+// Público — el checkout (cliente) y los selectores de pago del admin
+// necesitan saber si mostrar la 4ª opción, igual criterio que /valor-punto.
+router.get('/datafono', async (req, res) => {
+  try {
+    const habilitado = await s.datafonoHabilitado();
+    res.json({ success: true, data: { habilitado } });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.patch('/datafono', verifyToken, checkRolAdmin, async (req, res) => {
+  try {
+    const { habilitado } = req.body;
+    if (typeof habilitado !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'El campo habilitado debe ser true o false' });
+    }
+    await s.actualizar('datafono_habilitado', habilitado);
+    res.json({ success: true, data: { habilitado } });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;

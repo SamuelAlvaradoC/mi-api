@@ -224,6 +224,7 @@ async function imprimirComanda(venta) {
     if (toppings)    lin += `\n   Toppings: ${toppings}`;
     if (adiciones)   lin += `\n   +${adiciones}`;
     if (d.chocolate) lin += `\n   Chocolate: ${d.chocolate}`;
+    if (d.observacion) lin += `\n   Obs: ${d.observacion}`;
     return lin;
   }).join('\n');
 

@@ -283,6 +283,7 @@ model DetalleVenta {
   chocolate        String? @db.VarChar(20)
   salsas           String? @db.Text
   frutas           String? @db.VarChar(20)
+  observacion      String? @db.VarChar(255)
 
   venta    Venta    @relation(fields: [id_venta], references: [id_venta])
   producto Producto @relation(fields: [id_producto], references: [id_producto])

@@ -1,0 +1,1 @@
+ALTER TABLE detalle_venta ADD COLUMN IF NOT EXISTS observacion VARCHAR(255);

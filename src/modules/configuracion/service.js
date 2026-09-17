@@ -40,4 +40,12 @@ const valorPunto = async () => {
   return val !== null ? Number(val) : 12.5;
 };
 
-module.exports = { obtener, actualizar, tiempoEspera, horario, valorPunto };
+// Habilita/deshabilita "datafono" como método de pago válido -- exclusivo
+// admin (ver checkRolAdmin en routes.js). Default false: hasta que el admin
+// lo active explícitamente, ningún cliente/venta puede usar datafono.
+const datafonoHabilitado = async () => {
+  const val = await obtener('datafono_habilitado');
+  return val === 'true';
+};
+
+module.exports = { obtener, actualizar, tiempoEspera, horario, valorPunto, datafonoHabilitado };

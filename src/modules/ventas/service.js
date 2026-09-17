@@ -1,7 +1,18 @@
 const prisma = require('../../config/prisma');
 const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos, valorPunto } = require('../puntos/service');
+const { datafonoHabilitado } = require('../configuracion/service');
 const { getIo } = require('../../socket');
 const logger = require('../../utils/logger');
+
+// Capa de seguridad adicional al toggle visual: aunque el frontend oculte la
+// opción "datafono" cuando el admin la desactivó, un request directo a la API
+// no debe poder colarla igual.
+const validarMetodoPagoDatafono = async (metodo_pago) => {
+  if (metodo_pago !== 'datafono') return;
+  if (!(await datafonoHabilitado())) {
+    throw { status: 400, message: 'El pago con datafono no está habilitado actualmente' };
+  }
+};
 
 // El cliente solo puede usar puntos en incrementos de $1000 de descuento
 // (antes eran incrementos de 8 puntos = $100 con el valor por punto de
@@ -71,6 +82,8 @@ const obtener = async (id) => {
 };
 
 const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
+  await validarMetodoPagoDatafono(metodo_pago);
+
   // El saldo de puntos se valida siempre server-side, aunque venga del panel
   // admin (confiado) — evita dejar el saldo del cliente en negativo por un
   // error humano o una llamada directa a la API.
@@ -229,6 +242,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
           frutas: item.frutas || null,
+          observacion: item.observacion || null,
           salsas: item.salsas?.length ? JSON.stringify(item.salsas) : null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({
@@ -313,6 +327,8 @@ const validarPermisoTransicion = async (id_rol, estadoNombre) => {
 
 const cambiarEstado = async (id, datos, id_usuario, id_rol) => {
   const { id_estado, nombre_estado, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url } = datos;
+  await validarMetodoPagoDatafono(metodo_pago);
+
   const ventaActual = await obtener(id);
   let estadoId    = id_estado;
   let estadoNombre = nombre_estado || null;
@@ -493,10 +509,15 @@ const cambiarEstado = async (id, datos, id_usuario, id_rol) => {
         const metodos     = await prisma.metodoPago.findMany();
         const mEfectivo   = metodos.find((m) => m.nombre.toLowerCase().includes('efectivo'));
         const mTransf     = metodos.find((m) => m.nombre.toLowerCase().includes('transferencia'));
+        const mDatafono   = metodos.find((m) => m.nombre.toLowerCase().includes('datafono'));
 
         if (metodoPagoFinal === 'efectivo' && mEfectivo) {
           await prisma.detallePago.create({
             data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: venta.total },
+          });
+        } else if (metodoPagoFinal === 'datafono' && mDatafono) {
+          await prisma.detallePago.create({
+            data: { id_pago: pago.id_pago, id_metodo_pago: mDatafono.id_metodo_pago, monto: venta.total },
           });
         } else if (metodoPagoFinal === 'transferencia' && mTransf) {
           await prisma.detallePago.create({
@@ -808,6 +829,8 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
 };
 
 const editar = async (id, { items, costo_domicilio, override_costo_domicilio = false, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {
+  await validarMetodoPagoDatafono(metodo_pago);
+
   const venta = await obtener(id);
   const estadoActual = venta.estado?.nombre_estado;
 
@@ -939,6 +962,7 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
           precio_unitario: item.precio_unitario, subtotal: item.subtotal,
           chocolate: item.chocolate || null,
           frutas: item.frutas || null,
+          observacion: item.observacion || null,
           salsas: Array.isArray(item.salsas) && item.salsas.length > 0 ? JSON.stringify(item.salsas) : null,
           detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
           detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },
