@@ -56,6 +56,7 @@ const crearVentaSchema = z.object({
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
   puntos_usados:       z.number().int().min(0).optional().default(0),
+  agua_cortesia:       z.boolean().optional().default(false),
 });
 
 const crearMiPedidoSchema = z.object({
@@ -68,6 +69,7 @@ const crearMiPedidoSchema = z.object({
   monto_transferencia: z.number().min(0).optional().nullable(),
   comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
+  agua_cortesia:       z.boolean().optional().default(false),
   puntos_a_usar:       z.number().int().min(0).optional().default(0),
 }).refine((d) => d.id_direccion !== undefined || d.nueva_direccion !== undefined, {
   message: 'Debe seleccionar o registrar una dirección de entrega',

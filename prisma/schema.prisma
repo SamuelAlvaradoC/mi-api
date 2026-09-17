@@ -260,6 +260,7 @@ model Venta {
   barrio              String?  @db.VarChar(100)
   ciudad              String?  @db.VarChar(100)
   referencia_direccion String? @db.VarChar(255)
+  agua_cortesia         Boolean @default(false)
 
   cliente   Cliente    @relation(fields: [id_cliente], references: [id_cliente])
   estado    Estado     @relation(fields: [id_estado], references: [id_estado])

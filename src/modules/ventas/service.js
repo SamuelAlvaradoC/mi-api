@@ -81,7 +81,7 @@ const obtener = async (id) => {
   return { ...v, nombreDomiciliario: empleado?.usuario?.nombre || null };
 };
 
-const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0 }) => {
+const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0, agua_cortesia = false }) => {
   await validarMetodoPagoDatafono(metodo_pago);
 
   // El saldo de puntos se valida siempre server-side, aunque venga del panel
@@ -236,6 +236,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
       subtotal, total,
       puntos_usados:   Number(puntos_usados) || 0,
       descuento_puntos: descuento,
+      agua_cortesia: !!agua_cortesia,
       detalleVentas: {
         create: itemsCalc.map((item) => ({
           id_producto: item.id_producto, cantidad: item.cantidad,
@@ -759,7 +760,7 @@ const misVentas = async (id_usuario) => {
 };
 
 // Cliente crea su propio pedido (auto-crea perfil de cliente si no existe)
-const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_a_usar = 0 }) => {
+const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_a_usar = 0, agua_cortesia = false }) => {
   let cliente = await prisma.cliente.findUnique({ where: { id_usuario } });
   if (!cliente) {
     cliente = await prisma.cliente.create({ data: { id_usuario } });
@@ -825,7 +826,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
     throw { status: 400, message: 'La dirección seleccionada no tiene un barrio válido. Selecciona o registra una dirección con barrio del catálogo.' };
   }
 
-  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos });
+  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos, agua_cortesia });
 };
 
 const editar = async (id, { items, costo_domicilio, override_costo_domicilio = false, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {
