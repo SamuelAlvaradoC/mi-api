@@ -22,7 +22,7 @@ const rangoMes = (mes) => {
 //    número de pedidos, nuevos vs recurrentes y desglose por método de pago
 //    -- todo del mes indicado (o el mes actual si no se pasa uno) ──
 const resumen = async (mesParam) => {
-  const { inicio, fin, mes, anio, mesActual } = rangoMes(mesParam);
+  const { inicio, fin, mes, anio } = rangoMes(mesParam);
 
   const [clientesRegistrados, estadoEntregado, mesesNetas] = await Promise.all([
     // Fila en `clientes`, no en `usuarios` -- usuario.count({estado:1})
@@ -46,11 +46,11 @@ const resumen = async (mesParam) => {
   });
   const puntosRedimidosMes = ventasConPuntos.reduce((s, v) => s + (v.puntos_usados || 0), 0);
 
-  // Número de pedidos del mes -- se cuentan los recibidos (no anulados), no
-  // solo los ya entregados: es la pregunta de "cuántos pedidos entraron",
-  // distinta del desglose de pago (que sí exige entregado, es plata real).
-  const numeroPedidosMes = await prisma.venta.count({
-    where: { fecha: { gte: inicio, lt: fin }, estado: { nombre_estado: { not: 'anulado' } } },
+  // Número de ventas del mes -- solo entregadas, mismo criterio que ventas
+  // netas y el desglose de pago ("Ventas" en este negocio = ya entregada y
+  // cobrada, no cualquier pedido que haya entrado al pipeline).
+  const numeroVentasMes = await prisma.venta.count({
+    where: { fecha: { gte: inicio, lt: fin }, id_estado: estadoEntregado?.id_estado },
   });
 
   // Desglose por método de pago del mes -- solo ventas entregadas, mismo
@@ -95,14 +95,6 @@ const resumen = async (mesParam) => {
     porcentaje: totalDesglose > 0 ? Math.round((desgloseMap[metodo] / totalDesglose) * 1000) / 10 : 0,
   }));
 
-  // Promedio mensual: solo sobre los meses ya transcurridos del año (incluye
-  // el actual) -- promediar contra meses futuros en 0 hundiría el número sin
-  // razón. Es un indicador anual, no depende del mes filtrado.
-  const mesesTranscurridos = mesesNetas.slice(0, mesActual);
-  const promedioMensual = mesesTranscurridos.length > 0
-    ? mesesTranscurridos.reduce((s, m2) => s + m2.total, 0) / mesesTranscurridos.length
-    : 0;
-
   const ventasNetasMes = mesesNetas.find((m2) => m2.mes === mes)?.total || 0;
 
   // Clientes nuevos vs recurrentes del mes: "nuevo" = su primera compra
@@ -137,12 +129,30 @@ const resumen = async (mesParam) => {
     clientes_registrados: clientesRegistrados,
     puntos_redimidos_mes: puntosRedimidosMes,
     ventas_netas_mes:     Math.round(ventasNetasMes),
-    promedio_mensual:     Math.round(promedioMensual),
-    numero_pedidos_mes:   numeroPedidosMes,
+    numero_ventas_mes:    numeroVentasMes,
     clientes_nuevos_mes:      nuevos,
     clientes_recurrentes_mes: recurrentes,
     desglose_pago:        desglosePago,
   };
+};
+
+// ── Meses del año en curso que ya tienen al menos una venta registrada --
+//    para que el selector de mes del admin no ofrezca meses sin actividad
+//    (ej. antes de que el negocio empezara a usar la página) ──
+const mesesDisponibles = async () => {
+  const anio = new Date(Date.now() - 5 * 60 * 60 * 1000).getUTCFullYear();
+  const raw = await prisma.$queryRaw`
+    SELECT DISTINCT EXTRACT(MONTH FROM (fecha - interval '5 hours'))::int AS mes
+    FROM ventas
+    WHERE EXTRACT(YEAR FROM (fecha - interval '5 hours')) = ${anio}
+    ORDER BY mes ASC
+  `;
+  const meses = raw.map((r) => Number(r.mes));
+  // Si por lo que sea todavía no hay ninguna venta este año, al menos deja
+  // seleccionable el mes actual -- el selector nunca debe quedar vacío.
+  const mesActual = new Date(Date.now() - 5 * 60 * 60 * 1000).getUTCMonth() + 1;
+  if (!meses.includes(mesActual)) meses.push(mesActual);
+  return meses.sort((a, b) => a - b).map((mes) => ({ mes, anio, label: MESES[mes - 1] }));
 };
 
 // ── Clientes registrados a lo largo del tiempo -- 'dia' agrupa los días del
@@ -256,4 +266,4 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20 } = {}) => {
   return { data, total, page: paginaSegura, pageSize, total_paginas: totalPaginas, resumen: resumenSegmentos };
 };
 
-module.exports = { resumen, registros, clientesFrecuencia };
+module.exports = { resumen, registros, clientesFrecuencia, mesesDisponibles };

@@ -11,6 +11,7 @@ const router = Router();
 const auth = [verifyToken, checkPermiso('ver_metricas')];
 
 router.get('/resumen',              ...auth, controller.resumen);
+router.get('/meses-disponibles',    ...auth, controller.mesesDisponibles);
 router.get('/registros',            ...auth, controller.registros);
 router.get('/clientes-frecuencia',  ...auth, controller.clientesFrecuencia);
 

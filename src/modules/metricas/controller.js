@@ -8,6 +8,10 @@ const resumen = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+const mesesDisponibles = async (req, res, next) => {
+  try { success(res, await service.mesesDisponibles()); } catch (e) { next(e); }
+};
+
 const registros = async (req, res, next) => {
   try {
     const granularidad = req.query.granularidad === 'mes' ? 'mes' : 'dia';
@@ -27,4 +31,4 @@ const clientesFrecuencia = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-module.exports = { resumen, registros, clientesFrecuencia };
+module.exports = { resumen, registros, clientesFrecuencia, mesesDisponibles };
