@@ -224,11 +224,12 @@ async function imprimirComanda(venta) {
     if (toppings)    lin += `\n   Toppings: ${toppings}`;
     if (adiciones)   lin += `\n   +${adiciones}`;
     if (d.chocolate) lin += `\n   Chocolate: ${d.chocolate}`;
+    if (d.frutas)     lin += `\n   Frutas: ${d.frutas}`;
     if (d.observacion) lin += `\n   Obs: ${d.observacion}`;
     return lin;
   }).join('\n');
 
-  const metodoPago = { efectivo: 'Efectivo', transferencia: 'Transferencia', mixto: 'Mixto' }[venta.metodo_pago] || venta.metodo_pago || '-';
+  const metodoPago = { efectivo: 'Efectivo', transferencia: 'Transferencia', mixto: 'Mixto', datafono: 'Datafono' }[venta.metodo_pago] || venta.metodo_pago || '-';
   const puntosUsados    = venta.puntos_usados || 0;
   const descuentoPesos  = Number(venta.descuento_puntos) || (puntosUsados * 12.5);
   const puntosGanados   = (venta.puntosGanados ?? venta.puntos_ganados)
@@ -306,6 +307,7 @@ async function imprimirComanda(venta) {
 
     // Observaciones
     Buffer.from(venta.observaciones ? `Obs: ${venta.observaciones}\n` : ''),
+    Buffer.from(venta.agua_cortesia ? 'Incluir agua de cortesia\n' : ''),
 
     // Puntos
     Buffer.from(puntosGanados > 0 || puntosUsados > 0 || puntosTotal !== null
