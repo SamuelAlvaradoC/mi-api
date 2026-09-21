@@ -22,11 +22,12 @@ const registros = async (req, res, next) => {
 
 const clientesFrecuencia = async (req, res, next) => {
   try {
-    const { q, page, pageSize } = req.query;
+    const { q, page, pageSize, filtro } = req.query;
     success(res, await service.clientesFrecuencia({
       q,
       page: page ? Number(page) : undefined,
       pageSize: pageSize ? Number(pageSize) : undefined,
+      filtro,
     }));
   } catch (e) { next(e); }
 };

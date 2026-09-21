@@ -212,20 +212,33 @@ const registros = async (granularidad, mesParam) => {
 // explícito de esta tabla. Se trae todo (183 clientes hoy, escala bien a
 // unos cuantos miles) y se filtra/pagina/segmenta en JS -- evita duplicar la
 // misma agregación en dos queries (una para el resumen, otra paginada).
-const clientesFrecuencia = async ({ q, page = 1, pageSize = 20 } = {}) => {
+const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) => {
   const rows = await prisma.$queryRaw`
     SELECT
       c.id_cliente,
       u.nombre,
-      u.email,
+      c.telefono,
       COUNT(v.id_venta) FILTER (WHERE e.nombre_estado = 'entregado')::int AS total_compras,
-      MAX(v.fecha) FILTER (WHERE e.nombre_estado = 'entregado') AS ultima_compra
+      MAX(v.fecha) FILTER (WHERE e.nombre_estado = 'entregado') AS ultima_compra,
+      -- Ventanas móviles evaluadas contra "hoy" en cada consulta (no se
+      -- guardan ni se precalculan) -- mismo criterio de "día calendario
+      -- Colombia" que diaColombiaUTC() más abajo (restar 5h y truncar a
+      -- fecha), expresado en SQL para no traer cada venta individual solo
+      -- para contar cuántas caen en los últimos 7/30 días.
+      COUNT(v.id_venta) FILTER (
+        WHERE e.nombre_estado = 'entregado'
+          AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() - INTERVAL '5 hours')::date - INTERVAL '6 days'
+      )::int AS compras_7d,
+      COUNT(v.id_venta) FILTER (
+        WHERE e.nombre_estado = 'entregado'
+          AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() - INTERVAL '5 hours')::date - INTERVAL '29 days'
+      )::int AS compras_30d
     FROM clientes c
     JOIN usuarios u ON u.id_usuario = c.id_usuario
     LEFT JOIN ventas v ON v.id_cliente = c.id_cliente
     LEFT JOIN estados e ON e.id_estado = v.id_estado
     WHERE u.estado = 1
-    GROUP BY c.id_cliente, u.nombre, u.email
+    GROUP BY c.id_cliente, u.nombre, c.telefono
     HAVING COUNT(v.id_venta) FILTER (WHERE e.nombre_estado = 'entregado') > 0
     ORDER BY ultima_compra ASC NULLS FIRST
   `;
@@ -248,17 +261,29 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20 } = {}) => {
     if (diasDesdeUltimaCompra !== null && diasDesdeUltimaCompra > 30) segmento = 'en_riesgo';
     else if (r.total_compras === 1) segmento = 'nuevo';
     else if (r.total_compras >= 5) segmento = 'frecuente';
+    // Filtro de la tabla (Frecuentes/Activos/Todos) -- ventana móvil,
+    // excluyente entre sí (se evalúa "frecuente" primero; solo si no
+    // cumple se evalúa "activo"). Distinto del `segmento` de arriba (badge
+    // de estrategia de negocio, basado en total histórico + días desde la
+    // última compra) -- no se tocan ni se mezclan esas definiciones.
+    let cumpleFiltro = null;
+    if (r.compras_7d >= 3) cumpleFiltro = 'frecuentes';
+    else if (r.compras_30d >= 2) cumpleFiltro = 'activos';
     return {
       id_cliente: r.id_cliente,
       nombre: r.nombre,
-      email: r.email,
+      telefono: r.telefono,
       total_compras: r.total_compras,
       ultima_compra: r.ultima_compra,
       dias_desde_ultima_compra: diasDesdeUltimaCompra,
       segmento,
+      cumple_filtro: cumpleFiltro,
     };
   });
 
+  // resumenSegmentos (badges de arriba de la tabla) SIEMPRE sobre la base
+  // completa de clientes -- el filtro Frecuentes/Activos/Todos solo debe
+  // afectar las filas de la tabla, no estos totales.
   const resumenSegmentos = {
     total:      clientes.length,
     nuevo:      clientes.filter((c) => c.segmento === 'nuevo').length,
@@ -267,10 +292,14 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20 } = {}) => {
     activo:     clientes.filter((c) => c.segmento === 'activo').length,
   };
 
+  if (filtro === 'frecuentes' || filtro === 'activos') {
+    clientes = clientes.filter((c) => c.cumple_filtro === filtro);
+  }
+
   if (q && q.trim()) {
     const needle = q.trim().toLowerCase();
     clientes = clientes.filter((c) =>
-      c.nombre?.toLowerCase().includes(needle) || c.email?.toLowerCase().includes(needle)
+      c.nombre?.toLowerCase().includes(needle) || c.telefono?.toLowerCase().includes(needle)
     );
   }
 
