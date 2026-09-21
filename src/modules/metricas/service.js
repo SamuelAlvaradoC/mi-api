@@ -284,12 +284,17 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
   // resumenSegmentos (badges de arriba de la tabla) SIEMPRE sobre la base
   // completa de clientes -- el filtro Frecuentes/Activos/Todos solo debe
   // afectar las filas de la tabla, no estos totales.
+  // "frecuente"/"activo" del resumen usan cumple_filtro (ventana de 7/30
+  // días) y no `segmento` -- estos dos numeros son los que el frontend usa
+  // como botones de filtro, así que el número mostrado tiene que coincidir
+  // con lo que realmente se ve al hacer clic. "nuevo"/"en_riesgo" siguen
+  // con `segmento` (son solo informativos, no filtran nada).
   const resumenSegmentos = {
     total:      clientes.length,
     nuevo:      clientes.filter((c) => c.segmento === 'nuevo').length,
-    frecuente:  clientes.filter((c) => c.segmento === 'frecuente').length,
     en_riesgo:  clientes.filter((c) => c.segmento === 'en_riesgo').length,
-    activo:     clientes.filter((c) => c.segmento === 'activo').length,
+    frecuente:  clientes.filter((c) => c.cumple_filtro === 'frecuentes').length,
+    activo:     clientes.filter((c) => c.cumple_filtro === 'activos').length,
   };
 
   if (filtro === 'frecuentes' || filtro === 'activos') {
