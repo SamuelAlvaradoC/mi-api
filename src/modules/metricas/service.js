@@ -299,6 +299,10 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
 
   if (filtro === 'frecuentes' || filtro === 'activos') {
     clientes = clientes.filter((c) => c.cumple_filtro === filtro);
+  } else if (filtro === 'nuevo' || filtro === 'en_riesgo') {
+    // "nuevo"/"en_riesgo" no tienen una definicion de ventana pedida --
+    // filtran por `segmento` (la clasificacion historica que ya existia).
+    clientes = clientes.filter((c) => c.segmento === filtro);
   }
 
   if (q && q.trim()) {
