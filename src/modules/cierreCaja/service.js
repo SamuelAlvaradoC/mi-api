@@ -108,10 +108,12 @@ const resumenDia = async (fecha) => {
   const total_puntos_usados = ventas.reduce((s, v) => s + Number(v.puntos_usados || 0), 0);
 
   // Datáfono no llena monto_efectivo/monto_transferencia (ver ventas/service.js
-  // crear()), así que se calcula aparte filtrando por metodo_pago -- mismo
-  // criterio que metricas/service.js y dashboard/service.js (total - costo_domicilio).
+  // crear()), así que se calcula aparte filtrando por metodo_pago. Se usa el
+  // monto BRUTO (total, sin restar costo_domicilio) -- igual que total_efectivo
+  // y total_transferencia arriba, que tampoco restan el domicilio -- para que
+  // total_ventas quede en la misma unidad (bruto) en los 3 métodos.
   const ventasDatafono = ventas.filter((v) => v.metodo_pago === 'datafono');
-  const total_datafono = ventasDatafono.reduce((s, v) => s + (Number(v.total) - Number(v.costo_domicilio || 0)), 0);
+  const total_datafono = ventasDatafono.reduce((s, v) => s + Number(v.total), 0);
   const count_datafono = ventasDatafono.length;
 
   const total_ventas        = total_efectivo + total_transferencia + total_datafono;

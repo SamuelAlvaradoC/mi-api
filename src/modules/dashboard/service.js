@@ -150,10 +150,13 @@ const totalDia = async (fecha) => {
   const totalDomicilios = ventas.reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
 
   // Datáfono no llena monto_efectivo/monto_transferencia (ver ventas/service.js
-  // crear()), así que se calcula aparte filtrando por metodo_pago -- mismo
-  // criterio que metricas/service.js (total - costo_domicilio).
+  // crear()), así que se calcula aparte filtrando por metodo_pago. Se usa el
+  // monto BRUTO (total, sin restar costo_domicilio) -- igual que "transferencia"
+  // arriba -- porque totalDomicilios ya se resta UNA sola vez en efectivoNeto
+  // (todo domicilio se paga en efectivo al domiciliario, sin importar el método
+  // de pago del cliente). Restar el domicilio otra vez aquí lo contaría doble.
   const ventasDatafono = ventas.filter((v) => v.metodo_pago === 'datafono');
-  const totalDatafono  = ventasDatafono.reduce((s, v) => s + (Number(v.total) - Number(v.costo_domicilio || 0)), 0);
+  const totalDatafono  = ventasDatafono.reduce((s, v) => s + Number(v.total), 0);
   const countDatafono  = ventasDatafono.length;
 
   const efectivoNeto = efectivoBruto - totalDomicilios;
