@@ -191,6 +191,7 @@ const domiciliariosDia = async (fecha) => {
       costo_domicilio: true,
       monto_efectivo: true,
       monto_transferencia: true,
+      metodo_pago: true,
       id_domiciliario: true,
     },
   });
@@ -208,11 +209,15 @@ const domiciliariosDia = async (fecha) => {
   const resumen = {};
   ventas.forEach((v) => {
     const nombre = v.id_domiciliario ? (nombrePorId[v.id_domiciliario] || 'Desconocido') : 'Sin asignar';
-    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, total: 0, total_domicilios: 0 };
+    if (!resumen[nombre]) resumen[nombre] = { nombre, entregas: 0, efectivo: 0, transferencia: 0, datafono: 0, total: 0, total_domicilios: 0 };
     resumen[nombre].entregas++;
     resumen[nombre].total             += Number(v.total);
     resumen[nombre].efectivo          += Number(v.monto_efectivo      || 0);
     resumen[nombre].transferencia     += Number(v.monto_transferencia || 0);
+    // Datáfono no llena monto_efectivo/monto_transferencia (ver ventas/service.js
+    // crear()) -- se suma aparte por metodo_pago, en bruto (sin restar domicilio,
+    // igual que transferencia arriba).
+    if (v.metodo_pago === 'datafono') resumen[nombre].datafono += Number(v.total);
     resumen[nombre].total_domicilios  += Number(v.costo_domicilio     || 0);
   });
 
