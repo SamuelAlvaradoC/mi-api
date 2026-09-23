@@ -335,6 +335,10 @@ async function imprimirComanda(venta) {
 async function imprimirCierre(datos) {
   const linea = '================================';
 
+  const totalDatafono = Number(datos.total_datafono || 0);
+  const countDatafono  = Number(datos.count_datafono || 0);
+  const labelPagosDatafono = countDatafono === 1 ? 'pago' : 'pagos';
+
   const partes = [
     Buffer.from(INIT + LATIN1),
     Buffer.from(CENTRAR + NEGRITA_ON + DOBLE_ALTO),
@@ -357,8 +361,8 @@ async function imprimirCierre(datos) {
     Buffer.from('Transferencias: $' +
       Number(datos.total_transferencia).toLocaleString('es-CO') + '\n'),
     Buffer.from('Datafono: $' +
-      Number(datos.total_datafono || 0).toLocaleString('es-CO') +
-      ' (' + Number(datos.count_datafono || 0) + ' pagos)\n'),
+      totalDatafono.toLocaleString('es-CO') +
+      ' (' + countDatafono + ' ' + labelPagosDatafono + ')\n'),
     Buffer.from('Total domicilios: $' +
       Number(datos.total_domicilios).toLocaleString('es-CO') + '\n'),
     Buffer.from(linea + '\n'),
