@@ -99,14 +99,22 @@ const resumenDia = async (fecha) => {
   // evitar restar costo_domicilio dos veces sobre dinero real.
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: estadoEntregado?.id_estado },
-    select: { monto_efectivo: true, monto_transferencia: true, costo_domicilio: true, puntos_usados: true },
+    select: { monto_efectivo: true, monto_transferencia: true, costo_domicilio: true, puntos_usados: true, metodo_pago: true, total: true },
   });
 
   const total_efectivo      = ventas.reduce((s, v) => s + Number(v.monto_efectivo || 0), 0);
   const total_transferencia = ventas.reduce((s, v) => s + Number(v.monto_transferencia || 0), 0);
   const total_domicilios    = ventas.reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
   const total_puntos_usados = ventas.reduce((s, v) => s + Number(v.puntos_usados || 0), 0);
-  const total_ventas        = total_efectivo + total_transferencia;
+
+  // Datáfono no llena monto_efectivo/monto_transferencia (ver ventas/service.js
+  // crear()), así que se calcula aparte filtrando por metodo_pago -- mismo
+  // criterio que metricas/service.js y dashboard/service.js (total - costo_domicilio).
+  const ventasDatafono = ventas.filter((v) => v.metodo_pago === 'datafono');
+  const total_datafono = ventasDatafono.reduce((s, v) => s + (Number(v.total) - Number(v.costo_domicilio || 0)), 0);
+  const count_datafono = ventasDatafono.length;
+
+  const total_ventas        = total_efectivo + total_transferencia + total_datafono;
   const efectivo_sin_domicilios = total_efectivo - total_domicilios;
 
   const cierre        = await obtenerCierreHoy(fecha);
@@ -129,6 +137,8 @@ const resumenDia = async (fecha) => {
     total_efectivo,
     efectivo_sin_domicilios,
     total_transferencia,
+    total_datafono,
+    count_datafono,
     total_domicilios,
     total_puntos_usados,
     gastos,

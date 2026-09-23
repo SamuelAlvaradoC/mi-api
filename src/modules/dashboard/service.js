@@ -141,7 +141,7 @@ const totalDia = async (fecha) => {
   // Solo contar ventas ENTREGADAS — pedidos pendientes no son ingresos reales aún
   const ventas = await prisma.venta.findMany({
     where: { ...(fechaWhere ? { fecha: fechaWhere } : {}), id_estado: estadoEntregado?.id_estado },
-    select: { id_venta: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: { id_venta: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true, metodo_pago: true },
   });
 
   const totalVentas    = ventas.length;
@@ -149,8 +149,15 @@ const totalDia = async (fecha) => {
   const transferencia  = ventas.reduce((s, v) => s + Number(v.monto_transferencia || 0), 0);
   const totalDomicilios = ventas.reduce((s, v) => s + Number(v.costo_domicilio || 0), 0);
 
+  // Datáfono no llena monto_efectivo/monto_transferencia (ver ventas/service.js
+  // crear()), así que se calcula aparte filtrando por metodo_pago -- mismo
+  // criterio que metricas/service.js (total - costo_domicilio).
+  const ventasDatafono = ventas.filter((v) => v.metodo_pago === 'datafono');
+  const totalDatafono  = ventasDatafono.reduce((s, v) => s + (Number(v.total) - Number(v.costo_domicilio || 0)), 0);
+  const countDatafono  = ventasDatafono.length;
+
   const efectivoNeto = efectivoBruto - totalDomicilios;
-  const ingresoTotal = efectivoNeto + transferencia;
+  const ingresoTotal = efectivoNeto + transferencia + totalDatafono;
 
   return {
     fecha:                fecha || null,
@@ -160,6 +167,8 @@ const totalDia = async (fecha) => {
     total_efectivo_bruto: efectivoBruto,
     total_transferencia:  transferencia,
     total_domicilios:     totalDomicilios,
+    total_datafono:       totalDatafono,
+    count_datafono:       countDatafono,
   };
 };
 

@@ -356,6 +356,9 @@ async function imprimirCierre(datos) {
       Number(datos.efectivo_sin_domicilios).toLocaleString('es-CO') + '\n'),
     Buffer.from('Transferencias: $' +
       Number(datos.total_transferencia).toLocaleString('es-CO') + '\n'),
+    Buffer.from('Datafono: $' +
+      Number(datos.total_datafono || 0).toLocaleString('es-CO') +
+      ' (' + Number(datos.count_datafono || 0) + ' pagos)\n'),
     Buffer.from('Total domicilios: $' +
       Number(datos.total_domicilios).toLocaleString('es-CO') + '\n'),
     Buffer.from(linea + '\n'),
