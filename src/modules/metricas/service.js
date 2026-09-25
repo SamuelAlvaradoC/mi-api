@@ -220,19 +220,17 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
       c.telefono,
       COUNT(v.id_venta) FILTER (WHERE e.nombre_estado = 'entregado')::int AS total_compras,
       MAX(v.fecha) FILTER (WHERE e.nombre_estado = 'entregado') AS ultima_compra,
-      -- Ventanas móviles evaluadas contra "hoy" en cada consulta (no se
-      -- guardan ni se precalculan) -- mismo criterio de "día calendario
-      -- Colombia" que diaColombiaUTC() más abajo (restar 5h y truncar a
-      -- fecha), expresado en SQL para no traer cada venta individual solo
-      -- para contar cuántas caen en los últimos 7/30 días.
+      -- Ventana móvil evaluada contra "hoy" en cada consulta (no se guarda
+      -- ni se precalcula) -- mismo criterio de "día calendario Colombia"
+      -- que diaColombiaUTC() más abajo (restar 5h y truncar a fecha),
+      -- expresado en SQL para no traer cada venta individual solo para
+      -- contar cuántas caen en los últimos 7 días. Solo "frecuente" usa
+      -- ventana móvil; "activo" usa total_compras (todo el historial) +
+      -- dias_desde_ultima_compra, ver más abajo.
       COUNT(v.id_venta) FILTER (
         WHERE e.nombre_estado = 'entregado'
           AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() - INTERVAL '5 hours')::date - INTERVAL '6 days'
-      )::int AS compras_7d,
-      COUNT(v.id_venta) FILTER (
-        WHERE e.nombre_estado = 'entregado'
-          AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() - INTERVAL '5 hours')::date - INTERVAL '29 days'
-      )::int AS compras_30d
+      )::int AS compras_7d
     FROM clientes c
     JOIN usuarios u ON u.id_usuario = c.id_usuario
     LEFT JOIN ventas v ON v.id_cliente = c.id_cliente
@@ -261,14 +259,23 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
     if (diasDesdeUltimaCompra !== null && diasDesdeUltimaCompra > 30) segmento = 'en_riesgo';
     else if (r.total_compras === 1) segmento = 'nuevo';
     else if (r.total_compras >= 5) segmento = 'frecuente';
-    // Filtro de la tabla (Frecuentes/Activos/Todos) -- ventana móvil,
-    // excluyente entre sí (se evalúa "frecuente" primero; solo si no
-    // cumple se evalúa "activo"). Distinto del `segmento` de arriba (badge
-    // de estrategia de negocio, basado en total histórico + días desde la
-    // última compra) -- no se tocan ni se mezclan esas definiciones.
+    // Filtro de la tabla (Frecuentes/Activos/Todos), excluyente entre sí (se
+    // evalúa "frecuente" primero; solo si no cumple se evalúa "activo").
+    // "Frecuente" sigue siendo ventana móvil (3+ compras en los últimos 7
+    // días). "Activo" se corrigió (antes: compras_30d >= 2, una ventana
+    // móvil de 30 días) porque dejaba un hueco -- un cliente con 2+ compras
+    // en TODO su historial pero repartidas fuera de esa ventana de 30 días
+    // (ej. una hace 45 días y otra hace 10) no caía en ningún segmento:
+    // no está en riesgo (su última compra fue hace <30 días), no es nuevo
+    // (tiene 2+ compras), no es frecuente, y compras_30d solo contaba 1.
+    // Ahora "activo" = 2+ compras en TODO su historial (no solo en los
+    // últimos 30 días) Y su última compra fue en los últimos 30 días Y no
+    // es frecuente -- con esto, en_riesgo + nuevo + frecuente + activo
+    // cubren exactamente a todos los clientes con al menos una compra, sin
+    // huecos ni superposición.
     let cumpleFiltro = null;
     if (r.compras_7d >= 3) cumpleFiltro = 'frecuentes';
-    else if (r.compras_30d >= 2) cumpleFiltro = 'activos';
+    else if (r.total_compras >= 2 && diasDesdeUltimaCompra !== null && diasDesdeUltimaCompra <= 30) cumpleFiltro = 'activos';
     return {
       id_cliente: r.id_cliente,
       nombre: r.nombre,
@@ -284,8 +291,8 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
   // resumenSegmentos (badges de arriba de la tabla) SIEMPRE sobre la base
   // completa de clientes -- el filtro Frecuentes/Activos/Todos solo debe
   // afectar las filas de la tabla, no estos totales.
-  // "frecuente"/"activo" del resumen usan cumple_filtro (ventana de 7/30
-  // días) y no `segmento` -- estos dos numeros son los que el frontend usa
+  // "frecuente"/"activo" del resumen usan cumple_filtro y no `segmento` --
+  // estos dos numeros son los que el frontend usa
   // como botones de filtro, así que el número mostrado tiene que coincidir
   // con lo que realmente se ve al hacer clic. "nuevo"/"en_riesgo" siguen
   // con `segmento` (son solo informativos, no filtran nada).
