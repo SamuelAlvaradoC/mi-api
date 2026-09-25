@@ -103,18 +103,21 @@ const resumen = async (mesParam) => {
     ? mesesConVentas.reduce((s, m2) => s + m2.total, 0) / mesesConVentas.length
     : 0;
 
-  // Clientes nuevos vs recurrentes del mes: "nuevo" = su primera compra
-  // entregada JAMÁS cae dentro de este mes; "recurrente" = ya tenía al menos
-  // una compra entregada antes del inicio del mes. Un solo query con CTE:
-  // primero la fecha de la primera compra de cada cliente, luego se cuenta
-  // quiénes compraron este mes separados por si esa primera compra es este
-  // mes o anterior.
+  // Clientes nuevos vs activos del mes -- definición útil desde el primer mes
+  // de operación (2026-09-07 fue el lanzamiento real, así que "primera compra
+  // jamás" daba siempre 100%/0% en el primer mes). "nuevo" = compró este mes
+  // y, contando TODO su historial hasta el final de este mes, tiene exactamente
+  // 1 compra entregada. "activo" = compró este mes y tiene 2+ compras
+  // entregadas contando el historial hasta el final de este mes (repitió, sea
+  // dentro del mismo mes o en meses anteriores). Un solo query con CTE:
+  // primero el total de compras de cada cliente hasta el fin del mes, luego
+  // se cuenta quiénes compraron este mes separados por si ese total es 1 o 2+.
   const idEstadoEntregado = estadoEntregado?.id_estado ?? -1;
-  const nuevosVsRecurrentes = await prisma.$queryRaw`
-    WITH primera_compra AS (
-      SELECT id_cliente, MIN(fecha) AS primera
+  const nuevosVsActivos = await prisma.$queryRaw`
+    WITH compras_hasta_fin_mes AS (
+      SELECT id_cliente, COUNT(*) AS total_compras
       FROM ventas
-      WHERE id_estado = ${idEstadoEntregado}
+      WHERE id_estado = ${idEstadoEntregado} AND fecha < ${fin}
       GROUP BY id_cliente
     ),
     compraron_este_mes AS (
@@ -123,12 +126,12 @@ const resumen = async (mesParam) => {
       WHERE id_estado = ${idEstadoEntregado} AND fecha >= ${inicio} AND fecha < ${fin}
     )
     SELECT
-      COUNT(*) FILTER (WHERE pc.primera >= ${inicio} AND pc.primera < ${fin})::int AS nuevos,
-      COUNT(*) FILTER (WHERE pc.primera < ${inicio})::int AS recurrentes
+      COUNT(*) FILTER (WHERE chfm.total_compras = 1)::int AS nuevos,
+      COUNT(*) FILTER (WHERE chfm.total_compras >= 2)::int AS activos
     FROM compraron_este_mes cm
-    JOIN primera_compra pc ON pc.id_cliente = cm.id_cliente
+    JOIN compras_hasta_fin_mes chfm ON chfm.id_cliente = cm.id_cliente
   `;
-  const { nuevos = 0, recurrentes = 0 } = nuevosVsRecurrentes[0] || {};
+  const { nuevos = 0, activos = 0 } = nuevosVsActivos[0] || {};
 
   return {
     mes, anio, mes_label: MESES[mes - 1],
@@ -137,8 +140,8 @@ const resumen = async (mesParam) => {
     ventas_netas_mes:     Math.round(ventasNetasMes),
     promedio_mensual:     Math.round(promedioMensual),
     numero_ventas_mes:    numeroVentasMes,
-    clientes_nuevos_mes:      nuevos,
-    clientes_recurrentes_mes: recurrentes,
+    clientes_nuevos_mes:  nuevos,
+    clientes_activos_mes: activos,
     desglose_pago:        desglosePago,
   };
 };
