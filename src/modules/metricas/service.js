@@ -208,9 +208,12 @@ const clientesFrecuencia = async ({ q, page = 1, pageSize = 20, filtro } = {}) =
       -- contar cuántas caen en los últimos 7 días. Solo "frecuente" usa
       -- ventana móvil; "activo" usa total_compras (todo el historial) +
       -- dias_desde_ultima_compra, ver más abajo.
+      -- v.fecha es timestamp sin zona guardado en UTC (restar 5h está bien);
+      -- "hoy" usa AT TIME ZONE para no depender de la zona de la sesión de
+      -- Postgres (NOW() - 5h solo daba bien porque la sesión está en UTC).
       COUNT(v.id_venta) FILTER (
         WHERE e.nombre_estado = 'entregado'
-          AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() - INTERVAL '5 hours')::date - INTERVAL '6 days'
+          AND (v.fecha - INTERVAL '5 hours')::date >= (NOW() AT TIME ZONE 'America/Bogota')::date - INTERVAL '6 days'
       )::int AS compras_7d
     FROM clientes c
     JOIN usuarios u ON u.id_usuario = c.id_usuario
