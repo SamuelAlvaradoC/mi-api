@@ -1,5 +1,6 @@
 const prisma = require('../../config/prisma');
 const { ventasPorMes } = require('../dashboard/service');
+const { netoVentas } = require('../../utils/netoVentas');
 
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
@@ -60,39 +61,19 @@ const resumen = async (mesParam) => {
     select: { metodo_pago: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
-  // Regla de negocio (2026-09-22): el costo de domicilio SIEMPRE se paga en
-  // efectivo al domiciliario, sin importar cómo pagó el cliente -- así que
-  // se resta UNA sola vez, en agregado, del bucket de efectivo. Transferencia
-  // y datáfono van por su monto bruto (nunca se les resta domicilio). Mismo
-  // criterio que dashboard/service.js totalDia() y cierreCaja/service.js
-  // resumenDia() -- los 3 deben cuadrar entre sí.
-  const desgloseMap = { efectivo: 0, transferencia: 0, datafono: 0 };
-  let domiciliosMes = 0;
-  ventasMes.forEach((v) => {
-    const metodo = v.metodo_pago;
-    domiciliosMes += Number(v.costo_domicilio || 0);
-    if (metodo === 'mixto') {
-      // La parte en efectivo de un mixto va al bucket de efectivo (bruto por
-      // ahora, el domicilio del mes se resta al final en agregado); la parte
-      // en transferencia va bruta al bucket de transferencia.
-      desgloseMap.efectivo      += Number(v.monto_efectivo || 0);
-      desgloseMap.transferencia += Number(v.monto_transferencia || 0);
-      return;
-    }
-    if (desgloseMap[metodo] !== undefined) {
-      desgloseMap[metodo] += Number(v.total);
-    }
-  });
-  desgloseMap.efectivo -= domiciliosMes;
-
-  const totalDesglose = desgloseMap.efectivo + desgloseMap.transferencia + desgloseMap.datafono;
+  // Desglose y ventas netas salen del MISMO cálculo (netoVentas, ver la regla
+  // del domicilio allí) sobre las mismas ventas -- por construcción, ventas
+  // netas = suma del desglose. Antes ventas netas venía de ventasPorMes(), que
+  // cortaba el mes en UTC y no cuadraba con el desglose.
+  const desgloseMap = netoVentas(ventasMes);
+  const totalDesglose = desgloseMap.neto;
   const desglosePago = ['efectivo', 'transferencia', 'datafono'].map((metodo) => ({
     metodo,
     monto: Math.round(desgloseMap[metodo]),
     porcentaje: totalDesglose > 0 ? Math.round((desgloseMap[metodo] / totalDesglose) * 1000) / 10 : 0,
   }));
 
-  const ventasNetasMes = mesesNetas.find((m2) => m2.mes === mes)?.total || 0;
+  const ventasNetasMes = totalDesglose;
 
   // Promedio mensual: solo sobre los meses que ya tienen al menos una venta
   // -- dividir entre los 12 meses del año (o entre los "transcurridos")

@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { netoVentas, mesAnioColombia } = require('../../utils/netoVentas');
 
 const MESES  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DIAS_S = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -10,31 +11,24 @@ const horaLabel = (h) => {
   return `${h - 12}pm`;
 };
 
+// Ventas netas por mes del año en curso -- mes y año en hora Colombia (antes
+// se agrupaba con EXTRACT(MONTH FROM fecha) sobre UTC, y una venta del 30-sep
+// a las 7pm Colombia caía en octubre). El neto de cada mes sale de
+// netoVentas(), la misma función del desglose por método de métricas.
 const ventasPorMes = async () => {
-  const año = new Date().getFullYear();
-  const raw = await prisma.$queryRaw`
-    SELECT
-      EXTRACT(YEAR  FROM fecha)::int AS año,
-      EXTRACT(MONTH FROM fecha)::int AS mes,
-      COALESCE(SUM(
-        CASE
-          WHEN COALESCE(monto_efectivo,0) + COALESCE(monto_transferencia,0) > 0
-          THEN COALESCE(monto_efectivo,0) + COALESCE(monto_transferencia,0) - COALESCE(costo_domicilio,0)
-          ELSE total - COALESCE(costo_domicilio,0)
-        END
-      ), 0) AS monto_total
-    FROM ventas
-    WHERE EXTRACT(YEAR FROM fecha) = ${año}
-      AND id_estado = (SELECT id_estado FROM estados WHERE nombre_estado = 'entregado' LIMIT 1)
-    GROUP BY año, mes
-    ORDER BY mes ASC
-  `;
-  const meses = [];
-  for (let m = 1; m <= 12; m++) {
-    const found = raw.find((r) => Number(r.mes) === m);
-    meses.push({ label: MESES[m - 1], mes: m, año, total: Number(found?.monto_total || 0) });
-  }
-  return meses;
+  const año = new Date(Date.now() - 5 * 60 * 60 * 1000).getUTCFullYear();
+  const estadoEntregado = await prisma.estado.findFirst({ where: { nombre_estado: 'entregado' } });
+  const ventas = await prisma.venta.findMany({
+    where: {
+      fecha: { gte: new Date(Date.UTC(año, 0, 1, 5)), lt: new Date(Date.UTC(año + 1, 0, 1, 5)) },
+      id_estado: estadoEntregado?.id_estado,
+    },
+    select: { fecha: true, metodo_pago: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+  });
+
+  const porMes = Array.from({ length: 12 }, () => []);
+  ventas.forEach((v) => porMes[mesAnioColombia(v.fecha).mes - 1].push(v));
+  return porMes.map((vs, i) => ({ label: MESES[i], mes: i + 1, año, total: netoVentas(vs).neto }));
 };
 
 const ventasPorDia = async (fecha) => {
@@ -48,19 +42,14 @@ const ventasPorDia = async (fecha) => {
   ]);
   const ventas = await prisma.venta.findMany({
     where: { fecha: { gte: inicio, lt: fin }, id_estado: estadoEntregado?.id_estado },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: { fecha: true, metodo_pago: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
+  const porHora = {};
+  for (let h = 0; h < 24; h++) porHora[h] = [];
+  ventas.forEach((v) => porHora[(new Date(v.fecha).getUTCHours() - 5 + 24) % 24].push(v));
   const horas = {};
-  for (let h = 0; h < 24; h++) horas[h] = 0;
-  ventas.forEach((v) => {
-    const hora = (new Date(v.fecha).getUTCHours() - 5 + 24) % 24;
-    const ef   = Number(v.monto_efectivo || 0);
-    const tr   = Number(v.monto_transferencia || 0);
-    const dom  = Number(v.costo_domicilio || 0);
-    const neto = (ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom);
-    horas[hora] = horas[hora] + neto;
-  });
+  for (let h = 0; h < 24; h++) horas[h] = netoVentas(porHora[h]).neto;
 
   const nonZero = Object.entries(horas).filter(([, t]) => t > 0);
   if (nonZero.length === 0) return [{ label: '—', total: 0 }];
@@ -75,11 +64,12 @@ const ventasPorSemana = async (fecha) => {
     ? new Date(fecha + 'T12:00:00.000Z')
     : new Date(Date.now() - 5 * 60 * 60 * 1000); // Colombia UTC-5
 
-  // Calcular lunes de la semana actual
-  const diaSemana = hoy.getDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
+  // Calcular lunes de la semana actual -- métodos UTC porque `hoy` ya está
+  // desplazado a hora Colombia (getDay/setDate dependerían de la zona del servidor)
+  const diaSemana = hoy.getUTCDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
   const diasDesdeElLunes = diaSemana === 0 ? 6 : diaSemana - 1;
   const lunesCO = new Date(hoy);
-  lunesCO.setDate(hoy.getDate() - diasDesdeElLunes);
+  lunesCO.setUTCDate(hoy.getUTCDate() - diasDesdeElLunes);
   const lunesISO = lunesCO.toISOString().slice(0, 10);
   const lunes = new Date(lunesISO + 'T05:00:00.000Z'); // medianoche Colombia
 
@@ -90,20 +80,13 @@ const ventasPorSemana = async (fecha) => {
       fecha: { gte: lunes, lt: new Date(lunes.getTime() + 7 * 24 * 60 * 60 * 1000) },
       id_estado: estadoEntregadoSem?.id_estado,
     },
-    select: { fecha: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
+    select: { fecha: true, metodo_pago: true, total: true, costo_domicilio: true, monto_efectivo: true, monto_transferencia: true },
   });
 
   return diasSemana.map((label, i) => {
     const inicio = new Date(lunes.getTime() + i * 24 * 60 * 60 * 1000);
     const fin    = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
-    const total  = ventas
-      .filter((v) => new Date(v.fecha) >= inicio && new Date(v.fecha) < fin)
-      .reduce((s, v) => {
-        const ef  = Number(v.monto_efectivo || 0);
-        const tr  = Number(v.monto_transferencia || 0);
-        const dom = Number(v.costo_domicilio || 0);
-        return s + ((ef + tr > 0) ? (ef + tr - dom) : (Number(v.total) - dom));
-      }, 0);
+    const total  = netoVentas(ventas.filter((v) => new Date(v.fecha) >= inicio && new Date(v.fecha) < fin)).neto;
     return { label, total };
   });
 };
