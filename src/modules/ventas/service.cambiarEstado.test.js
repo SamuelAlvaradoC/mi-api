@@ -85,3 +85,32 @@ describe('cambiarEstado — impresion del comprobante al pasar a "listo"', () =>
     expect(emit).not.toHaveBeenCalled();
   });
 });
+
+describe('cambiarEstado — montos del pago mixto', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getIo.mockReturnValue({ emit: jest.fn() });
+    prisma.estado.findFirst.mockResolvedValue({ id_estado: 5, nombre_estado: 'entregado' });
+    prisma.venta.update.mockResolvedValue({ id_venta: 1 });
+  });
+
+  test('rechaza pasar a mixto con montos que no suman el total, sin tocar la venta', async () => {
+    prisma.venta.findUnique.mockResolvedValue(mockVenta('despachado'));
+
+    await expect(service.cambiarEstado(1, {
+      nombre_estado: 'entregado', metodo_pago: 'mixto', monto_efectivo: 5000, monto_transferencia: 5000,
+    }, 99)).rejects.toMatchObject({ status: 400 });
+    expect(prisma.venta.update).not.toHaveBeenCalled();
+  });
+
+  test('acepta mixto cuando efectivo + transferencia = total', async () => {
+    prisma.venta.findUnique.mockResolvedValue(mockVenta('despachado'));
+
+    await service.cambiarEstado(1, {
+      nombre_estado: 'entregado', metodo_pago: 'mixto', monto_efectivo: 8000, monto_transferencia: 12000,
+    }, 99);
+    expect(prisma.venta.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ metodo_pago: 'mixto', monto_efectivo: 8000, monto_transferencia: 12000 }),
+    }));
+  });
+});

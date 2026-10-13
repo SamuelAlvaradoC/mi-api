@@ -3,6 +3,7 @@ const { acumularPuntos, calcularDescuentoPuntos, obtenerPuntos, valorPunto } = r
 const { datafonoHabilitado } = require('../configuracion/service');
 const { getIo } = require('../../socket');
 const logger = require('../../utils/logger');
+const { validarMontosMixto } = require('./montosMixto');
 
 // Capa de seguridad adicional al toggle visual: aunque el frontend oculte la
 // opción "datafono" cuando el admin la desactivó, un request directo a la API
@@ -220,6 +221,7 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   } else if (metodo_pago === 'mixto') {
     montoEfectivo = Number(monto_efectivo) || 0;
     montoTransfer = Number(monto_transferencia) || 0;
+    validarMontosMixto(total, montoEfectivo, montoTransfer);
   }
 
   const nuevaVenta = await prisma.venta.create({
@@ -355,6 +357,17 @@ const cambiarEstado = async (id, datos, id_usuario, id_rol) => {
   if (estadoNombre === 'anulado') {
     const motivo = datos.motivo_anulacion || '';
     if (!String(motivo).trim()) throw { status: 400, message: 'El motivo de anulación es requerido' };
+  }
+
+  // Si el cambio deja la venta en mixto con montos nuevos, deben cuadrar con el
+  // total -- antes de cualquier efecto (puntos, pagos) para no dejar nada a medias.
+  const metodoResultante = metodo_pago || ventaActual.metodo_pago;
+  if (metodoResultante === 'mixto' && (metodo_pago === 'mixto' || monto_efectivo != null || monto_transferencia != null)) {
+    validarMontosMixto(
+      ventaActual.total,
+      monto_efectivo      != null ? monto_efectivo      : ventaActual.monto_efectivo      || 0,
+      monto_transferencia != null ? monto_transferencia : ventaActual.monto_transferencia || 0,
+    );
   }
 
   // Devolver puntos si se anula y la venta usó puntos
@@ -865,7 +878,10 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
     let montoEf = null, montoTr = null, metodoFinal = metodo_pago;
     if (metodo_pago === 'efectivo')      { montoEf = Number(venta.total); montoTr = 0; }
     if (metodo_pago === 'transferencia') { montoTr = Number(venta.total); montoEf = 0; }
-    if (metodo_pago === 'mixto')         { montoEf = Number(monto_efectivo || 0); montoTr = Number(monto_transferencia || 0); }
+    if (metodo_pago === 'mixto') {
+      montoEf = Number(monto_efectivo || 0); montoTr = Number(monto_transferencia || 0);
+      validarMontosMixto(venta.total, montoEf, montoTr);
+    }
 
     await prisma.venta.update({
       where: { id_venta: id },
@@ -876,14 +892,6 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
 
   if (!Array.isArray(items) || items.length === 0) {
     throw { status: 400, message: 'Debe incluir al menos un producto' };
-  }
-
-  // Borrar detalles existentes en orden de FK
-  const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
-  if (detalleIds.length > 0) {
-    await prisma.detalleTopping.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
-    await prisma.detalleAdicion.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
-    await prisma.detalleVenta.deleteMany({ where: { id_venta: id } });
   }
 
   // Recalcular con misma lógica que crear
@@ -940,15 +948,28 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
   const descuentoAplicado = Math.min(Number(venta.descuento_puntos || 0), subtotal);
   const total = Math.max(0, subtotal - descuentoAplicado) + Number(costo_domicilio || 0);
 
-  // Calcular montos: para efectivo/transferencia siempre derivar del total real (evitar inconsistencias)
+  // Calcular montos: para efectivo/transferencia siempre derivar del total real
+  // (evitar inconsistencias). Antes, si no se reenviaba metodo_pago, se
+  // conservaban los montos viejos aunque el total cambiara (ej. venta #157:
+  // mixto que sumaba $2.000 más que el total tras editar el domicilio).
+  const metodoFinal = metodo_pago || venta.metodo_pago;
   let montoEf = venta.monto_efectivo;
   let montoTr = venta.monto_transferencia;
-  let metodoFinal = venta.metodo_pago;
-  if (metodo_pago) {
-    metodoFinal = metodo_pago;
-    if (metodo_pago === 'efectivo')      { montoEf = total; montoTr = 0; }
-    else if (metodo_pago === 'transferencia') { montoTr = total; montoEf = 0; }
-    else if (metodo_pago === 'mixto')    { montoEf = Number(monto_efectivo || 0); montoTr = Number(monto_transferencia || 0); }
+  if (metodoFinal === 'efectivo')           { montoEf = total; montoTr = 0; }
+  else if (metodoFinal === 'transferencia') { montoTr = total; montoEf = 0; }
+  else if (metodoFinal === 'mixto') {
+    if (monto_efectivo != null)      montoEf = Number(monto_efectivo);
+    if (monto_transferencia != null) montoTr = Number(monto_transferencia);
+    validarMontosMixto(total, montoEf || 0, montoTr || 0);
+  }
+
+  // Borrar detalles existentes en orden de FK -- recién aquí, después de todas
+  // las validaciones, para que un error no deje la venta sin productos.
+  const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
+  if (detalleIds.length > 0) {
+    await prisma.detalleTopping.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+    await prisma.detalleAdicion.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+    await prisma.detalleVenta.deleteMany({ where: { id_venta: id } });
   }
 
   await prisma.venta.update({
