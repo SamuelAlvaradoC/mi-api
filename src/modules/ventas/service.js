@@ -4,6 +4,7 @@ const { datafonoHabilitado } = require('../configuracion/service');
 const { getIo } = require('../../socket');
 const logger = require('../../utils/logger');
 const { validarMontosMixto } = require('./montosMixto');
+const { sincronizarDetallePagos } = require('./detallePagos');
 
 // Capa de seguridad adicional al toggle visual: aunque el frontend oculte la
 // opción "datafono" cuando el admin la desactivó, un request directo a la API
@@ -501,57 +502,24 @@ const cambiarEstado = async (id, datos, id_usuario, id_rol) => {
       const empleado = id_usuario
         ? await prisma.empleado.findUnique({ where: { id_usuario: Number(id_usuario) } })
         : null;
+      // La venta ya quedó actualizada arriba con metodo_pago/montos/comprobante
+      // de este PATCH, así que el detalle se deriva de ella (detallePagos.js).
       const venta = await prisma.venta.findUnique({ where: { id_venta: id } });
-      const metodoPagoFinal = metodo_pago || venta.metodo_pago;
-      if (empleado && metodoPagoFinal) {
-        const montoEfectivoFinal      = monto_efectivo      != null ? Number(monto_efectivo)      : Number(venta.monto_efectivo || 0);
-        const montoTransferenciaFinal = monto_transferencia != null ? Number(monto_transferencia) : Number(venta.monto_transferencia || 0);
-
-        // Crear o actualizar registro de pago
-        let pago = await prisma.pago.findFirst({ where: { id_venta: id } });
-        if (pago) {
-          pago = await prisma.pago.update({
-            where: { id_pago: pago.id_pago },
-            data: { total_pagado: venta.total, fecha_pago: new Date(), id_empleado: empleado.id_empleado },
-          });
-        } else {
-          pago = await prisma.pago.create({
-            data: { id_venta: id, id_empleado: empleado.id_empleado, total_pagado: venta.total, fecha_pago: new Date() },
-          });
-        }
-
-        // Limpiar detalles anteriores y recrear
-        await prisma.detallePago.deleteMany({ where: { id_pago: pago.id_pago } });
-
-        const metodos     = await prisma.metodoPago.findMany();
-        const mEfectivo   = metodos.find((m) => m.nombre.toLowerCase().includes('efectivo'));
-        const mTransf     = metodos.find((m) => m.nombre.toLowerCase().includes('transferencia'));
-        const mDatafono   = metodos.find((m) => m.nombre.toLowerCase().includes('datafono'));
-
-        if (metodoPagoFinal === 'efectivo' && mEfectivo) {
-          await prisma.detallePago.create({
-            data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: venta.total },
-          });
-        } else if (metodoPagoFinal === 'datafono' && mDatafono) {
-          await prisma.detallePago.create({
-            data: { id_pago: pago.id_pago, id_metodo_pago: mDatafono.id_metodo_pago, monto: venta.total },
-          });
-        } else if (metodoPagoFinal === 'transferencia' && mTransf) {
-          await prisma.detallePago.create({
-            data: { id_pago: pago.id_pago, id_metodo_pago: mTransf.id_metodo_pago, monto: venta.total, comprobante: comprobante_url || null },
-          });
-        } else if (metodoPagoFinal === 'mixto') {
-          if (mEfectivo && montoEfectivoFinal > 0) {
-            await prisma.detallePago.create({
-              data: { id_pago: pago.id_pago, id_metodo_pago: mEfectivo.id_metodo_pago, monto: montoEfectivoFinal },
+      if (empleado && venta.metodo_pago) {
+        await prisma.$transaction(async (tx) => {
+          const pago = await tx.pago.findFirst({ where: { id_venta: id } });
+          if (pago) {
+            await tx.pago.update({
+              where: { id_pago: pago.id_pago },
+              data: { fecha_pago: new Date(), id_empleado: empleado.id_empleado },
+            });
+          } else {
+            await tx.pago.create({
+              data: { id_venta: id, id_empleado: empleado.id_empleado, total_pagado: venta.total, fecha_pago: new Date() },
             });
           }
-          if (mTransf && montoTransferenciaFinal > 0) {
-            await prisma.detallePago.create({
-              data: { id_pago: pago.id_pago, id_metodo_pago: mTransf.id_metodo_pago, monto: montoTransferenciaFinal, comprobante: comprobante_url || null },
-            });
-          }
-        }
+          await sincronizarDetallePagos(tx, venta);
+        });
       }
     } catch (pagoErr) {
       logger.error('Error creando pago detallado', { error: pagoErr.message, stack: pagoErr.stack, id_venta: id });
@@ -883,9 +851,14 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
       validarMontosMixto(venta.total, montoEf, montoTr);
     }
 
-    await prisma.venta.update({
-      where: { id_venta: id },
-      data: { metodo_pago: metodoFinal, monto_efectivo: montoEf, monto_transferencia: montoTr, ...snapData },
+    // Venta y detalle del pago en la misma transacción: si la venta ya fue
+    // entregada tiene pago, y su detalle debe quedar igual a la venta.
+    await prisma.$transaction(async (tx) => {
+      const actualizada = await tx.venta.update({
+        where: { id_venta: id },
+        data: { metodo_pago: metodoFinal, monto_efectivo: montoEf, monto_transferencia: montoTr, ...snapData },
+      });
+      await sincronizarDetallePagos(tx, actualizada);
     });
     return obtener(id);
   }
@@ -963,37 +936,42 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
     validarMontosMixto(total, montoEf || 0, montoTr || 0);
   }
 
-  // Borrar detalles existentes en orden de FK -- recién aquí, después de todas
-  // las validaciones, para que un error no deje la venta sin productos.
-  const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
-  if (detalleIds.length > 0) {
-    await prisma.detalleTopping.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
-    await prisma.detalleAdicion.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
-    await prisma.detalleVenta.deleteMany({ where: { id_venta: id } });
-  }
+  // Todo en una transacción: borrar y recrear los productos, actualizar la
+  // venta y, si ya tiene pago (ej. se devolvió de entregado), su detalle.
+  await prisma.$transaction(async (tx) => {
+    // Borrar detalles existentes en orden de FK -- recién aquí, después de todas
+    // las validaciones, para que un error no deje la venta sin productos.
+    const detalleIds = venta.detalleVentas.map((d) => d.id_detalle_venta);
+    if (detalleIds.length > 0) {
+      await tx.detalleTopping.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+      await tx.detalleAdicion.deleteMany({ where: { id_detalle_venta: { in: detalleIds } } });
+      await tx.detalleVenta.deleteMany({ where: { id_venta: id } });
+    }
 
-  await prisma.venta.update({
-    where: { id_venta: id },
-    data: {
-      subtotal, total, costo_domicilio: Number(costo_domicilio || 0),
-      descuento_puntos: descuentoAplicado,
-      metodo_pago: metodoFinal,
-      monto_efectivo: montoEf,
-      monto_transferencia: montoTr,
-      ...snapData,
-      detalleVentas: {
-        create: itemsCalc.map((item) => ({
-          id_producto: item.id_producto, cantidad: item.cantidad,
-          precio_unitario: item.precio_unitario, subtotal: item.subtotal,
-          chocolate: item.chocolate || null,
-          frutas: item.frutas || null,
-          observacion: item.observacion || null,
-          salsas: Array.isArray(item.salsas) && item.salsas.length > 0 ? JSON.stringify(item.salsas) : null,
-          detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
-          detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },
-        })),
+    const actualizada = await tx.venta.update({
+      where: { id_venta: id },
+      data: {
+        subtotal, total, costo_domicilio: Number(costo_domicilio || 0),
+        descuento_puntos: descuentoAplicado,
+        metodo_pago: metodoFinal,
+        monto_efectivo: montoEf,
+        monto_transferencia: montoTr,
+        ...snapData,
+        detalleVentas: {
+          create: itemsCalc.map((item) => ({
+            id_producto: item.id_producto, cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario, subtotal: item.subtotal,
+            chocolate: item.chocolate || null,
+            frutas: item.frutas || null,
+            observacion: item.observacion || null,
+            salsas: Array.isArray(item.salsas) && item.salsas.length > 0 ? JSON.stringify(item.salsas) : null,
+            detalleToppings:  { create: (item.toppings || []).map((t) => typeof t === 'number' ? { id_topping: t, cantidad: 1 } : { id_topping: t.id_topping, cantidad: t.cantidad || 1 }) },
+            detalleAdiciones: { create: item.adicionesCalc.map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad, precio_unitario: a.precio_unitario, subtotal: a.subtotal * item.cantidad })) },
+          })),
+        },
       },
-    },
+    });
+    await sincronizarDetallePagos(tx, actualizada);
   });
 
   return obtener(id);
