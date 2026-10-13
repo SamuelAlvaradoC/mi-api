@@ -9,7 +9,7 @@ const baseHTML = (contenido) => `
   overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
   <div style="background:#CA0B0B;padding:24px;text-align:center;">
     <img
-      src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png"
+      src="https://www.chocofreseo.com/img/logo.png"
       alt="ChocoFreseo"
       style="height:60px;object-fit:contain;"
     />
