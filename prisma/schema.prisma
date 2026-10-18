@@ -64,8 +64,24 @@ model Usuario {
   empleado Empleado?
   resenas  Resena[]
   cierresCaja CierreCaja[]
+  carrito     CarritoGuardado?
 
   @@map("usuarios")
+}
+
+// Carrito del cliente guardado en el servidor, para conservarlo entre
+// dispositivos (web y app) y al cerrar sesión. `items` usa el mismo formato
+// mínimo que se manda al crear el pedido: id_producto, cantidad, toppings,
+// adiciones, salsas, chocolate, frutas y observacion. Los precios NO se
+// guardan: se recalculan siempre con POST /api/carrito/validar.
+model CarritoGuardado {
+  id_usuario  Int      @id
+  items       Json     @default("[]")
+  actualizado DateTime @default(now()) @updatedAt
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade)
+
+  @@map("carritos")
 }
 
 model Cliente {

@@ -14,11 +14,9 @@ router.get('/catalogo/productos/:id',  controller.obtenerProducto);
 router.get('/catalogo/toppings',       controller.listarToppingsActivos);
 router.get('/catalogo/adiciones',      controller.listarAdicionesActivas);
 
-// ── Carrito (requiere auth) ─────────────────────────────
-router.get('/carrito/total',   verifyToken, controller.totalCarrito);
-router.get('/carrito',         verifyToken, controller.getCarrito);
-router.post('/carrito/agregar',verifyToken, controller.agregarItem);
-router.put('/carrito/:id',     verifyToken, controller.actualizarItem);
-router.delete('/carrito/:id',  verifyToken, controller.eliminarItem);
+// ── Carrito ─────────────────────────────────────────────
+router.post('/carrito/validar', controller.validarCarrito);           // público: revalida y reconstruye
+router.get('/carrito',          verifyToken, controller.getCarrito);  // carrito guardado del usuario
+router.put('/carrito',          verifyToken, controller.guardarCarrito);
 
 module.exports = router;
