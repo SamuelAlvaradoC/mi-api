@@ -71,7 +71,10 @@ const actualizar = async (id, datos) => {
   if (id === SUPER_ADMIN_ID && datos.id_rol !== undefined) {
     throw { status: 403, message: 'No se puede cambiar el rol del Super Admin' };
   }
-  if (datos.contrasena) datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
+  if (datos.contrasena) {
+    datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
+    datos.tiene_contrasena = true; // también si era una cuenta solo de Google
+  }
   // Todo en una transacción: si falla la sincronización de Empleado/Cliente,
   // el cambio de rol en Usuario tampoco debe quedar aplicado a medias.
   return prisma.$transaction(async (tx) => {

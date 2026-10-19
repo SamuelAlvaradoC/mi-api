@@ -25,6 +25,11 @@ const editarPerfilSchema = z.object({
   telefono: telefonoCol,
 });
 
+// ID token de Google Identity Services (se verifica en el servidor).
+const googleSchema = z.object({
+  credential: z.string().min(20, 'Falta la credencial de Google').max(8192),
+});
+
 const solicitarCambioCorreoSchema = z.object({
   email: z.string().trim().toLowerCase().email('Ingresa un correo electrónico válido'),
 });
@@ -54,4 +59,4 @@ const crearDireccionSchema = z.object({
 
 module.exports = { loginSchema, registerSchema, editarPerfilSchema,
                    solicitarResetSchema, verificarResetSchema, crearDireccionSchema,
-                   solicitarCambioCorreoSchema, confirmarCambioCorreoSchema };
+                   solicitarCambioCorreoSchema, confirmarCambioCorreoSchema, googleSchema };

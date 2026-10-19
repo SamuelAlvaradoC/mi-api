@@ -7,6 +7,7 @@ const router = Router();
 // Públicos
 router.post('/login',               controller.login);
 router.post('/register',            controller.register);
+router.post('/google',              controller.loginGoogle); // Continuar con Google (web, solo clientes)
 
 // Recuperación con código de 6 dígitos (email vía Resend)
 router.post('/solicitar-reset',  controller.solicitarReset);

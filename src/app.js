@@ -45,6 +45,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api/auth/login',           authLimiter);
+app.use('/api/auth/google',          authLimiter);
 app.use('/api/auth/solicitar-reset', authLimiter);
 app.use('/api/auth/verificar-reset', authLimiter);
 app.use('/api/auth/register',        registroLimiter);

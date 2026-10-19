@@ -1,7 +1,7 @@
 const authService = require('./service');
 const { loginSchema, registerSchema, editarPerfilSchema,
         solicitarResetSchema, verificarResetSchema, crearDireccionSchema,
-        solicitarCambioCorreoSchema, confirmarCambioCorreoSchema } = require('./schema');
+        solicitarCambioCorreoSchema, confirmarCambioCorreoSchema, googleSchema } = require('./schema');
 const cambioCorreo = require('./cambioCorreo');
 const { success } = require('../../utils/response');
 const { obtenerIpReal } = require('../../utils/obtenerIpReal');
@@ -10,6 +10,13 @@ const login = async (req, res, next) => {
   try {
     const datos = loginSchema.parse(req.body);
     success(res, await authService.login({ ...datos, ip: obtenerIpReal(req) }), 'Login exitoso');
+  } catch (err) { next(err); }
+};
+
+const loginGoogle = async (req, res, next) => {
+  try {
+    const { credential } = googleSchema.parse(req.body);
+    success(res, await authService.loginConGoogle({ credential, ip: obtenerIpReal(req) }), 'Login exitoso');
   } catch (err) { next(err); }
 };
 
@@ -126,6 +133,9 @@ const cambiarContrasenaAuth = async (req, res, next) => {
     if (!contrasena_actual || !nueva_contrasena) throw { status: 400, message: 'Faltan campos requeridos' };
     if (nueva_contrasena.length < 8) throw { status: 400, message: 'La contraseña debe tener al menos 8 caracteres' };
     const usuario = await prisma.usuario.findUnique({ where: { id_usuario: req.user.id_usuario } });
+    if (usuario.tiene_contrasena === false) {
+      throw { status: 400, message: "Tu cuenta usa Google y no tiene contraseña. Créala desde '¿Olvidaste tu contraseña?'" };
+    }
     const valida = await bcrypt.compare(contrasena_actual, usuario.contrasena);
     // 400 y no 401: la web y la app cierran la sesión ante cualquier 401.
     if (!valida) throw { status: 400, message: 'Contraseña actual incorrecta' };
@@ -176,7 +186,7 @@ const misPermisos = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { login, register, logout,
+module.exports = { login, loginGoogle, register, logout,
   solicitarReset, verificarReset,
   getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth, misPermisos,
   solicitarCambioCorreo, confirmarCambioCorreo };
