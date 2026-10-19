@@ -1,17 +1,21 @@
 const prisma = require('../../config/prisma');
 
 const crear = async (datos) => {
-  // Igual que el resto del endpoint (sin auth): confía en el id_venta que
-  // manda el cliente, pero valida que exista, esté entregada y no tenga ya
-  // una reseña -- así el error es un 400 claro en vez de un 500 crudo por
-  // violar el UNIQUE de resenas.id_venta (double-submit del banner, o un
-  // id inventado/de otro cliente).
+  // Sin id_venta es la encuesta general (pública). Con id_venta, solo el
+  // cliente dueño de ese pedido puede reseñarlo (antes cualquiera podía
+  // reseñar un pedido ajeno y bloquear la reseña del cliente real). Además
+  // debe estar entregado y sin reseña -- un 400 claro en vez de un 500 por
+  // el UNIQUE de resenas.id_venta.
   if (datos.id_venta) {
+    if (!datos.id_usuario) throw { status: 401, message: 'Inicia sesión para reseñar tu pedido' };
     const venta = await prisma.venta.findUnique({
       where: { id_venta: datos.id_venta },
-      include: { estado: true, resena: true },
+      include: { estado: true, resena: true, cliente: { select: { id_usuario: true } } },
     });
     if (!venta) throw { status: 400, message: 'El pedido indicado no existe' };
+    if (venta.cliente?.id_usuario !== datos.id_usuario) {
+      throw { status: 403, message: 'Solo puedes reseñar tus propios pedidos' };
+    }
     if (venta.estado?.nombre_estado !== 'entregado') {
       throw { status: 400, message: 'Solo se puede reseñar un pedido ya entregado' };
     }

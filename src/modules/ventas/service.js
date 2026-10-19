@@ -5,6 +5,7 @@ const { getIo } = require('../../socket');
 const logger = require('../../utils/logger');
 const { validarMontosMixto } = require('./montosMixto');
 const { sincronizarDetallePagos } = require('./detallePagos');
+const { validarExtras } = require('./extras');
 
 // Capa de seguridad adicional al toggle visual: aunque el frontend oculte la
 // opción "datafono" cuando el admin la desactivó, un request directo a la API
@@ -153,9 +154,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
     permite_frutas: !!p.permite_frutas,
   }]));
 
-  const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
-  const adiciones   = adicionIds.length ? await prisma.adicion.findMany({ where: { id_adicion: { in: adicionIds } } }) : [];
-  const precioA     = Object.fromEntries(adiciones.map((a) => [a.id_adicion, Number(a.precio)]));
+  // Toppings y adiciones: deben existir y estar activos (400 claro si no).
+  const extras  = await validarExtras(items, { exigirActivos: true });
+  items         = extras.items;
+  const precioA = extras.precioA;
 
   let subtotal = 0;
   const itemsCalc = items.map((item) => {
@@ -887,9 +889,11 @@ const editar = async (id, { items, costo_domicilio, override_costo_domicilio = f
     permite_frutas: !!p.permite_frutas,
   }]));
 
-  const adicionIds  = items.flatMap((i) => (i.adiciones || []).map((a) => a.id_adicion));
-  const adics       = adicionIds.length ? await prisma.adicion.findMany({ where: { id_adicion: { in: adicionIds } } }) : [];
-  const precioA     = Object.fromEntries(adics.map((a) => [a.id_adicion, Number(a.precio)]));
+  // Al editar solo se exige que existan: el pedido puede traer extras que
+  // se desactivaron después de hacerlo.
+  const extras  = await validarExtras(items, { exigirActivos: false });
+  items         = extras.items;
+  const precioA = extras.precioA;
 
   let subtotal = 0;
   const itemsCalc = items.map((item) => {

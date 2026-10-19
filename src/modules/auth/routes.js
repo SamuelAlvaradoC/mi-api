@@ -21,6 +21,8 @@ router.get('/mis-direcciones',          verifyToken, controller.misDirecciones);
 router.post('/mis-direcciones',          verifyToken, controller.crearMiDireccion);
 router.delete('/mis-direcciones/:id',    verifyToken, controller.eliminarMiDireccion);
 router.patch('/cambiar-contrasena-auth', verifyToken, controller.cambiarContrasenaAuth);
+router.post('/cambiar-correo/solicitar', verifyToken, controller.solicitarCambioCorreo);
+router.post('/cambiar-correo/confirmar', verifyToken, controller.confirmarCambioCorreo);
 router.get('/mis-permisos',             verifyToken, controller.misPermisos);
 
 module.exports = router;

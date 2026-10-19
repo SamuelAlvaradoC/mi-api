@@ -1,6 +1,8 @@
 const authService = require('./service');
 const { loginSchema, registerSchema, editarPerfilSchema,
-        solicitarResetSchema, verificarResetSchema, crearDireccionSchema } = require('./schema');
+        solicitarResetSchema, verificarResetSchema, crearDireccionSchema,
+        solicitarCambioCorreoSchema, confirmarCambioCorreoSchema } = require('./schema');
+const cambioCorreo = require('./cambioCorreo');
 const { success } = require('../../utils/response');
 const { obtenerIpReal } = require('../../utils/obtenerIpReal');
 
@@ -35,6 +37,20 @@ const editarPerfil = async (req, res, next) => {
   try {
     const datos = editarPerfilSchema.parse(req.body);
     success(res, await authService.editarPerfil(req.user.id_usuario, datos), 'Perfil actualizado');
+  } catch (err) { next(err); }
+};
+
+const solicitarCambioCorreo = async (req, res, next) => {
+  try {
+    const { email } = solicitarCambioCorreoSchema.parse(req.body);
+    success(res, await cambioCorreo.solicitar(req.user.id_usuario, email), 'Código enviado');
+  } catch (err) { next(err); }
+};
+
+const confirmarCambioCorreo = async (req, res, next) => {
+  try {
+    const { codigo } = confirmarCambioCorreoSchema.parse(req.body);
+    success(res, await cambioCorreo.confirmar(req.user.id_usuario, codigo), 'Correo actualizado');
   } catch (err) { next(err); }
 };
 
@@ -111,7 +127,8 @@ const cambiarContrasenaAuth = async (req, res, next) => {
     if (nueva_contrasena.length < 8) throw { status: 400, message: 'La contraseña debe tener al menos 8 caracteres' };
     const usuario = await prisma.usuario.findUnique({ where: { id_usuario: req.user.id_usuario } });
     const valida = await bcrypt.compare(contrasena_actual, usuario.contrasena);
-    if (!valida) throw { status: 401, message: 'Contraseña actual incorrecta' };
+    // 400 y no 401: la web y la app cierran la sesión ante cualquier 401.
+    if (!valida) throw { status: 400, message: 'Contraseña actual incorrecta' };
     const igual = await bcrypt.compare(nueva_contrasena, usuario.contrasena);
     if (igual) throw { status: 400, message: 'La nueva contraseña debe ser diferente a la actual' };
     const hash = await bcrypt.hash(nueva_contrasena, 10);
@@ -161,4 +178,5 @@ const misPermisos = async (req, res, next) => {
 
 module.exports = { login, register, logout,
   solicitarReset, verificarReset,
-  getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth, misPermisos };
+  getPerfil, editarPerfil, desactivarCuenta, misDirecciones, crearMiDireccion, eliminarMiDireccion, cambiarContrasenaAuth, misPermisos,
+  solicitarCambioCorreo, confirmarCambioCorreo };

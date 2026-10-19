@@ -63,6 +63,19 @@ const generalLimiter = rateLimit({
 // Health check
 app.get('/', (req, res) => res.json({ success: true, data: null, message: 'ChocoAdmin API running' }));
 
+// ── Sesiones ────────────────────────────────────────────
+// verifyToken guarda unos segundos el estado de cada cuenta (ver
+// utils/sesionUsuario.js). Cuando el admin cambia usuarios, clientes,
+// empleados o roles (activar/desactivar, cambiar rol, eliminar...), se vacía
+// esa caché para que la sesión afectada se corte en su siguiente petición.
+const { limpiarCacheSesiones } = require('./utils/sesionUsuario');
+app.use(['/api/usuarios', '/api/clientes', '/api/empleados', '/api/roles'], (req, res, next) => {
+  if (req.method !== 'GET') {
+    res.on('finish', () => { if (res.statusCode < 400) limpiarCacheSesiones(); });
+  }
+  next();
+});
+
 // ── Rutas ───────────────────────────────────────────────
 app.use('/api/auth',          require('./modules/auth/routes'));
 app.use('/api/roles',         require('./modules/roles/routes'));

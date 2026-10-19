@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../../config/prisma');
 const { enviarCodigoRecuperacion, enviarBienvenida, enviarAlertaLogin } = require('../../utils/mailer');
 const logger = require('../../utils/logger');
+const { limpiarCacheSesiones } = require('../../utils/sesionUsuario');
 
 // ── Tokens en memoria (en prod usar Redis) ─────────────
 const resetTokens      = new Map(); // email → { token, expiry }
@@ -195,12 +196,15 @@ const getPerfil = async (id_usuario) => {
 
 // ── Editar perfil ───────────────────────────────────────
 const editarPerfil = async (id_usuario, { nombre, email, telefono }) => {
-  // Validar email único si se está cambiando
+  // El correo solo se cambia verificándolo con un código enviado al correo
+  // nuevo (POST /auth/cambiar-correo/solicitar y /confirmar). Aquí solo se
+  // acepta si es el mismo que ya tiene la cuenta.
   if (email !== undefined) {
-    const emailExistente = await prisma.usuario.findFirst({
-      where: { email, NOT: { id_usuario } },
-    });
-    if (emailExistente) throw { status: 409, message: 'Ese correo electrónico ya está en uso por otra cuenta' };
+    const actual = await prisma.usuario.findUnique({ where: { id_usuario }, select: { email: true } });
+    if (actual?.email !== email) {
+      throw { status: 400, message: 'Para cambiar tu correo debes verificarlo con el código que te enviamos al correo nuevo' };
+    }
+    email = undefined;
   }
 
   // Validar teléfono único si se está cambiando (ignorar vacío)
@@ -240,11 +244,13 @@ const editarPerfil = async (id_usuario, { nombre, email, telefono }) => {
 
 // ── Desactivar cuenta ───────────────────────────────────
 const desactivarCuenta = async (id_usuario) => {
-  return prisma.usuario.update({
+  const usuario = await prisma.usuario.update({
     where: { id_usuario },
     data: { estado: 0 },
     select: { id_usuario: true, nombre: true, email: true, estado: true },
   });
+  limpiarCacheSesiones(); // sus sesiones abiertas se cortan ya
+  return usuario;
 };
 
 module.exports = { login, register, logout,

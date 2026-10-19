@@ -141,4 +141,62 @@ const enviarCodigoRecuperacion = async (email, codigo) => {
   });
 };
 
-module.exports = { enviarBienvenida, enviarAlertaLogin, enviarCodigoRecuperacion };
+// 4. CÓDIGO PARA CAMBIAR EL CORREO (se manda al correo NUEVO)
+const enviarCodigoCambioCorreo = async (email, codigo) => {
+  return resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: '✉️ Código para cambiar tu correo - ChocoFreseo',
+    html: baseHTML(`
+      <h2 style="color:#1a1a1a;font-size:20px;margin:0 0 8px;">
+        Confirma tu nuevo correo
+      </h2>
+      <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        Recibimos una solicitud para usar este correo en una cuenta de ChocoFreseo.
+        Usa el siguiente código para confirmarlo:
+      </p>
+      <div style="background:#fff5f5;border:2px solid #CA0B0B;
+        border-radius:12px;padding:24px;text-align:center;margin:0 0 20px;">
+        <p style="color:#888;font-size:12px;margin:0 0 8px;">
+          Código de verificación
+        </p>
+        <h1 style="color:#CA0B0B;font-size:48px;letter-spacing:8px;
+          margin:0;font-weight:900;">
+          ${codigo}
+        </h1>
+        <p style="color:#888;font-size:12px;margin:8px 0 0;">
+          Válido por 10 minutos
+        </p>
+      </div>
+      <p style="color:#888;font-size:12px;text-align:center;">
+        Si no fuiste tú, ignora este email: el correo no se cambiará.
+      </p>
+    `)
+  });
+};
+
+// 5. AVISO AL CORREO ANTERIOR CUANDO SE CAMBIA
+const enviarAvisoCambioCorreo = async (emailAnterior, nombre, emailNuevo) => {
+  return resend.emails.send({
+    from: FROM,
+    to: emailAnterior,
+    subject: '⚠️ El correo de tu cuenta cambió - ChocoFreseo',
+    html: baseHTML(`
+      <h2 style="color:#1a1a1a;font-size:20px;margin:0 0 8px;">
+        Hola, ${nombre}
+      </h2>
+      <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        El correo de tu cuenta de ChocoFreseo se cambió a <strong>${emailNuevo}</strong>.
+        Desde ahora debes iniciar sesión con ese correo.
+      </p>
+      <div style="background:#fef3c7;border-radius:8px;padding:12px 16px;
+        border-left:4px solid #f59e0b;">
+        <p style="margin:0;font-size:13px;color:#92400e;">
+          ⚠️ Si no fuiste tú, escríbenos de inmediato por WhatsApp al 315-991-46-24.
+        </p>
+      </div>
+    `)
+  });
+};
+
+module.exports = { enviarBienvenida, enviarAlertaLogin, enviarCodigoRecuperacion, enviarCodigoCambioCorreo, enviarAvisoCambioCorreo };

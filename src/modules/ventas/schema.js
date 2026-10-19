@@ -30,6 +30,14 @@ const itemVentaSchema = z.object({
   ).optional().default([]),
 });
 
+// Comprobantes de pago: solo imágenes subidas a NUESTRA cuenta de Cloudinary
+// (la página y la app suben ahí). Evita que un pedido apunte a un enlace
+// cualquiera que luego abre el equipo al revisar el pago.
+const PREFIJO_COMPROBANTE = 'https://res.cloudinary.com/dnoxlv5kn/';
+const comprobanteUrlSchema = z.string().url()
+  .refine((u) => u.startsWith(PREFIJO_COMPROBANTE), 'El comprobante debe subirse desde la página o la app de ChocoFreseo')
+  .optional().or(z.literal('')).nullable();
+
 const nuevaDireccionSchema = z.object({
   direccion_linea: z.string().trim().min(1).refine(noContengaHtml, MSG_HTML),
   barrio:          z.string().trim().optional().nullable().refine(noContengaHtml, MSG_HTML),
@@ -53,7 +61,7 @@ const crearVentaSchema = z.object({
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
-  comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  comprobante_url:     comprobanteUrlSchema,
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
   puntos_usados:       z.number().int().min(0).optional().default(0),
   agua_cortesia:       z.boolean().optional().default(false),
@@ -67,7 +75,7 @@ const crearMiPedidoSchema = z.object({
   metodo_pago:         z.string().optional().nullable(),
   monto_efectivo:      z.number().min(0).optional().nullable(),
   monto_transferencia: z.number().min(0).optional().nullable(),
-  comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  comprobante_url:     comprobanteUrlSchema,
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
   agua_cortesia:       z.boolean().optional().default(false),
   puntos_a_usar:       z.number().int().min(0).optional().default(0),
@@ -81,7 +89,7 @@ const estadoVentaSchema = z.object({
   metodo_pago:         z.string().optional(),
   monto_efectivo:      z.number().min(0).optional(),
   monto_transferencia: z.number().min(0).optional(),
-  comprobante_url:     z.string().url().optional().or(z.literal('')).nullable(),
+  comprobante_url:     comprobanteUrlSchema,
   motivo_anulacion:    z.string().trim().optional().refine(noContengaHtml, MSG_HTML),
 }).refine((d) => d.id_estado !== undefined || d.nombre_estado !== undefined, {
   message: 'Debe proporcionar id_estado o nombre_estado',

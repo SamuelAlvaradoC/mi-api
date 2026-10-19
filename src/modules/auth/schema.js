@@ -25,6 +25,14 @@ const editarPerfilSchema = z.object({
   telefono: telefonoCol,
 });
 
+const solicitarCambioCorreoSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Ingresa un correo electrónico válido'),
+});
+
+const confirmarCambioCorreoSchema = z.object({
+  codigo: z.string().trim().regex(/^\d{6}$/, 'El código debe tener 6 dígitos'),
+});
+
 const solicitarResetSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email inválido'),
 });
@@ -45,4 +53,5 @@ const crearDireccionSchema = z.object({
 });
 
 module.exports = { loginSchema, registerSchema, editarPerfilSchema,
-                   solicitarResetSchema, verificarResetSchema, crearDireccionSchema };
+                   solicitarResetSchema, verificarResetSchema, crearDireccionSchema,
+                   solicitarCambioCorreoSchema, confirmarCambioCorreoSchema };
