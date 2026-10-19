@@ -759,6 +759,17 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
   }
   const descuento_puntos = puntosUsar > 0 ? await calcularDescuentoPuntos(puntosUsar) : 0;
 
+  // Una dirección guardada solo se puede usar si es de ESTE cliente: el
+  // id_direccion llega del cliente, y crear() copia su texto (calle, barrio,
+  // referencia) al pedido, que luego el cliente ve en "mis pedidos".
+  if (id_direccion) {
+    const propia = await prisma.direccion.findFirst({
+      where: { id_direccion, id_cliente: cliente.id_cliente },
+      select: { id_direccion: true },
+    });
+    if (!propia) throw { status: 404, message: 'Dirección no encontrada' };
+  }
+
   let direccionId = id_direccion;
   if (!direccionId && nueva_direccion) {
     const existente = await prisma.direccion.findFirst({

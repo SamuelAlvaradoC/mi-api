@@ -21,7 +21,7 @@ setInterval(() => {
       if (e.name === 'TokenExpiredError') blacklistTokens.delete(token);
     }
   }
-}, 60 * 60 * 1000); // cada hora
+}, 60 * 60 * 1000).unref(); // cada hora; unref: no mantiene vivo el proceso (tests)
 
 // Máximo de IPs recordadas por usuario (evita que el arreglo crezca sin límite)
 const MAX_IPS_CONOCIDAS = 10;
@@ -64,47 +64,44 @@ const login = async ({ email, contrasena, ip }) => {
 };
 
 // ── Register ────────────────────────────────────────────
-const register = async ({ nombre, email, contrasena, id_rol }) => {
+// Registro público: SIEMPRE crea un cliente (id_rol 4), sin importar lo que
+// mande el cliente. Admin, domiciliarios, cocina, etc. se crean solo desde
+// el panel de administración (módulos usuarios/empleados, con permisos).
+const ID_ROL_CLIENTE = 4;
+
+const register = async ({ nombre, email, contrasena }) => {
   const existe = await prisma.usuario.findUnique({ where: { email } });
   if (existe) throw { status: 409, message: 'Ya existe una cuenta con ese correo electrónico. ¿Olvidaste tu contraseña?' };
 
   const hash = await bcrypt.hash(contrasena, 10);
-  const rol  = await prisma.rol.findUnique({ where: { id_rol } });
 
-  return prisma.$transaction(async (tx) => {
+  const datos = await prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.create({
-      data: { nombre, email, contrasena: hash, id_rol, estado: 1 },
+      data: { nombre, email, contrasena: hash, id_rol: ID_ROL_CLIENTE, estado: 1 },
       include: { rol: true },
     });
 
-    if (id_rol === 4 || rol?.nombre === 'cliente') {
-      const nuevoCliente = await tx.cliente.create({ data: { id_usuario: usuario.id_usuario } });
-      const puntosReg = await tx.puntosCliente.create({ data: { id_cliente: nuevoCliente.id_cliente, puntos: 200 } });
-      await tx.movimientoPuntos.create({
-        data: {
-          id_puntos:   puntosReg.id_puntos,
-          id_venta:    null,
-          tipo:        'acumulacion',
-          puntos:      200,
-          descripcion: '¡Bienvenido! 200 puntos de regalo por registrarte',
-        },
-      });
-    } else if (['domiciliario', 'confirmador_domicilio', 'admin'].includes(rol?.nombre)) {
-      await tx.empleado.create({
-        data: { id_usuario: usuario.id_usuario, cargo: rol.nombre, fecha_ingreso: new Date(), estado: 1 },
-      });
-    }
+    const nuevoCliente = await tx.cliente.create({ data: { id_usuario: usuario.id_usuario } });
+    const puntosReg = await tx.puntosCliente.create({ data: { id_cliente: nuevoCliente.id_cliente, puntos: 200 } });
+    await tx.movimientoPuntos.create({
+      data: {
+        id_puntos:   puntosReg.id_puntos,
+        id_venta:    null,
+        tipo:        'acumulacion',
+        puntos:      200,
+        descripcion: '¡Bienvenido! 200 puntos de regalo por registrarte',
+      },
+    });
 
-    const { contrasena: _, ...datos } = usuario;
-
-    // Enviar email de bienvenida (no bloquear si falla)
-    if (id_rol === 4 || rol?.nombre === 'cliente') {
-      enviarBienvenida(email, nombre)
-        .catch(e => logger.error('Error enviando email de bienvenida', { error: e.message, stack: e.stack, email }));
-    }
-
-    return datos;
+    const { contrasena: _, ...resto } = usuario;
+    return resto;
   });
+
+  // Email de bienvenida (no bloquear si falla)
+  enviarBienvenida(email, nombre)
+    .catch(e => logger.error('Error enviando email de bienvenida', { error: e.message, stack: e.stack, email }));
+
+  return datos;
 };
 
 // ── Logout ──────────────────────────────────────────────

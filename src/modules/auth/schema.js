@@ -10,7 +10,8 @@ const registerSchema = z.object({
   nombre:    z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').refine(noContengaHtml, MSG_HTML),
   email:     z.string().trim().toLowerCase().email('Ingresa un correo electrónico válido'),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  id_rol:    z.number().int().positive(),
+  // Sin id_rol: el registro público SIEMPRE crea clientes. Si el cliente lo
+  // manda, zod lo descarta (los demás roles solo se crean desde el admin).
 });
 
 const telefonoCol = z.string()
