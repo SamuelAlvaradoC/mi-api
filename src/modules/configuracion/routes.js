@@ -3,6 +3,7 @@ const verifyToken  = require('../../middlewares/verifyToken');
 const checkPermiso = require('../../middlewares/checkPermiso');
 const { checkRolAdmin } = require('../../middlewares/checkPermiso');
 const s = require('./service');
+const { estadoHorario } = require('../../utils/horarioTienda');
 
 // Tope absoluto para bloquear errores de tecleo (ej. escribir 99999) --
 // el rango "normal" del negocio hoy es ~10-25 pesos por punto; 100 deja
@@ -79,27 +80,25 @@ router.patch('/horario', verifyToken, checkPermiso('ver_dashboard'), async (req,
 // Público — calcula si está abierto considerando estado y horario
 router.get('/estado-tienda', async (req, res) => {
   try {
-    const { hora_apertura, hora_cierre, estado_tienda } = await s.horario();
-
-    let abierto = false;
-    if (estado_tienda === 'open') {
-      abierto = true;
-    } else if (estado_tienda === 'closed') {
-      abierto = false;
-    } else {
-      const ahora    = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-      const hora     = ahora.getHours() + ahora.getMinutes() / 60;
-      abierto = hora >= hora_apertura && hora < hora_cierre;
-    }
+    const h = await s.horario();
+    const { hora_apertura, hora_cierre, estado_tienda } = h;
+    // Mismo cálculo que checkHorario (utils/horarioTienda.js), en hora Colombia.
+    const est = estadoHorario(h);
 
     res.json({
       success: true,
       data: {
-        abierto,
-        estado:         estado_tienda,
+        abierto:         est.abierto,
+        estado:          estado_tienda,
         hora_apertura,
         hora_cierre,
         horario: `${hora_apertura}:00 - ${hora_cierre}:00`,
+        // "Por horario" fuera de horario: se puede pedir y queda para la
+        // apertura. La web arma el aviso con estos textos.
+        acepta_pedidos_en_espera: est.fueraDeHorario,
+        proxima_apertura: est.proximaApertura,
+        texto_dia:       est.textoDia,
+        texto_hora:      est.textoHora,
       },
     });
   } catch (e) {

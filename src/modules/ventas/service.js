@@ -87,7 +87,7 @@ const obtener = async (id) => {
   return { ...v, nombreDomiciliario: empleado?.usuario?.nombre || null };
 };
 
-const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0, agua_cortesia = false }) => {
+const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicilio = 0, override_costo_domicilio = false, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados = 0, descuento_puntos = 0, agua_cortesia = false, fecha_apertura = null }) => {
   await validarMetodoPagoDatafono(metodo_pago);
 
   // El saldo de puntos se valida siempre server-side, aunque venga del panel
@@ -230,6 +230,10 @@ const crear = async ({ id_cliente, id_direccion, nueva_direccion, costo_domicili
   const nuevaVenta = await prisma.venta.create({
     data: {
       id_cliente, id_estado: estadoPendiente?.id_estado || 1,
+      // Pedido hecho fuera de horario: "fecha" es la hora de la próxima
+      // apertura (así entra ese día a cocina, domiciliarios, admin y cierre
+      // de caja, y queda primero en la fila) y "fecha_real", la hora real.
+      ...(fecha_apertura ? { fecha: fecha_apertura, fecha_real: new Date() } : {}),
       nombre_cliente:  clienteSnap?.usuario?.nombre || null,
       telefono_cliente: clienteSnap?.telefono || null,
       id_direccion: direccionId, costo_domicilio, observaciones,
@@ -746,7 +750,9 @@ const misVentas = async (id_usuario) => {
 };
 
 // Cliente crea su propio pedido (auto-crea perfil de cliente si no existe)
-const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_a_usar = 0, agua_cortesia = false }) => {
+// fecha_apertura: solo si el pedido se hace fuera de horario ("Por horario")
+// y el cliente aceptó el aviso; la calcula el middleware checkHorario.
+const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_domicilio = 3000, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_a_usar = 0, agua_cortesia = false }, fecha_apertura = null) => {
   let cliente = await prisma.cliente.findUnique({ where: { id_usuario } });
   if (!cliente) {
     cliente = await prisma.cliente.create({ data: { id_usuario } });
@@ -823,7 +829,7 @@ const crearMiPedido = async (id_usuario, { id_direccion, nueva_direccion, costo_
     throw { status: 400, message: 'La dirección seleccionada no tiene un barrio válido. Selecciona o registra una dirección con barrio del catálogo.' };
   }
 
-  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos, agua_cortesia });
+  return crear({ id_cliente: cliente.id_cliente, id_direccion: direccionId, costo_domicilio, observaciones, items, metodo_pago, monto_efectivo, monto_transferencia, comprobante_url, puntos_usados: puntosUsar, descuento_puntos, agua_cortesia, fecha_apertura });
 };
 
 const editar = async (id, { items, costo_domicilio, override_costo_domicilio = false, metodo_pago, monto_efectivo, monto_transferencia, nombre_cliente, telefono_cliente }) => {

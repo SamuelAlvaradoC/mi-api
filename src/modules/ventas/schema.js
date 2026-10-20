@@ -79,6 +79,8 @@ const crearMiPedidoSchema = z.object({
   items:               z.array(itemVentaSchema).min(1, 'Debe incluir al menos un producto'),
   agua_cortesia:       z.boolean().optional().default(false),
   puntos_a_usar:       z.number().int().min(0).optional().default(0),
+  // El cliente marcó el aviso de pedido fuera de horario (lo valida checkHorario)
+  acepto_espera:       z.boolean().optional(),
 }).refine((d) => d.id_direccion !== undefined || d.nueva_direccion !== undefined, {
   message: 'Debe seleccionar o registrar una dirección de entrega',
 });

@@ -36,7 +36,14 @@ const misDespachos = async (req, res, next) => {
     }));
   } catch (e) { next(e); }
 };
-const crearMiPedido= async (req, res, next) => { try { success(res, await service.crearMiPedido(req.user.id_usuario, crearMiPedidoSchema.parse(req.body)), 'Pedido creado', 201); } catch (e) { next(e); } };
+// req.pedidoEnEspera lo pone checkHorario cuando el pedido se hace fuera de
+// horario y el cliente aceptó el aviso: el pedido queda para la apertura.
+const crearMiPedido= async (req, res, next) => {
+  try {
+    const fechaApertura = req.pedidoEnEspera ? req.pedidoEnEspera.fechaApertura : null;
+    success(res, await service.crearMiPedido(req.user.id_usuario, crearMiPedidoSchema.parse(req.body), fechaApertura), 'Pedido creado', 201);
+  } catch (e) { next(e); }
+};
 
 const editar = async (req, res, next) => { try { success(res, await service.editar(Number(req.params.id), editarVentaSchema.parse(req.body)), 'Venta actualizada'); } catch (e) { next(e); } };
 

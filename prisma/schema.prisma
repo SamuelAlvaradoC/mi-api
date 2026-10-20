@@ -264,6 +264,10 @@ model Venta {
   id_estado        Int
   id_direccion     Int?
   fecha            DateTime @default(now())
+  // Pedido hecho fuera de horario ("Por horario"): "fecha" es la hora de la
+  // próxima apertura (así entra ese día a cocina, cierre de caja, etc.) y
+  // aquí queda la hora real en que el cliente lo hizo. Vacío en los demás.
+  fecha_real       DateTime?
   motivo_anulacion String?  @db.Text
   subtotal         Decimal  @db.Decimal(10, 2)
   costo_domicilio  Decimal  @default(0) @db.Decimal(10, 2)
